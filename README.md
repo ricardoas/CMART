@@ -7,4 +7,4 @@ Please visit the wiki for a brief walkthrough of the branch organization of this
 
 If you would like deployment ready VMs, please visit http://theone.ece.cmu.edu/cmart.
 
-This application was (intially) written and designed by Andrew Turner, Andrew Fox, John Payne, and Hyong Kim.
+This application was (intially) written and designed by Andrew Turner, Andrew Fox, John Payne, and Hyong Kim at the Electrical and Computing Engineering Department of Carnegie Mellon University.
