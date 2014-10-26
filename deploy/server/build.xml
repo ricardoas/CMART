@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="cmart.deployserver" default="dist" basedir=".">
+	<property name="src" location="src"/>
+  <property name="build" location="build"/>
+  <property name="dist"  location="dist"/>
+  <property name="lib"  location="lib"/>
+
+<target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init" description="compile the source " >
+  <path id="master-classpath">
+  <fileset dir="${lib}/">
+    <include name="*.jar"/>
+  </fileset>
+
+  <pathelement path="${build}"/>
+</path>
+  
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}">
+    	<classpath refid="master-classpath"/> 
+    </javac>
+  </target>
+
+<target name="clean" description="clean up" >
+    <!-- Delete the ${build} and ${dist} directory trees -->
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+ </target>
+
+<target name="dist" depends="compile"
+        description="generate the distribution" >
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}/lib"/>
+    
+    <jar jarfile="deployserver.jar" includes="server/*/*.class" basedir="${build}">
+    	<manifest>
+    	    <attribute name="Main-Class" value="server.main.DeploymentController"/>
+    		<attribute name="Class-Path" value="lib"/>
+    	</manifest>
+    	<zipgroupfileset dir="${lib}" includes="*.jar" />
+    </jar>
+  </target>
+</project>

@@ -1,0 +1,27 @@
+#!/bin/bash
+# description: Tomcat Start Stop Restart
+# processname: tomcat
+# chkconfig: 234 20 80
+JAVA_HOME=/usr/share/java/jdk1.7.0_01
+export JAVA_HOME
+PATH=$JAVA_HOME/bin:$PATH
+export PATH
+CASSANDRA_HOME=/usr/share/cassandra
+
+case $1 in
+start)
+kill $(cat $CASSANDRA_HOME/run.pid)
+rm -f $CASSANDRA_HOME/run.pid
+sh $CASSANDRA_HOME/bin/cassandra -p $CASSANDRA_HOME/run.pid &
+;; 
+stop)   
+kill $(cat $CASSANDRA_HOME/run.pid)
+rm -f $CASSANDRA_HOME/run.pid
+;; 
+restart)
+kill $(cat $CASSANDRA_HOME/run.pid)
+rm -f $CASSANDRA_HOME/run.pid
+sh $CASSANDRA_HOME/bin/startup.sh
+;; 
+esac    
+exit 0

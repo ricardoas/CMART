@@ -1,0 +1,22 @@
+#!/bin/bash
+# description: Solr
+# processname: java
+# chkconfig: 234 20 80
+JAVA_HOME=/usr/share/java/jdk1.7.0_01
+export JAVA_HOME
+PATH=$JAVA_HOME/bin:$PATH
+export PATH
+
+case $1 in
+start)
+sh /usr/share/solr/startup.sh
+;; 
+stop)   
+sh /usr/share/solr/shutdown.sh
+;; 
+restart)
+sh /usr/share/solr/shutdown.sh
+sh /usr/share/solr/startup.sh
+;; 
+esac    
+exit 0

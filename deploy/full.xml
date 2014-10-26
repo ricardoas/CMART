@@ -1,0 +1,70 @@
+<Host IP="10.1.8.5" Gateway="10.1.0.2" port="4444" OS="Fedora" beginIP="10.22.1.1" deployPath="/root/">
+     <Host IP="10.1.9.4">
+        <Type>FrontEnd</Type>
+        <OSType>Fedora</OSType>
+    	<VMType Type="Application" RAMSIZE="1024"></VMType>
+    	<VMType Type="Client" RAMSIZE="1024"></VMType>
+    	<VMType Type="Solr" RAMSIZE="1024"></VMType>
+    	<VMType Type="Image" RAMSIZE="1024"></VMType>
+    	<VMType Type="SQL" RAMSIZE="1024"></VMType>
+    	<VMType Type="CasMaster" RAMSIZE="1024"></VMType>
+    	<VMType Type="LoadBalancer" RAMSIZE="1024"></VMType>
+    	<VMType Type="Client" RAMSIZE="1024"></VMType>
+    	<VMType Type="GFS" RAMSIZE="1024"></VMType>
+    	
+    	<UserName>root</UserName>
+    	<Password>root_pass</Password>
+    	<BaseFolder>/customdeploypath</BaseFolder>
+    </Host>   
+    <VMImageSetting Type="Application">
+    	<ImagePath>/root/vmImages/</ImagePath>
+    	<XMLPath>/root/vmImages/</XMLPath>
+        </VMImageSetting>
+        <VMImageSetting Type="SQL">
+    	<ImagePath>/root/vmImages/</ImagePath>
+    	<XMLPath>/root/vmImages/</XMLPath>
+        </VMImageSetting>
+        <VMImageSetting Type="LoadBalancer">
+        	<ImagePath>/root/vmImages/</ImagePath>
+        	<XMLPath>/root/vmImages/</XMLPath>
+        </VMImageSetting>
+        <VMImageSetting Type="Image">
+        	<ImagePath>/root/vmImages/</ImagePath>
+        	<XMLPath>/root/vmImages/</XMLPath>
+        </VMImageSetting>
+        <VMImageSetting Type="Solr">
+            <ImagePath>/root/vmImages/</ImagePath>
+            <XMLPath>/root/vmImages/</XMLPath>
+        </VMImageSetting>
+        <VMImageSetting Type="CasMaster">
+            <ImagePath>/root/vmImages/</ImagePath>
+            <XMLPath>/root/vmImages/</XMLPath>
+        </VMImageSetting>
+        <VMImageSetting Type="Client">
+            <ImagePath>/root/vmImages/</ImagePath>
+            <XMLPath>/root/vmImages/</XMLPath>
+        </VMImageSetting>
+        <VMImageSetting Type="GFS">
+            <ImagePath>/root/vmImages/</ImagePath>
+            <XMLPath>/root/vmImages/</XMLPath>
+    </VMImageSetting>
+    <ExtraConfigSetting Type="Application">
+	<Setting Key="solr_enabled" Value="0"/>
+	<Setting Key="solr_max_conns_per_host" Value="400"/>
+    </ExtraConfigSetting>
+    <ExtraConfigSetting Type="SQL">
+	<Setting Key="max_connections" Value="200"/>
+    </ExtraConfigSetting>
+    <ExtraConfigSetting Type="Client">
+	<Setting Key="run_length" Value="2"/>
+	<Setting Key="peak_users" Value="30"/>
+	<Setting Key="rampup_time" Value="1"/>
+	<Setting Key="speedup_factor" Value="1"/>
+	<Setting Key="output_stats" Value="true"/>
+	<Setting Key="output_think_times" Value="true"/>	
+	<Setting Key="output_site_data_file" Value="/cmartclient/"/>
+	<Setting Key="clients_per_minute" Value="15"/>
+	<Setting Key="slope1" Value="0,30"/>
+	<Setting Key="rt_threshold" Value="200"/>
+    </ExtraConfigSetting>
+</Host>

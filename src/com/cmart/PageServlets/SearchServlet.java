@@ -1,0 +1,381 @@
+package com.cmart.PageServlets;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.*;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.cmart.Data.Error;
+import com.cmart.Data.Footer;
+import com.cmart.Data.GlobalVars;
+import com.cmart.Data.Header;
+import com.cmart.PageControllers.FaultController;
+import com.cmart.PageControllers.SearchController;
+import com.cmart.util.Image;
+import com.cmart.util.Item;
+import com.cmart.util.StopWatch;
+
+/**
+ * This page allows the user to search for items
+ * 
+ * @author Andy (andrewtu@cmu.edu)
+ * @since 0.1
+ * @version 1.0
+ * @date 23rd Aug 2012
+ * 
+ * C-MART Benchmark
+ * Copyright (C) 2011-2012 theONE Networking Group, Carnegie Mellon University, Pittsburgh, PA 15213, U.S.A
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
+
+@WebServlet(name="SearchServlet", urlPatterns="/search")
+public class SearchServlet extends HttpServlet{
+	private static final long serialVersionUID = 6472741223023438743L;
+	private static final String EMPTY = "";
+	private static final String title = "Search";
+	private static final GlobalVars GV = GlobalVars.getInstance();
+
+	/**
+	 * Get the page, calls the page to be made
+	 * We used to check the parameters in here, but I moved it to a controller object to keep the logic away from the layout
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 * @author Andy (andrewtu@cmu.edu)
+	 */
+	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		this.makePage(request, response, Boolean.FALSE);
+	}
+
+	/**
+	 * Get the page, we can just pass this to doPost since the client generator will be posting userIDs and authTokens all the time
+	 * 
+	 * @param request
+	 * @param response
+	 * @throws ServletException
+	 * @throws IOException
+	 * @author Andy (andrewtu@cmu.edu)
+	 */
+	public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		makePage(request, response, Boolean.TRUE);
+	}
+
+	/**
+	 * This method starts the page timer, writes the header, creates the HTML for the page, writes the stats, and the footer
+	 * 
+	 * @param request
+	 * @param response
+	 * @param errorString
+	 * @throws ServletException
+	 * @throws IOException
+	 * @author Andy (andrewtu@cmu.edu)
+	 */
+	public void makePage(HttpServletRequest request, HttpServletResponse response, Boolean isGet)  throws ServletException, IOException {
+		if(request !=null && response != null && !FaultController.fault(response)){
+			response.setHeader("Access-Control-Allow-Origin", "*");
+
+			// Do the timer if we are collecting stats
+			StopWatch timer = null;
+			if(GV.COLLECT_STATS){
+				timer = new StopWatch();
+				timer.start();
+			}
+
+			// Create a new page controller for this page, it will get and process the data
+			SearchController vars = new SearchController();
+			int loopCount = 0;
+			do{
+				vars.checkInputs(request);
+				loopCount++;
+			}while(loopCount <= vars.getProcessingLoop());
+
+			// We are using PrintWriter to be friendly to the international community. PrintWrite auto-converts coding
+			PrintWriter out = response.getWriter();
+
+			// If the output is to be suppressed then we'll redirect the output
+			if(vars.getSuppressOutput())
+				out = new PrintWriter(GV.BLACK_HOLE);
+
+			// Do HTML4 or 5 depending on the page
+			if(!vars.useHTML5()){
+				// Set the return type
+				response.setContentType("text/html");
+
+				// Write the page header
+				Header.writeHeaderNew(out, title, "browse",vars.getUserIDString(), vars.getAuthTokenString());
+
+				// Create the HTML4
+				createHTML4(out, vars, isGet);
+
+				// Redirect the output to start writing the the user again in case we were putting it in the black hole
+				out = response.getWriter();
+
+				/*
+				 * Output any errors. These don't need to be too pretty since we hope there isn't any!
+				 * We put them here to help with debug and info, the page above should show pretty ones for users
+				 */
+				if(GV.PRINT_ALL_ERRORS){
+					GV.addErrors(out, vars.getErrors());
+				}
+
+				/*
+				 * Process the page time
+				 */
+				if(GV.COLLECT_STATS){
+					if(timer != null) timer.stop();
+					vars.setTotalTime(timer.getTimeTaken());
+					GV.addStats(request, out, vars, 13);
+				}
+
+				// Write the page footer
+				Footer.writeFooter(out);
+			}
+			else{
+				response.setContentType("application/json");
+				out.write("{");
+				
+				createHTML5(out, vars, isGet);
+				
+				/*
+				 * Add the errors and page statistics
+				 */
+				out.print(",");
+				GV.addErrorsJSON(out, vars.getErrors());
+				
+				// Process the page time
+				if(GV.COLLECT_STATS){
+					if(timer != null) timer.stop();
+					vars.setTotalTime(timer.getTimeTaken());
+					
+					out.print(",");
+					GV.addStatsJSON(request, out, vars, 13);
+				}
+				
+				out.print("}");
+			}
+		}
+	}
+
+	/**
+	 * Creates the HTML4 version of the website
+	 * 
+	 * @param request The incoming request
+	 * @param response The response sent to the user
+	 * @param out The out writer to write the HTML to
+	 * @author Andy (andrewtu@cmu.edu)
+	 */
+	public void createHTML4(PrintWriter out, SearchController vars, Boolean isGet){
+		if(out != null && vars != null)
+			try{		
+				// Get the data needed to display the page
+				vars.getHTML4Data();
+				int loopCount = 0;
+				do{
+					vars.processHTML4();
+					loopCount++;
+				}while(loopCount <= vars.getProcessingLoop());
+
+				out.write("<div class=\"container\">");
+				out.write("<div class=\"row\">");
+				out.write("<div class=\"nine columns\">");
+
+
+				out.println("<div class=\"browse\">");
+
+				/*
+				 * Print out all of the items in the current category	
+				 */
+				ArrayList<Item> items = vars.getItems();
+				String[] itemURLs = vars.getItemURLs();	
+
+
+				out.println("<div class=\"items\"><table><thead><tr>");
+
+				out.println("<div class=\"title\">");
+				out.println("<th><div class=\"img\"></div></th>");
+				out.println("<th>Name</th>");
+
+				out.println("<th>");
+				out.write("<img src=\"images/arrow_down.png\" alt=\"sort by price\" width=\"15\"/>");
+				out.println(vars.getSortByPriceURL());
+				out.println("</th>");
+
+				out.println("<th>");
+				out.write("<img src=\"images/arrow_down.png\" alt=\"sort by end date\" width=\"15\"/>");
+				out.println(vars.getSortByEndURL());
+				out.println("</th>");
+
+				out.println("</div></tr></thead><tbody>");
+
+				if(itemURLs != null && itemURLs.length > 0)
+					for(int i=0; i < itemURLs.length; i++){
+						Item item = items.get(i);
+						String thumbnailURL = item.getThumbnailURL();
+
+						/*
+						 * Thumbnail
+						 * Link
+						 * CurrentBid
+						 * End date
+						 */
+						out.println("<tr><div class=\"entry\" id=\"entry\">");
+						out.println("<td><div class=\"img\">");
+						out.println("<img height=\"80\" width=\"80\" src=\"" + GV.REMOTE_IMAGE_IP + GV.REMOTE_IMAGE_DIR + thumbnailURL + "\" alt=\"" + item.getDescription() + "\" />");
+						out.println("</div></td>");
+
+						out.println("<td><div class=\"desc\">");
+						out.print("<label for=\"itemlink"); out.print(item.getID()); out.print("\">"); out.print(itemURLs[i]); out.println("</label>");
+						out.println("</div></td>");
+
+						out.println("<td><div class=\"bid\">");
+						out.print("<label for=\"itemBid"); out.print(item.getID()); out.print("\">");out.println(GV.currency.format(item.getMaxCurrentBidStartPrice()));out.println("</label>");
+						out.println("</div></td>");
+
+						out.println("<td><div class=\"endDate\">");
+						out.print("<label for=\"itemEndDate"); out.print(item.getID()); out.print("\">");out.println(item.getEndDate());out.println("</label>");
+						out.println("</div></td>");
+						out.println("</div></tr>");
+					}
+				else{
+					out.println("<tr><div class=\"entry\" id=\"entry\">");
+					out.println("<td colspan=\"4\"><div class=\"desc\">");
+					out.println("Sorry, there are not items to view");
+					out.println("</div></td>");
+					out.println("</div></tr>");
+				}
+				out.println("</tbody></table>");
+				out.println("</div>");
+
+				out.println("</div>");
+				out.println("</div>");
+				out.println("</div>");
+
+				/*
+				 * Print the previous page and next page links
+				 */
+				out.write("<div class=\"container\">");
+				out.write("<div class=\"row\">");
+				out.write("<div class=\"twelve columns\">");
+				out.println("<div class=\"move\">");
+				out.print(vars.getPreviousPageURL());
+				out.print(" | ");
+				out.print(vars.getNextPageURL());
+				out.println("</div>");
+
+				out.println("</div>");
+				out.println("</div>");
+				out.println("</div>");
+				out.println("</div>");
+				
+				//Image Prefetching
+				if(GV.PREFETCH_IMAGES==true){
+					out.println("<script type=\"text/javascript\">");
+					out.println("$(window).load(function(){preloadImages(["+vars.getItemPrefetchImagesURLs()+"]);});");
+					out.println("</script>");
+				}
+			}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Creates the HTML5 version of the website
+	 * 
+	 * @param request The incoming request
+	 * @param response The response sent to the user
+	 * @param out The out writer to write the HTML to
+	 * @return The HTML5 response (although it could just return void since it writes to the requests out writer)
+	 * @author Andy (andrewtu@cmu.edu)
+	 */
+	public void createHTML5(PrintWriter out, SearchController vars, Boolean isGet){
+		if(out != null && vars != null)
+		try{
+			// Get the data needed to display the page
+			vars.getHTML5Data();
+			vars.processHTML5();
+			
+			/*
+			 * Print out all of the items
+			 */
+			String[] itemJSON = vars.getItemJSON();
+			String[] sellerJSON = vars.getSellerJSON();
+			String[] questionJSON=vars.getQuestionJSON();
+			String[] commentJSON=vars.getCommentJSON();
+			ArrayList<Long> order = vars.getItemOrder();
+			String[] prefetchImagesJSON=vars.getPrefetchImagesJSON();
+			
+			out.append("\"pageType\":\"search\",");
+			out.append("\"order\":[");
+			if(order != null && !order.isEmpty()){
+				for(int i=0; i<order.size()-1; i++)
+					out.append(order.get(i) + ",");
+				
+				// Last guy has no comma
+				out.append(order.get(order.size()-1).toString());
+			}
+			out.append("],");
+
+				out.append("\"items\":[");
+				if(itemJSON.length>0){
+					out.append(itemJSON[0]);}
+				for(int i=1; i<itemJSON.length; i++){
+					out.append(",").append(itemJSON[i]);}
+				out.append("],");
+				
+				out.append("\"sellers\":[");
+				if(sellerJSON.length>0){
+					out.append(sellerJSON[0]);}
+				for(int i=1; i<sellerJSON.length; i++){
+					out.append(",").append(sellerJSON[i]);}
+				out.append("],");
+				
+				out.append("\"questions\":[");
+				if(questionJSON.length>0){
+					out.append(questionJSON[0]);}
+				for(int i=1; i<questionJSON.length; i++){
+					out.append(",").append(questionJSON[i]);}
+				out.append("],");
+				
+				out.append("\"comments\":[");
+				if(commentJSON.length>0){
+					out.append(commentJSON[0]);}
+				for(int i=1; i<commentJSON.length; i++){
+					out.append(",").append(commentJSON[i]);}
+				out.append("],");
+				
+				out.append("\"prefetch\":[");
+				if(prefetchImagesJSON.length>0){
+					out.append(prefetchImagesJSON[0]);}
+				for(int i=1; i<prefetchImagesJSON.length; i++){
+					out.append(",").append(prefetchImagesJSON[i]);}
+				out.append("]");
+
+			}
+		catch(Exception e){
+			//TODO: make this output to a file
+			e.printStackTrace();
+		}
+	}
+}
+

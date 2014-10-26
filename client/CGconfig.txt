@@ -1,0 +1,75 @@
+# this is a comment
+# full_url should be in form http://ip:port/appName
+# Include the port even if it is 80
+#full_url1=http://10.9.77.3:8080/cmart-0.1
+#full_url1=http://10.112.112.214:8080/cmart-0.1
+#full_url1=http://10.78.242.124:80/cmart/cmart-0.1
+#full_url1=http://10.36.72.110:8080/cmart-0.1
+full_url1=http://theone.ece.cmu.edu:80/cmartv1
+# output_site_data_file - directory for output data
+output_site_data_file=C:\cmart\client\OutputData\
+# distributions_folder - directory of input distributions
+distributions_folder=C:\cmart\client\Distributions\
+# run_length - run length of the experiment in minutes
+run_length=10
+# verbose - if debugging output is to be turned on
+verbose = false
+# html4 - if the HTML4 version of the website is to be accessed
+html4=true
+# output_matlab - if the results should be output in .mat form
+output_matlab=false
+# output_stats - if stats from the experiment run are to be output
+output_stats=true
+# output_think_times - if the distribution of think times are to be output
+output_think_times=false
+# get_css_js_img - if CSS, JS, IMG files are to be downloaded on page requests
+get_css_js_img=true
+# static_userload - if the client level is to be held static (closed loop)
+static_userload=true
+# rampup_time - time in seconds to ramp up client generator to peak level in closed loop mode
+rampup_time=30
+# tabbed_browsing - if the clients can use tabbed browsing mode
+tabbed_browsing=false
+# cache_clear - the fraction of clients that clear their cache when exiting the website
+cache_clear=0.2
+# cache_real_data - if the actual JS, CSS, IMG files are to be cached (true) or just flags (false). Caching real data is extremely memory intensive
+cache_real_data=false
+# local_images - if C-MART is accessing images from the local application server or if it is using an external image server
+local_images=true
+# rt_threshold - response time threshold in milliseconds above which clients are dissatisfied with the service
+rt_threshold=1000
+# speedup_factor - multiplier used for speeding up the think time.
+speedup_factor=1
+# clients_per_minute - For open loop mode, the amount of clients to be added on average per minute.
+clients_per_minute=10
+# peak_users - For closed loop mode, the number of clients which the system is to be held statically at.
+peak_users=10
+# allow_bursts - if the Client Generator is allowed to add in random client bursts
+allow_bursts=false
+# markov_page_transitions - if a Markov Chain is used to determine page transition probabilities or if the decision making process is to be more complex
+markov_page_transitions=true
+# workload_type = 1=read heavy, 2=mixed, 3=write heavy
+workload_type=2
+# network_delay - if a fake additional network delay is to be added
+network_delay=false
+# network_delay_avg - if network_delay is true, this is the average delay in milliseconds to add per client
+network_delay_avg=0
+# repeated_run - if the experiment run is a new run (false) or if it is a repeated instance of a prior experiment (true)
+repeated_run=false
+# repeated_xml - directory where XML documents for repeated runs are stored/read from
+repeated_xml=C:\cmart\client\repeatedXML\
+
+# Change clients format - changenum=time_from_start_in_seconds,new_clients_per_minute
+# num must start at 1 and increase by 1 for each change
+# Ex. change1=120, 600
+# Ex. change2=300, 400
+#change1=30,600
+#change2=120, 400
+
+# For static userload, change the slope of the peak users
+# Should be in form - slopenum=time_from_start_in_seconds,rate_of_change_of_peak_users_in_users_per_minute
+# num must start at 1 and increase by 1 for each change
+# Ex. slope1=120,100
+# Ex. slope2=240,-100
+#slope1=30,30
+#slope2=60,-30

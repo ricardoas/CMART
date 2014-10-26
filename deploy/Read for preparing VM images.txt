@@ -1,0 +1,14 @@
+1. Make sure the images have the latest C-MART code
+chmod +x update_cmart_in_vm_images.sh
+/cmart/deploy/update_cmart_in_vm_images.sh
+
+2. Inside the VMs zero the disk space ready for release
+chmod +x /cmart/deploy/prepare_for_release.sh
+/cmart/deploy/prepare_for_release.sh
+
+3. Once complete for all VMs, resize the images
+(edit scipt to contian qcow file)
+chmod +x /cmart/deploy/release_image_space.sh
+/cmart/deploy/release_image_space.sh
+
+4. For release on the website, tar.gz the files

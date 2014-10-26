@@ -1,0 +1,22 @@
+#!/bin/bash
+# description: Mongo Start Stop Restart
+# processname: mongod
+# chkconfig: 234 20 80
+MONGO_HOME=/usr/share/mongo/
+export MONGO_HOME
+PATH=$MONGO_HOME/bin:$PATH
+export PATH
+
+case $1 in
+start)
+sh $MONGO_HOME/bin/startup.sh
+;; 
+stop)   
+sh $MONGO_HOME/bin/shutdown.sh
+;; 
+restart)
+sh $MONGO_HOME/bin/shutdown.sh
+sh $MONGO_HOME/bin/startup.sh
+;; 
+esac    
+exit 0

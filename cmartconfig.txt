@@ -1,0 +1,131 @@
+
+
+# 
+# CMART WEBSITE CONFIGURATION
+#
+debug = 1
+verbose = 1
+remote_image_dir = /img/
+remote_image_ip = ../
+#remote_image_ip = ./uploadimage?url=
+
+linux_local_temp_dir = /usr/share/tomcat7/webapps/temp
+linux_local_image_dir = /usr/share/tomcat7/webapps/img
+win_local_temp_dir = c:
+win_local_image_dir = c:
+
+prefetch_image = 0
+
+#
+# CMART DATABASE CONFIGURATION
+#
+
+# can be 'myisam', 'innodb', 'cassandra'
+database_type = myisam
+
+my_database_url = jdbc:mysql://10.48.177.43/cmart?cachePrepStmts=true&rewriteBatchedStatements=true&autoReconnect=true
+my_database_username = cmart
+my_database_password = Cm4rt!
+my_database_driver = com.mysql.jdbc.Driver
+my_conn_cache = 1
+first_is_master = false
+
+cassandra_database_url = jdbc:cassandra://10.18.146.228:9160/CMARTv1
+cassandra_database_driver = org.apache.cassandra.cql.jdbc.CassandraDriver
+cassandra_database_username = blank
+cassandra_database_password = blank
+
+#
+# CMART Solr configuration
+#
+solr_enabled = 0
+solr_url = http://10.103.232.98:8983/solr
+solr_max_conns_per_host = 200
+
+
+#
+# gfs
+#
+gfs_ip=10.1.1.1
+gfs_enabled=0
+
+#
+# CMART POPULATOR INFORMATION
+#
+
+# 10Gb inc search index
+#populate_no_of_users = 15000000
+#populate_no_of_items = 1500000
+#populate_no_of_old_items = 3000000
+
+# 1GB inc search index
+#populate_no_of_users = 1500000
+#populate_no_of_items = 150000
+#populate_no_of_old_items = 300000
+
+
+# main variables for data size
+populate_no_of_states = -1
+populate_no_of_categories = -1
+populate_no_of_users = 5000
+populate_no_of_items = 700
+populate_no_of_old_items = 350
+populate_base_path = /cmart/populator/
+
+# for users
+populate_first_names_file = firstNames.csv
+populate_last_names_file = lastNames.csv
+populate_user_ratings_file = sellerRating.csv
+
+# for user's addresses
+populate_states_file = states.csv
+populate_streets_file = streetNames.csv
+populate_towns_file = cities.csv
+populate_states_uniform = false
+
+# for items
+populate_categories_file = categories.csv
+populate_categories_uniform = false
+populate_start_price_file = startingBid.csv
+populate_buy_now_price_file = buyNowPrice.csv
+
+
+
+populate_title_words_number_file = titleWordsDistribution.csv
+populate_title_words_file = titleWords.csv
+populate_description_words_number_file = itemSpecificsDescriptionTotal.csv
+populate_description_words_file = itemSpecificsDescriptionWords.csv
+
+
+
+
+# for images
+populate_images_file = itemImages.csv
+populate_images_dist_file = numHeaderImages.csv
+populate_in_image_path = /cmart/populator/images/
+populate_out_image_path = /cmart/populator/outimages/
+
+# number of bids per item bids_dist: 0 = uniform, 1 = normal
+populate_bids_dist_type = 1
+populate_bids_min = 0
+populate_bids_max = 30
+populate_bids_dist_mean = 10
+populate_bids_dist_sd = 2
+
+# number of questions per item: 0 = uniform, 1 = normal
+populate_questions_dist_type = 1
+populate_questions_min = 0
+populate_questions_max = 5
+populate_questions_dist_mean = 2
+populate_questions_dist_sd = 2
+populate_questions_fraction_answered = 0.3
+
+# number of images per item: -1 = use distribution from file, 0 = uniform, 1 = normal
+populate_images_dist_type = -1
+populate_images_min = 0
+populate_images_max = 5
+populate_images_dist_mean = 2
+populate_images_dist_sd = 2
+
+# fraction of users that have left comments
+populate_comments_fraction = 0.8

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="cmart.populator" default="makecmartpopulatorjar" basedir=".">
+  <target name ="makecmartpopulatorjar" description="Create a jar for the populator">
+  	
+    <jar jarfile="populator/cmartpopulator.jar" includes="populator/*.class" basedir="bin">
+    	<manifest>
+    	                <attribute name="Main-Class" value="populator.CreateAll"/>
+    					<attribute name="Class-Path" value="lib"/>
+    	            </manifest>
+    	<zipgroupfileset dir="populator/lib" includes="*.jar" />
+    	</jar>
+  </target>
+</project>
