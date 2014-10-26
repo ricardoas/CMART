@@ -1,0 +1,130 @@
+
+<HTML>
+
+<HEAD><TITLE>Bid Confirmed</TITLE>
+
+<link rel="stylesheet" type="text/css" href="header.css" />
+
+<link rel="stylesheet" type="text/css" href="body.css" />
+
+<link rel="stylesheet" type="text/css" href="myaccount.css" />
+
+<link rel="stylesheet" type="text/css" href="browse.css" />
+
+<link rel="stylesheet" type="text/css" href="errors.css" />
+
+<link rel="stylesheet" type="text/css" href="errors.css" />
+
+
+<link rel="stylesheet" type="text/css"
+	href="css/jquery-ui-1.8.11.custom.css" />
+	<link rel="stylesheet" type="text/css" href="item_image_style.css" />
+<link rel="stylesheet" type="text/css" href="home_recommendation.css" />
+<link rel="stylesheet" type="text/css" href="stylesheets/foundation.css" />
+<script src="js/jquery-1.7.2.min.js" type="text/javascript"></script>
+<script src="js/jquery-ui-1.8.11.custom.min.js" type="text/javascript"></script>
+<script src="js/imagePrefetch.js" type="text/javascript"></script>
+<script src="js/database.js" type="text/javascript"></script>
+<script src="js/onload.js" type="text/javascript"></script>
+<script src="js/login.js" type="text/javascript"></script>
+<script src="js/utilities.js" type="text/javascript"></script>
+<script src="js/selectmenu.js" type="text/javascript"></script>
+<script src="js/date.format.js" type="text/javascript"></script>
+</HEAD>
+<BODY>
+	<div id="header" class="header">
+		<div class="link">
+			<img src="cmart.jpg" alt="C-MART">
+		</div>
+		<div class="link">
+			<a href="index.html"> Home </a>
+		</div>
+		<div class="link">
+			| <a href="browse.html"> Browse </a>
+		</div>
+		<div class="link">
+			| <a href="sell.html"> Sell </a>
+		</div>
+		<div class="link">
+			| <a href="login.html"> Login </a>
+		</div>
+		<div class="link">
+			| <a href="register.html"> Register </a>
+		</div>
+	</div>
+
+	<div class="three columns">
+		<form name="search_bar" action="search.html" class="nice" method="GET">
+			<input type="hidden" name="userID" value=""> <input
+				type="hidden" name="authToken" value=""> <input type="text"
+				id="searchTerm" name="searchTerm" value="" /> <input type="submit"
+				class="nice small radius white button" value="Search">
+		</form>
+	</div>
+
+	<div class="container">
+		<div class="row">
+			<div class="twelve columns">
+				<div id="body_content" class="body">
+		Thank you for bidding on an item.<BR/>
+		Please check your user account later to see if you won the item.<BR/>
+				</div>
+			</div>
+		</div>
+	</div>
+
+		<!-- The error and statistics containers -->
+		<div class="container">
+			<div class="row">
+				<div class="seven columns">
+					<table>
+						<thead>
+							<tr>
+								<th colspan="2" id="numOfErrors">Errors: </th>
+							</tr>
+						</thead>
+						<tbody id="errorBody"></tbody>
+					</table>
+					<span id="scriptError"></span>
+					<span id="scriptDebug"></span>
+				</div>
+			</div>
+		</div>
+		<div class="container">
+			<div class="row">
+				<div class="seven columns">
+					<table>
+						<thead>
+							<tr>
+								<th>Server: </th>
+								<th id="statsServerName"></th>
+							</tr>
+						</thead>
+						<tbody id="statsBody">
+							<tr class="row1">
+								<td>Time to process parameters:</td>
+								<td id="statsPramTime">0</td>
+							</tr>
+							<tr class="row2">
+								<td>Time to access database:</td>
+								<td id="statsDBTime">0</td>
+							</tr>
+							<tr class="row1">
+								<td>Time to process page data:</td>
+								<td id="statsProcTime">0</td>
+							</tr>
+							<tr class="row2">
+								<td>Time to render page:</td>
+								<td id="statsRenderTime">0</td>
+							</tr>
+							<tr class="row1">
+								<td>Total time to process:</td>
+								<td id="statsTotalTime">0</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+</BODY>
+</HTML>

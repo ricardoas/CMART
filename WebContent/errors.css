@@ -1,0 +1,109 @@
+.errors{
+	padding: 20px;
+	float: left;
+	clear: both;
+	width: 95%;
+}
+
+.errors .title{
+	float: left;
+	clear: both;
+	width: 100%;
+	background-color:aqua;
+}
+
+.errors .row1{
+	float: left;
+	clear: both;
+	width: 100%;	
+}
+
+.errors .row2{
+	float: left;
+	clear: both;
+	width: 100%;
+}
+
+.errors .row1 .nocol{
+	float: left;
+	clear: none;
+	background-color:silver;
+	width: 10%;
+}
+
+.errors .row1 .msgcol{
+	float: left;
+	clear: none;
+	background-color:hotpink;
+	width: 90%;	
+}
+
+.errors .row2 .nocol{
+	float: left;
+	clear: none;
+	background-color:silver;
+	width: 10%;
+}
+
+.errors .row2 .msgcol{
+	float: left;
+	clear: none;
+	background-color:hotpink;
+	width: 90%;	
+}
+
+.stats{
+	padding: 20px;
+	float: left;
+	clear: both;
+	width: 95%;
+}
+
+.stats .title{
+	float: left;
+	clear: both;
+	width: 100%;
+	background-color:aqua;
+}
+
+.stats .row1{
+	float: left;
+	clear: both;
+	width: 100%;	
+}
+
+.stats .row2{
+	float: left;
+	clear: both;
+	width: 100%;
+}
+
+.stats .row1 .name{
+	float: left;
+	clear: none;
+	background-color:silver;
+	width: 30%;
+}
+
+.stats .row1 .time{
+	float: left;
+	clear: none;
+	background-color:hotpink;
+	width: 70%;	
+}
+
+.stats .row2 .name{
+	float: left;
+	clear: none;
+	background-color:silver;
+	width: 30%;
+}
+
+.stats .row2 .time{
+	float: left;
+	clear: none;
+	background-color:hotpink;
+	width: 70%;	
+}
+
+a.nav {color: blue; text-decoration: underline; }
