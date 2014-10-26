@@ -1,0 +1,481 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;
+      charset=ISO-8859-1">
+    <title>C-MART</title>
+    <link rel="stylesheet" type="text/css"
+      href="css/jquery-ui-1.8.11.custom.css" media="screen">
+    <script src="js/jquery-1.6.3.min.js" type="text/javascript"></script>
+    <script src="js/jquery-ui-1.8.11.custom.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css"
+      href="stylesheets/foundation.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="eight columns"> <a class="mainlogo-link"
+            href="http://theone.ece.cmu.edu/wordpress" title="theONE"><img
+              class="mainlogo-img" src="images/banner.png" alt="theONE"
+              width="450"></a> </div>
+        <div class="four columns"> <a class="ece-logo"
+            href="http://www.ece.cmu.edu" title="cmuECE"><img
+              class="ece-logo" src="images/logo-ece.jpg" alt="cmuECE"
+              align="right" width="200"></a> </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="twelve columns">
+          <center>
+            <h1>C-MART</h1>
+            <h3>Benchmarking the Cloud</h3>
+          </center>
+        </div>
+      </div>
+    </div>
+    <br>
+    <br>
+    <div class="container">
+      <div class="row">
+        <div class="three columns"><ul style="list-style-image: url(images/orbit/bullets.jpg)">
+      <li>Overview</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="cmart_overview.html">C-MART overview</a></li>
+        <li><a href="../cmart-1/">C-MART online</a></li>
+		<li><a href="pagedescriptions.html">Web Page Descriptions</a></li>
+		<li><a href="C-MART.11.26.2012.pdf">Presentation Slides</a></li>
+		<li><a href="IEEE_C-MART.pdf">IEEE TPDS Paper</a></li>
+      </ul>
+
+	  <li>Virtual Machine Configuration</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="initial_config.html">Initial Configuration</a></li>
+      </ul>
+      <li>Populate Data</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="populate.html">Populate quick start</a></li>
+        <li><a href="populate_details.html">Populate details</a></li>
+        <li><a href="populate_distributions.html">Populate distributions</a></li>
+        <li><a href="populate_additional.html">Additional operations</a></li>
+      </ul>
+	  <li>Client Generator</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="client.html">Client quick start</a></li>
+        <li><a href="client_details.html">Client Generator details</a></li>
+		<li><a href="CG_output.html">Output File Description</a></li>
+		<li><a href="client_repeat.html">Experiment Repeatability</a></li>
+      </ul></div>
+        <div class="nine columns">
+          <center>
+            <h4>Populate Details<br>
+            </h4>
+          </center>
+          The C-MART populator is highly configurable and the data it
+          creates can be edited via its configuration file or editing
+          the data distribution files. This document describes how to
+          configure the populator's variables.<br>
+          <br>
+          <h5><span style="font-weight: bold;">Users</span></h5>
+          <br>
+          <span style="font-weight: bold;">1. populate_no_of_users</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> # create 100 users<br>
+                  populate_no_of_users =100<br>
+                  <br>
+                  # create 1M users<br>
+                  populate_no_of_users = 1000000<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          This variable controls how many users will be created when
+          populating C-MART's database.<br>
+          <br>
+          <span style="font-weight: bold;">2. populate_first_names_file</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> # DEFAULT: will use
+                  default first names list<br>
+                  populate_first_names_file = firstNames.csv<br>
+                  <br>
+                  # will create use "custom_firstNames.csv" as input
+                  file<br>
+                  populate_first_names_file = custom_firstNames.csv<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          This variable controls which file is used to choose the first
+          names of users.<br>
+          The file format is: <span style="font-style: italic;">
+            frequency with which to select the name, the name</span><br>
+          <br>
+          <br>
+          <span style="font-weight: bold;"> 3. populate_last_names_file</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> # DEFAULT: will use
+                  default last names list<br>
+                  populate_last_names_file = lastNames.csv<br>
+                  <br>
+                  # will create use "custom_lastNames.csv" as input file<br>
+                  populate_last_names_file = custom_lastNames.csv</td>
+              </tr>
+            </tbody>
+          </table>
+          This variable controls which file is used to choose the last
+          names of users.<br>
+          The file format is: <span style="font-style: italic;">
+            frequency with which to select the name, the name</span><br>
+          <br>
+          <span style="font-weight: bold;"> 4.
+            populate_user_ratings_file</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> # DEFAULT: will use
+                  eBay emperical seller rating<br>
+                  populate_user_ratings_file = sellerRating.csv<br>
+                  <br>
+                  # will create use "custom_lastNames.csv" as input file<br>
+                  populate_user_ratings_file = custom_sellerRating.csv</td>
+              </tr>
+            </tbody>
+          </table>
+          This variable control the distribution that is used for user's
+          seller ratings.<br>
+          The file format is: <span style="font-style: italic;">frequency
+
+
+            with which to select the rating, the rating</span><br>
+          <br>
+          <h5>User Addresses</h5>
+          <br>
+          <span style="font-weight: bold;"> 5. populate_streets_file</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> # DEFAULT: will use
+                  popular American street names<br>
+                  populate_streets_file = streetNames.csv<br>
+                  <br>
+                  # will create use "custom_streetNames.csv" as input
+                  file<br>
+                  populate_streets_file = custom_streetNames.csv</td>
+              </tr>
+            </tbody>
+          </table>
+          This variable controls the distribution used to selected the
+          value of street names used in creating users' addresses.<br>
+          The file format is: <span style="font-style: italic;">frequency
+
+
+            with which to select the street name, the street name</span><br>
+          <br>
+          <span style="font-weight: bold;"> 6. populate_towns_file</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> # DEFAULT: will use
+                  popular American cities<br>
+                  <span style="font-weight: bold;"> </span>populate_towns_file
+
+
+                  = cities.csv<br>
+                  <br>
+                  # will create use "custom_cities.csv" as input file<br>
+                  populate_towns_file = custom_cities.csv</td>
+              </tr>
+            </tbody>
+          </table>
+          This variable controls the distribution used to selected the
+          value of city names used in users' addresses.<br>
+          The file format is: <span style="font-style: italic;">frequency
+
+
+            with which to select the city name, the city name</span><br>
+          <br style="font-weight: bold;">
+          <span style="font-weight: bold;"> 7. populate_no_of_states</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"># DEFAULT: insert all
+                  states<br>
+                  populate_no_of_states = -1<br>
+                  <br>
+                  # insert only 20 states<br>
+                  populate_no_of_states = 20<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          This variable controls the number of states inserted in to
+          C-MART's database, typically all states should be added.<br>
+          <br>
+          <span style="font-weight: bold;"> 8. populate_states_uniform</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> # DEFAULT: will use
+                  emperical distribution of eBay buyers<br>
+                  populate_states_uniform = false<br>
+                  <br>
+                  # will create peoples address with uniform states<br>
+                  populate_states_uniform = true<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          This variable controls if the user's state is selected from a
+          uniform distribution or the one defined in states.csv<br>
+          <br>
+          <span style="font-weight: bold;">9. populate_states_file</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> # DEFAULT: use USA
+                  states<br>
+                  populate_states_file = states.csv<br>
+                  <br>
+                  # will create peoples 'states' with custom values from
+                  "custom_places.csv"<br>
+                  populate_states_file = custom_places.csv<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          This variable sets the file to use for the user's states and
+          the distribution that should be used to select user's
+          locations.<br>
+          <br>
+          The file format is: <span style="font-style: italic;">frequency
+
+
+            with which to select the state, state short name, state full
+            name</span><br>
+          <br>
+          The order values appear in the file will be the same order
+          they are inserted in to the database.<br>
+          <br>
+          <h5>Items</h5>
+          <br>
+          <span style="font-weight: bold;"> 10.
+            populate_no_of_categories</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> # DEFAULT: will
+                  populate all eBay categories<br>
+                  populate_no_of_categories = -1<br>
+                  <br>
+                  # will populate 100 eBay categories<br>
+                  populate_no_of_categories = 100<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          This variable controls how many item categories are inserted
+          in to C-MART's database. The default is to insert all
+          categories.<br>
+          <br>
+          <span style="font-weight: bold;"> 11.
+            populate_categories_uniform</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> # DEFAULT: will
+                  select an item's category from the empirical
+                  distribution<br>
+                  populate_categories_uniform = false<br>
+                  <br>
+                  # will select an item's category using a uniform
+                  distribution<br>
+                  populate_categories_uniform = true<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          This variable controls whether an item's category is selected
+          using the observed eBay distribution or a uniform distribution<br>
+          <br>
+          <span style="font-weight: bold;">12. populate_categories_file</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> # DEFAULT: use eBay
+                  categories<br>
+                  populate_categories_file = categories.csv<br>
+                  <br>
+                  # will create items with categories from
+                  "custom_categories.csv"<br>
+                  populate_categories_file = custom_categories.csv </td>
+              </tr>
+            </tbody>
+          </table>
+          This variable controls the file used to select items'
+          categories and the distribution with which they are selected.<br>
+          The file format is: <span style="font-style: italic;">frequency
+
+
+            with which to select the category, category ID, category
+            name, parent category ID</span><br>
+          <br>
+          <span style="font-weight: bold;">13. populate_start_price_file</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> # DEFAULT: use
+                  distribution from starting prices on eBay<br>
+                  populate_start_price_file = startingBid.csv<br>
+                  <br>
+                  # will create items with categories from
+                  "custom_startingBid.csv"<br>
+                  populate_start_price_file = custom_startingBid.csv</td>
+              </tr>
+            </tbody>
+          </table>
+          This variable controls the file used to select item's starting
+          prices.<br>
+          The file format is: <span style="font-style: italic;">frequency
+
+
+            with which to select the price, the price in dollars ($)</span><br>
+          <br>
+          <span style="font-weight: bold;">14.
+            populate_buy_now_price_file = buyNowPrice.csv</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> # DEFAULT: use
+                  distribution from buy now prices on eBay<br>
+                  populate_buy_now_price_file = buyNowPrice.csv<br>
+                  <br>
+                  # will create items with categories from
+                  "custom_buyNowPrice.csv"<br>
+                  populate_buy_now_price_file = custom_buyNowPrice.csv</td>
+              </tr>
+            </tbody>
+          </table>
+          This variable controls the file used to select item's buy now
+          prices. The buy now price is always higher than the starting
+          price and reserve price if the item is available to buy now.<br>
+          The file format is: <span style="font-style: italic;">frequency
+
+
+            with which to select the price, the price in dollars ($)</span><br>
+          <br>
+          <h5>Database</h5>
+          <br>
+          <span style="font-weight: bold;">15. Configure database
+            credentials</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> # MySQL connection<br>
+                  my_database_url = jdbc:mysql://10.1.1.1/cmart<br>
+                  my_database_username = cmart<br>
+                  my_database_password = Cm4rt!<br>
+                  my_database_driver = com.mysql.jdbc.Driver<br>
+                  <br>
+                  # Cassandra connection<br>
+                  cassandra_database_url =
+                  jdbc:cassandra://10.1.1.1:9160/CMART<br>
+                  cassandra_database_driver =
+                  org.apache.cassandra.cql.jdbc.CassandraDriver<br>
+                  cassandra_database_username = cmart<br>
+                  cassandra_database_password = Cm4rt!<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The cmart user must be able to add/drop tables, create
+          indexes, and insert, delete, update etc table entries.<br>
+          <br>
+          <br>
+          <span style="font-weight: bold;">16. Database connection cache</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> # Close each
+                  connection after query<br>
+                  my_conn_cache = 0<br>
+                  <br>
+                  # Internal connection cache<br>
+                  my_conn_cache = 1<br>
+                  <br>
+                  # Tomcat JDBC connection cache<br>
+                  my_conn_cache = 2<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The cmart website can either not cache connections, keep track
+          of its own connections or use a cache managed by the Tomcat
+          context.<br>
+          <br>
+          <br>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="twelve columns">
+          <center> &copy; 2012 TheONE Network Research Group </center>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

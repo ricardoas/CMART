@@ -1,0 +1,607 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;
+      charset=ISO-8859-1">
+    <title>C-MART</title>
+    <link rel="stylesheet" type="text/css"
+      href="css/jquery-ui-1.8.11.custom.css" media="screen">
+    <script src="js/jquery-1.6.3.min.js" type="text/javascript"></script>
+    <script src="js/jquery-ui-1.8.11.custom.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css"
+      href="stylesheets/foundation.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="eight columns"> <a class="mainlogo-link"
+            href="http://theone.ece.cmu.edu/wordpress" title="theONE"><img
+              class="mainlogo-img" src="images/banner.png" alt="theONE"
+              width="450"></a> </div>
+        <div class="four columns"> <a class="ece-logo"
+            href="http://www.ece.cmu.edu" title="cmuECE"><img
+              class="ece-logo" src="images/logo-ece.jpg" alt="cmuECE"
+              align="right" width="200"></a> </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="twelve columns">
+          <center>
+            <h1>C-MART</h1>
+            <h3>Benchmarking the Cloud</h3>
+          </center>
+        </div>
+      </div>
+    </div>
+    <br>
+    <br>
+    <div class="container">
+      <div class="row">
+        <div class="three columns"> <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+      <li>Overview</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="cmart_overview.html">C-MART overview</a></li>
+        <li><a href="../cmart-1/">C-MART online</a></li>
+		<li><a href="pagedescriptions.html">Web Page Descriptions</a></li>
+		<li><a href="C-MART.11.26.2012.pdf">Presentation Slides</a></li>
+		<li><a href="IEEE_C-MART.pdf">IEEE TPDS Paper</a></li>
+      </ul>
+
+	  <li>Virtual Machine Configuration</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="initial_config.html">Initial Configuration</a></li>
+      </ul>
+      <li>Populate Data</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="populate.html">Populate quick start</a></li>
+        <li><a href="populate_details.html">Populate details</a></li>
+        <li><a href="populate_distributions.html">Populate distributions</a></li>
+        <li><a href="populate_additional.html">Additional operations</a></li>
+      </ul>
+	  <li>Client Generator</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="client.html">Client quick start</a></li>
+        <li><a href="client_details.html">Client Generator details</a></li>
+		<li><a href="CG_output.html">Output File Description</a></li>
+		<li><a href="client_repeat.html">Experiment Repeatability</a></li>
+      </ul></div>
+        <div class="nine columns">
+          <center>
+            <h4>Client</h4>
+          </center>
+          The C-MART client emulator access the website to create load
+          on the servers. The emulated clients emulate modern browsing
+          behaviors such as tabbed browsing, using AJAX, and upload and
+          download images. The clients configuration is specified in
+          CGconfig.txt. This document describes how to configure the
+          variables for the Client Generator.<br>
+          <br>
+          <h5><span style="font-weight: bold;">Website Address and
+                File Directories</span></h5><br>
+          <br style="font-weight: bold;">
+          <span style="font-weight: bold;"> 1. full_url1, full_url2,
+            full_url3, etc.</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;">full_url1=http://10.1.1.1:80/cmart-0.1<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          This variable tells the emulated clients which URL to use to
+          open the C-MART application. The format should be in the form
+          of http://ip:port/appName. C-MART can send to multiple IP
+          addresses to emulate DNS. full_url1 must always be set and any
+          additional URLs, for example for multiple load balancers,
+          should be set in order as full_url2, full_url3, etc.<br>
+          <br>
+          <span style="font-weight: bold;">2. distributions_folder</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;">
+                  distributions_folder=C:\cmart\client\Distributions</td>
+              </tr>
+            </tbody>
+          </table>
+          The emulated clients use distributions taken from production
+          websites to interact with the C-MART site. The location of the
+          distribution files and the images used to send to the site contained in the 'Distributions' folder. These must be
+          included for the Client Generator to run.<br>
+          <br>
+          <span style="font-weight: bold;">3. output_site_date_file</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;">
+                  output_site_data_file=C:\cmart_output\</td>
+              </tr>
+            </tbody>
+          </table>
+          This variable specifies the directory used to output the
+          response time, page hits and other statistics collected by the
+          emulated clients throughout their sessions.<br>
+          <br>
+          <span style="font-weight: bold;">4. repeated_xml</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;">
+                  repeated_xml=C:\cmart\repeatedXML\</td>
+              </tr>
+            </tbody>
+          </table>
+          This variable specifies the directory used to output the
+          response time, page hits and other statistics collected by the
+          emulated clients throughout their sessions.<br>
+          <br>
+          <span style="font-weight: bold;">5. output_stats</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> output_stats=true</td>
+              </tr>
+            </tbody>
+          </table>
+          The output_stats variable indicates whether statistics about
+          the run should be output. Default is true.<br>
+          <br>
+		  <span style="font-weight: bold;">6. output_matlab</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> output_matlab=true</td>
+              </tr>
+            </tbody>
+          </table>
+          The output_matlab variable indicates whether the data should be output in .mat form in addition to .csv form. Default is false.<br>
+          <br>
+          <span style="font-weight: bold;">7. output_think_times</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;">
+                  output_think_times=true</td>
+              </tr>
+            </tbody>
+          </table>
+          The output_think_times variable indicates whether the
+          distribution of think times is to be output. Default is false.<br>
+          <br>
+          <span style="font-weight: bold;">8. get_css_js_img</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> get_css_js_img=true</td>
+              </tr>
+            </tbody>
+          </table>
+          The get_css_js_img variable is used to indicate whether the
+          CSS, JavaScript, and Image files on each webpage should be
+          downloaded. If set to false only the HTML document for each
+          page is downloaded. Default is true.<br>
+          <br>
+          <h5><span style="font-weight: bold;">Runtime Variables</span></h5><br>
+          <br>
+          <span style="font-weight: bold;">9. run_length</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> run_length=15<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The run_length variable defines the length of the experiment
+          in minutes. This includes rampup time at the start but does
+          not include ramp-down time at the end when clients gracefully
+          exit. Default is 10.<br>
+          <span style="font-weight: bold;"><br>
+            10. verbose</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> verbose=false<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The verbose variable indicates if debugging output should be
+          displayed. Options are 'true' or 'false'. Default is false.<br>
+          <br>
+          <span style="font-weight: bold;">11. html4</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> html4=true<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The html4 variable indicates whether the HTML4 ('true') or
+          HTML5 ('false') version of C-MART is to be used. Default is
+          HTML4.<br>
+          <br>
+          <span style="font-weight: bold;">12. speedup_factor</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> speedup_factor=5<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The speedup_factor is used to speedup the client's access to
+          the website by changing the think time between page accesses.
+          A speedup_factor of 5 would make the think time 1/5th the
+          normal amount. A speedup_factor between 0 and 1 could be used
+          to slow down the clients. Default speedup_factor=1.<br>
+          <br>
+          <span style="font-weight: bold;">13. repeated_run</span><br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> repeated_run=false<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The repeated_run variable is used to determine if the
+          experiment run is based off repeating an existing run ('true')
+          based off the XML files in repeated_xml, or if it is to be an
+          original Client Generator experiment ('false'). If
+          repeated_run is set to false, then the results of each client
+          are saved to the repeated_xml directory for so that the run
+          can be repeated. Default is false.<br>
+          <br>
+         <h5><span style="font-weight: bold;">Client Load
+                Variables</span></h5><br>
+          <br>
+          <span style="font-weight: bold;">14. static_userload</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> static_userload=true<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The static_userload variable is used to determine if the
+          client generator is used in closed loop ('true') or open loop
+          ('false') mode. In closed loop mode a client exiting the
+          system spawns a new client to join, keeping the userload
+          static. In the open loop mode clients are created at a
+          specified rate. Default static_userload is false.<br>
+          <br>
+          <span style="font-weight: bold;">15. clients_per_minute</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> clients_per_minute=100<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The clients_per_minute variable is used when static_userload
+          is set to false. The value of clients_per_minute determines
+          the average number of clients to be added to the system every
+          minute. Default is 100.<br>
+          <br>
+          <span style="font-weight: bold;">16. peak_users</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> peak_users=300<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The peak_users variable is used when static_userload is set to
+          true. The value determines the value of the number of users to
+          be held statically for the experiment. Default is 100.<br>
+          <br>
+          <span style="font-weight: bold;">17. rampup_time</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> rampup_time=60<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The rampup_time is used for when static_userload is set to
+          true. It is the amount of time in seconds over which the
+          client level ramps up to the peak_users level. Default is 30.<br>
+          <br>
+          <span style="font-weight: bold;">18. allow_bursts</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> allow_bursts=false<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The allow_bursts variable determines if C-MART is allowed to
+          add in random client bursts to the workload. User defined
+          bursts will be defined in subsequent sections.&nbsp; Default
+          is true.<br>
+          <br>
+          <span style="font-weight: bold;">19. change1, change2,
+            change3, etc.</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> change1=30,600<br>
+                  change2=120,400<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          These variables are used to change the clients_per_minute
+          variable over the course of the experiment for when
+          static_userload is set to false. Each variable is a set of two
+          numbers, the first number is the time in seconds from the
+          start of the experiment when the change is set to begin, the
+          second number is the new clients_per_minute value which should
+          be implemented. <br>
+          <br>
+          <span style="font-weight: bold;">20. slope1, slope2, slope3,
+            etc.</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> slope1= 30,30<br>
+                  slope2=60,-30<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          These variables are used to change the peak_users variable
+          over the course of the experiment for when static_userload is
+          set to true. Each variable is a set of two numbers, the first
+          number is the time in seconds from the start of the experiment
+          when the change is set to begin, the second number is the
+          slope, in terms of clients/minute, of how much the peak_users
+          value is to change. <br>
+          <br>
+          <br>
+          <h5><span style="font-weight: bold;">Additional
+                Variables</span></h5><br>
+          <br>
+          <span style="font-weight: bold;">21. rt_threshold</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> rt_threshold=1000<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The rt_threshold variable defines a threshold in milliseconds,
+          above which the clients become dissatisfied with the response
+          time and become more likely to leave the website. The
+          rt_threshold is used as the average of a normal distribution
+          for which each client has their own defined threshold value.
+          Default is 1000.<br>
+          <br>
+          <span style="font-weight: bold;">22. tabbed_browsing</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> tabbed_browsing=true<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The tabbed_browsing variable indicates if clients are allowed
+          to open tabs in the style of modern Internet browsers.&nbsp;
+          Default is true.<br>
+          <br>
+          <span style="font-weight: bold;">23. markov_page_transitions</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;">
+                  markov_page_transitions=false<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The markov_page_transitions variable is used to determine if
+          the page transition probabilities are determined by a Markov
+          distribution on the page type, or if there is a more complex
+          decision process involved to determine the page transition
+          probabilities involving page content, client history,
+          etc.&nbsp; Default is false.<br>
+          <br>
+          <span style="font-weight: bold;">24. workload_type</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> workload_type=2<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The workload_type variable indicates whether the workload type
+          should be database read heavy ('1'), mixed ('2'), or write
+          heavy ('3').&nbsp; Default is 2.<br>
+          <br>
+          <span style="font-weight: bold;">25. cache_clear</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> cache_clear=0.33<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The cache_clear variable determines what percentage of clients
+          clear their local cache upon exiting the system. Clients
+          returning to the system come with caches prepopulated from
+          their previous browsing experience. Some clients will have
+          empty caches due to possibly switching computers or specific
+          browsing settings.&nbsp; Default is 0.2.<br>
+          <br>
+          <span style="font-weight: bold;">26. cache_real_data</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> cache_real_data=false<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The cache_real_data variable is used to determine if the real
+          CSS, JavaScript, Image files are cached ('true') or whether
+          there are just flags indicating that the specific files have
+          been cached ('false'). Caching the real returned data is
+          extremely memory intensive.&nbsp; Default is false.<br>
+          <br>
+          <span style="font-weight: bold;">27. local_images</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> local_images=false<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The local_images variable is used to indicate whether the
+          images on C-MART are read from the local application server
+          ('true') or from an external image server ('false').&nbsp;
+          Default is false.<br>
+          <br>
+          <span style="font-weight: bold;">28. network_delay</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> network_delay=false<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The network_delay variable is used to add a fake addition
+          network delay to each request. Since clients originate from
+          the same source they all experience the same network delay and
+          this can be used to differentiate between clients. Default is
+          false.<br>
+          <br>
+          <span style="font-weight: bold;">29. network_delay</span>_avg<br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> network_delay_avg=50<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The network_delay_avg variable is used when network_delay is
+          set to true. The network_delay_avg is a value in milliseconds
+          which is used as the average of an exponential distribution
+          from which the network delay for each client is drawn from.
+          Default is 0.<br>
+          <br>
+          <br>
+          &nbsp;<br>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="twelve columns">
+          <center> &copy; 2012 TheONE Network Research Group </center>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

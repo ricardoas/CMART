@@ -1,0 +1,558 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;
+      charset=ISO-8859-1">
+    <title>C-MART</title>
+    <link rel="stylesheet" type="text/css"
+      href="css/jquery-ui-1.8.11.custom.css" media="screen">
+    <script src="js/jquery-1.6.3.min.js" type="text/javascript"></script>
+    <script src="js/jquery-ui-1.8.11.custom.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css"
+      href="stylesheets/foundation.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="eight columns"> <a class="mainlogo-link"
+            href="http://theone.ece.cmu.edu/wordpress" title="theONE"><img
+              class="mainlogo-img" src="images/banner.png" alt="theONE"
+              width="450"></a> </div>
+        <div class="four columns"> <a class="ece-logo"
+            href="http://www.ece.cmu.edu" title="cmuECE"><img
+              class="ece-logo" src="images/logo-ece.jpg" alt="cmuECE"
+              align="right" width="200"></a> </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="twelve columns">
+          <center>
+            <h1>C-MART</h1>
+            <h3>Benchmarking the Cloud</h3>
+          </center>
+        </div>
+      </div>
+    </div>
+    <br>
+    <br>
+    <div class="container">
+      <div class="row">
+        <div class="three columns"><ul style="list-style-image: url(images/orbit/bullets.jpg)">
+      <li>Overview</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="cmart_overview.html">C-MART overview</a></li>
+        <li><a href="../cmart-1/">C-MART online</a></li>
+		<li><a href="pagedescriptions.html">Web Page Descriptions</a></li>
+		<li><a href="C-MART.11.26.2012.pdf">Presentation Slides</a></li>
+		<li><a href="IEEE_C-MART.pdf">IEEE TPDS Paper</a></li>
+      </ul>
+
+	  <li>Virtual Machine Configuration</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="initial_config.html">Initial Configuration</a></li>
+      </ul>
+      <li>Populate Data</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="populate.html">Populate quick start</a></li>
+        <li><a href="populate_details.html">Populate details</a></li>
+        <li><a href="populate_distributions.html">Populate distributions</a></li>
+        <li><a href="populate_additional.html">Additional operations</a></li>
+      </ul>
+	  <li>Client Generator</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="client.html">Client quick start</a></li>
+        <li><a href="client_details.html">Client Generator details</a></li>
+		<li><a href="CG_output.html">Output File Description</a></li>
+		<li><a href="client_repeat.html">Experiment Repeatability</a></li>
+      </ul></div>
+        <div class="nine columns">
+          <center>
+            <h4>Experiment Repeatability</h4>
+          </center>
+          <p>C-MART experiments are logged for repeatability so management algorithms can be directly compared. Clients’ actions and think times from experimental runs are output to XML files which can be read by the workload generator and reproduced in subsequent runs. 
+		  </p>
+		  <p>There are two types of XML documents used for the repeatability experiments. The first is clientGenerator.xml which describes when each client is added to the system. The second file type is client<em>n</em>.xml, where <em>n</em> is the index of the client. This file details the sequence of requests that client <em>n</em> will perform.</p>
+		  <p>An example of clientGenerator.xml is as follows:</p>
+		  <textarea rows="20" cols="780" readonly="readonly" style="width:780px !important;">
+<ClientGenerator>&#10;
+	<HTML4>true</HTML4>&#10;
+	<client>&#10;
+		<clientIndex>0</clientIndex>&#10;
+		<runTime>102</runTime>&#10;
+		<clientInfo>&#10;
+			<userID/>&#10;
+			<username>JeraldHarris8818</username>&#10;
+			<password>HiNhp\F1R</password>&#10;
+			<registered>false</registered>&#10;
+			<imageCache/>&#10;
+			<jscssCache/>&#10;
+			<HTML5Cache/>&#10;
+		</clientInfo>&#10;
+	</client>&#10;
+	<client>&#10;
+		<clientIndex>1</clientIndex>&#10;
+		<runTime>146</runTime>&#10;
+		<clientInfo>&#10;
+			<userID>20425</userID>&#10;
+			<username>User4903</username>&#10;
+			<password>User4903</password>&#10;
+			<registered>true</registered>&#10;
+			<imageCache>&#10;
+				<image>images/arrow_down.png</image>&#10;
+				<image>images/cmart.jpg</image>&#10;
+				<image>images/header/application.png</image>&#10;
+				<image>images/header/browse.png</image>&#10;
+				<image>images/header/home.png</image>&#10;
+				<image>images/header/logout.png</image>&#10;
+				<image>images/header/sell.png</image>&#10;
+				<image>images/header/video.png</image>&#10;
+				<image>images/header/videoup.png</image>&#10;
+				<image>images/misc/button-gloss.png</image>&#10;
+				<image>images/orbit/bullets.jpg</image>&#10;
+				<image>js/themes/light/next.png</image>&#10;
+				<image>js/themes/light/pointer.png</image>&#10;
+				<image>js/themes/light/prev.png</image>&#10;
+			</imageCache>&#10;
+			<jscssCache>&#10;
+				<jscss>css/body.css</jscss>&#10;
+				<jscss>css/errors.css</jscss>&#10;
+				<jscss>css/header.css</jscss>&#10;
+				<jscss>css/jquery-ui-1.8.11.custom.css</jscss>&#10;
+				<jscss>css/myaccount.css</jscss>&#10;
+				<jscss>home_recommendation.css</jscss>&#10;
+				<jscss>item_image_style.css</jscss>&#10;
+				<jscss>js/database.js</jscss>&#10;
+				<jscss>js/date.format.js</jscss>&#10;
+				<jscss>js/getRecommendationItem.js</jscss>&#10;
+				<jscss>js/getRecommendationItemHTML5.js</jscss>&#10;
+				<jscss>js/itemPriceUpdate.js</jscss>&#10;
+				<jscss>js/jquery-1.3.2.min.js</jscss>&#10;
+				<jscss>js/jquery-1.7.2.min.js</jscss>&#10;
+				<jscss>js/jquery-ui-1.8.11.custom.min.js</jscss>&#10;
+				<jscss>js/jquery-ui-sliderAccess.js</jscss>&#10;
+				<jscss>js/jquery-ui-timepicker-addon.js</jscss>&#10;
+				<jscss>js/jquery.easing.1.3.js</jscss>&#10;
+				<jscss>js/jquery.galleryview-1.1.js</jscss>&#10;
+				<jscss>js/jquery.timers-1.1.2.js</jscss>&#10;
+				<jscss>js/login.js</jscss>&#10;
+				<jscss>js/onload.js</jscss>&#10;
+				<jscss>js/selectmenus.js</jscss>&#10;
+				<jscss>js/utilities.js</jscss>&#10;
+				<jscss>stylesheets/foundation.css</jscss>&#10;
+			</jscssCache>&#10;
+			<HTML5Cache/>&#10;
+		</clientInfo>&#10;
+	</client>&#10;
+	<client>&#10;
+		<clientIndex>2</clientIndex>&#10;
+		<runTime>247</runTime>&#10;
+		<clientInfo>&#10;
+			<userID>39278</userID>&#10;
+			<username>User59942</username>&#10;
+			<password>User59942</password>&#10;
+			<registered>true</registered>&#10;
+			<imageCache/>&#10;
+			<jscssCache/>&#10;
+			<HTML5Cache/>&#10;
+		</clientInfo>&#10;
+	</client>&#10;
+	<client>&#10;
+		<clientIndex>3</clientIndex>&#10;
+		<runTime>370</runTime>&#10;
+		<clientInfo>&#10;
+			<userID/>&#10;
+			<username>WalterGray3508</username>&#10;
+			<password>@uwUD]A;y[c</password>&#10;
+			<registered>false</registered>&#10;
+			<imageCache/>&#10;
+			<jscssCache/>&#10;
+			<HTML5Cache/>&#10;
+		</clientInfo>&#10;
+	</client>&#10;
+	<client>&#10;
+		<clientIndex>4</clientIndex>&#10;
+		<runTime>474</runTime>&#10;
+		<clientInfo>&#10;
+			<userID>87270</userID>&#10;
+			<username>User21033</username>&#10;
+			<password>User21033</password>&#10;
+			<registered>true</registered>&#10;
+			<imageCache>&#10;
+				<image>images/arrow_down.png</image>&#10;
+				<image>images/cmart.jpg</image>&#10;
+				<image>images/header/application.png</image>&#10;
+				<image>images/header/browse.png</image>&#10;
+				<image>images/header/home.png</image>&#10;
+				<image>images/header/logout.png</image>&#10;
+				<image>images/header/sell.png</image>&#10;
+				<image>images/header/video.png</image>&#10;
+				<image>images/header/videoup.png</image>&#10;
+				<image>images/misc/button-gloss.png</image>&#10;
+				<image>images/orbit/bullets.jpg</image>&#10;
+				<image>js/themes/light/next.png</image>&#10;
+				<image>js/themes/light/pointer.png</image>&#10;
+				<image>js/themes/light/prev.png</image>&#10;
+			</imageCache>&#10;
+			<jscssCache>&#10;
+				<jscss>css/body.css</jscss>&#10;
+				<jscss>css/errors.css</jscss>&#10;
+				<jscss>css/header.css</jscss>&#10;
+				<jscss>css/jquery-ui-1.8.11.custom.css</jscss>&#10;
+				<jscss>css/myaccount.css</jscss>&#10;
+				<jscss>home_recommendation.css</jscss>&#10;
+				<jscss>item_image_style.css</jscss>&#10;
+				<jscss>js/database.js</jscss>&#10;
+				<jscss>js/date.format.js</jscss>&#10;
+				<jscss>js/getRecommendationItem.js</jscss>&#10;
+				<jscss>js/getRecommendationItemHTML5.js</jscss>&#10;
+				<jscss>js/itemPriceUpdate.js</jscss>&#10;
+				<jscss>js/jquery-1.3.2.min.js</jscss>&#10;
+				<jscss>js/jquery-1.7.2.min.js</jscss>&#10;
+				<jscss>js/jquery-ui-1.8.11.custom.min.js</jscss>&#10;
+				<jscss>js/jquery-ui-sliderAccess.js</jscss>&#10;
+				<jscss>js/jquery-ui-timepicker-addon.js</jscss>&#10;
+				<jscss>js/jquery.easing.1.3.js</jscss>&#10;
+				<jscss>js/jquery.galleryview-1.1.js</jscss>&#10;
+				<jscss>js/jquery.timers-1.1.2.js</jscss>&#10;
+				<jscss>js/login.js</jscss>&#10;
+				<jscss>js/onload.js</jscss>&#10;
+				<jscss>js/selectmenus.js</jscss>&#10;
+				<jscss>js/utilities.js</jscss>&#10;
+				<jscss>stylesheets/foundation.css</jscss>&#10;
+			</jscssCache>&#10;
+			<HTML5Cache/>&#10;
+		</clientInfo>&#10;
+	</client>&#10;
+	<client>&#10;
+		<clientIndex>5</clientIndex>&#10;
+		<runTime>588</runTime>&#10;
+		<clientInfo>&#10;
+			<userID>54896</userID>&#10;
+			<username>User38986</username>&#10;
+			<password>User38986</password>&#10;
+			<registered>true</registered>&#10;
+			<imageCache>&#10;
+				<image>images/arrow_down.png</image>&#10;
+				<image>images/cmart.jpg</image>&#10;
+				<image>images/header/application.png</image>&#10;
+				<image>images/header/browse.png</image>&#10;
+				<image>images/header/home.png</image>&#10;
+				<image>images/header/logout.png</image>&#10;
+				<image>images/header/sell.png</image>&#10;
+				<image>images/header/video.png</image>&#10;
+				<image>images/header/videoup.png</image>&#10;
+				<image>images/misc/button-gloss.png</image>&#10;
+				<image>images/orbit/bullets.jpg</image>&#10;
+				<image>js/themes/light/next.png</image>&#10;
+				<image>js/themes/light/pointer.png</image>&#10;
+				<image>js/themes/light/prev.png</image>&#10;
+			</imageCache>&#10;
+			<jscssCache>&#10;
+				<jscss>css/body.css</jscss>&#10;
+				<jscss>css/errors.css</jscss>&#10;
+				<jscss>css/header.css</jscss>&#10;
+				<jscss>css/jquery-ui-1.8.11.custom.css</jscss>&#10;
+				<jscss>css/myaccount.css</jscss>&#10;
+				<jscss>home_recommendation.css</jscss>&#10;
+				<jscss>item_image_style.css</jscss>&#10;
+				<jscss>js/database.js</jscss>&#10;
+				<jscss>js/date.format.js</jscss>&#10;
+				<jscss>js/getRecommendationItem.js</jscss>&#10;
+				<jscss>js/getRecommendationItemHTML5.js</jscss>&#10;
+				<jscss>js/itemPriceUpdate.js</jscss>&#10;
+				<jscss>js/jquery-1.3.2.min.js</jscss>&#10;
+				<jscss>js/jquery-1.7.2.min.js</jscss>&#10;
+				<jscss>js/jquery-ui-1.8.11.custom.min.js</jscss>&#10;
+				<jscss>js/jquery-ui-sliderAccess.js</jscss>&#10;
+				<jscss>js/jquery-ui-timepicker-addon.js</jscss>&#10;
+				<jscss>js/jquery.easing.1.3.js</jscss>&#10;
+				<jscss>js/jquery.galleryview-1.1.js</jscss>&#10;
+				<jscss>js/jquery.timers-1.1.2.js</jscss>&#10;
+				<jscss>js/login.js</jscss>&#10;
+				<jscss>js/onload.js</jscss>&#10;
+				<jscss>js/selectmenus.js</jscss>&#10;
+				<jscss>js/utilities.js</jscss>&#10;
+				<jscss>stylesheets/foundation.css</jscss>&#10;
+			</jscssCache>&#10;
+			<HTML5Cache/>&#10;
+		</clientInfo>&#10;
+	</client>&#10;
+	<client>&#10;
+		<clientIndex>6</clientIndex>&#10;
+		<runTime>689</runTime>&#10;
+		<clientInfo>&#10;
+			<userID>86571</userID>&#10;
+			<username>User96867</username>&#10;
+			<password>User96867</password>&#10;
+			<registered>true</registered>&#10;
+			<imageCache>&#10;
+				<image>..//img/30102_0.jpg</image>&#10;
+				<image>..//img/30103_0.jpg</image>&#10;
+				<image>..//img/30115_0.jpg</image>&#10;
+				<image>..//img/30118_0.jpg</image>&#10;
+				<image>..//img/30119_0.jpg</image>&#10;
+				<image>..//img/30120_0.jpg</image>&#10;
+				<image>..//img/30121_0.jpg</image>&#10;
+				<image>..//img/30122_0.jpg</image>&#10;
+				<image>..//img/30123_0.jpg</image>&#10;
+				<image>..//img/30124_0.jpg</image>&#10;
+				<image>..//img/30124_1.jpg</image>&#10;
+				<image>..//img/30125_0.jpg</image>&#10;
+				<image>..//img/30125_1.jpg</image>&#10;
+				<image>..//img/30126_0.jpg</image>&#10;
+				<image>..//img/30126_1.jpg</image>&#10;
+				<image>..//img/30130_1.jpg</image>&#10;
+				<image>..//img/30130_2.jpg</image>&#10;
+				<image>..//img/30130_3.jpg</image>&#10;
+				<image>..//img/30130_4.jpg</image>&#10;
+				<image>..//img/30131_0.jpg</image>&#10;
+				<image>..//img/30131_1.jpg</image>&#10;
+				<image>..//img/30131_2.jpg</image>&#10;
+				<image>..//img/30132_0.jpg</image>&#10;
+				<image>..//img/30132_1.jpg</image>&#10;
+				<image>..//img/30132_2.jpg</image>&#10;
+				<image>..//img/30132_3.jpg</image>&#10;
+				<image>..//img/30132_4.jpg</image>&#10;
+				<image>..//img/30133_0.jpg</image>&#10;
+				<image>..//img/blank.jpg</image>&#10;
+				<image>images/arrow_down.png</image>&#10;
+				<image>images/cmart.jpg</image>&#10;
+				<image>images/header/application.png</image>&#10;
+				<image>images/header/browse.png</image>&#10;
+				<image>images/header/home.png</image>&#10;
+				<image>images/header/logout.png</image>&#10;
+				<image>images/header/sell.png</image>&#10;
+				<image>images/header/video.png</image>&#10;
+				<image>images/header/videoup.png</image>&#10;
+				<image>images/misc/button-gloss.png</image>&#10;
+				<image>images/orbit/bullets.jpg</image>&#10;
+				<image>js/themes/light/next.png</image>&#10;
+				<image>js/themes/light/pointer.png</image>&#10;
+				<image>js/themes/light/prev.png</image>&#10;
+			</imageCache>&#10;
+			<jscssCache>&#10;
+				<jscss>css/body.css</jscss>&#10;
+				<jscss>css/errors.css</jscss>&#10;
+				<jscss>css/header.css</jscss>&#10;
+				<jscss>css/jquery-ui-1.8.11.custom.css</jscss>&#10;
+				<jscss>css/myaccount.css</jscss>&#10;
+				<jscss>home_recommendation.css</jscss>&#10;
+				<jscss>item_image_style.css</jscss>&#10;
+				<jscss>js/database.js</jscss>&#10;
+				<jscss>js/date.format.js</jscss>&#10;
+				<jscss>js/getRecommendationItem.js</jscss>&#10;
+				<jscss>js/getRecommendationItemHTML5.js</jscss>&#10;
+				<jscss>js/itemPriceUpdate.js</jscss>&#10;
+				<jscss>js/jquery-1.3.2.min.js</jscss>&#10;
+				<jscss>js/jquery-1.7.2.min.js</jscss>&#10;
+				<jscss>js/jquery-ui-1.8.11.custom.min.js</jscss>&#10;
+				<jscss>js/jquery-ui-sliderAccess.js</jscss>&#10;
+				<jscss>js/jquery-ui-timepicker-addon.js</jscss>&#10;
+				<jscss>js/jquery.easing.1.3.js</jscss>&#10;
+				<jscss>js/jquery.galleryview-1.1.js</jscss>&#10;
+				<jscss>js/jquery.timers-1.1.2.js</jscss>&#10;
+				<jscss>js/login.js</jscss>&#10;
+				<jscss>js/onload.js</jscss>&#10;
+				<jscss>js/selectmenus.js</jscss>&#10;
+				<jscss>js/utilities.js</jscss>&#10;
+				<jscss>stylesheets/foundation.css</jscss>&#10;
+			</jscssCache>&#10;
+			<HTML5Cache/>&#10;
+		</clientInfo>&#10;
+	</client>&#10;
+	<client>&#10;
+		<clientIndex>7</clientIndex>&#10;
+		<runTime>789</runTime>&#10;
+		<clientInfo>&#10;
+			<userID>23685</userID>&#10;
+			<username>User56002</username>&#10;
+			<password>User56002</password>&#10;
+			<registered>true</registered>&#10;
+			<imageCache/>&#10;
+			<jscssCache/>&#10;
+			<HTML5Cache/>&#10;
+		</clientInfo>&#10;
+	</client>&#10;
+	<client>&#10;
+		<clientIndex>8</clientIndex>&#10;
+		<runTime>889</runTime>&#10;
+		<clientInfo>&#10;
+			<userID>15561</userID>&#10;
+			<username>User3729</username>&#10;
+			<password>User3729</password>&#10;
+			<registered>true</registered>&#10;
+			<imageCache/>&#10;
+			<jscssCache/>&#10;
+			<HTML5Cache/>&#10;
+		</clientInfo>&#10;
+	</client>&#10;
+	<client>&#10;
+		<clientIndex>9</clientIndex>&#10;
+		<runTime>989</runTime>&#10;
+		<clientInfo>&#10;
+			<userID>19228</userID>&#10;
+			<username>User54867</username>&#10;
+			<password>User54867</password>&#10;
+			<registered>true</registered>&#10;
+			<imageCache/>&#10;
+			<jscssCache/>&#10;
+			<HTML5Cache/>&#10;
+		</clientInfo>&#10;
+	</client>&#10;
+</ClientGenerator>
+		  </textarea>
+		  <p>The HTML4 element at the top indicates the operation mode for the benchmark run. This is followed by a series of client objects. Each object contains the clientIndex number, which is used to refer to the appropriate client<em>n</em>.xml file. This is followed by the runTime which is the number of milliseconds after the start of the run in which to start the client. Each client contains a clientInfo object. This object contains the client's userID, username, password, and whether or not the client is already registered when first visiting the website. The clientInfo also contains an imageCache, JavaScript/CSS Cache, and an HTML5 cache. These contain files that the client already has in their cache when first visiting the website, and includes SQLite data for the HTML5 Cache. </p>
+		  <p>An example of client<em>n</em>.xml is as follows: </p>
+		  
+		  <textarea rows="20" cols="780" readonly="readonly" style="width:780px !important;">
+<Client>&#10;
+	<UserID>19244</UserID>&#10;
+	<Username>User29915</Username>&#10;
+	<password>User29915</password>&#10;
+	<actions>&#10;
+		<action id="0">&#10;
+			<currentPage>15</currentPage>&#10;
+			<nextPage>Login</nextPage>&#10;
+			<thinkTime>15263</thinkTime>&#10;
+			<request>&#10;
+				<type>GET</type>&#10;
+				<url>/cmartv1/login</url>&#10;
+			</request>&#10;
+		</action>&#10;
+		<action id="1">&#10;
+			<currentPage>1</currentPage>&#10;
+			<nextPage>login</nextPage>&#10;
+			<thinkTime>10102</thinkTime>&#10;
+			<request>&#10;
+				<url>/cmartv1/login</url>&#10;
+				<data name="username">User29915</data>&#10;
+				<data name="password">User29915</data>&#10;
+				<type>POST</type>&#10;
+			</request>&#10;
+		</action>&#10;
+		<action id="2">&#10;
+			<currentPage>4</currentPage>&#10;
+			<nextPage>Search</nextPage>&#10;
+			<thinkTime>12217</thinkTime>&#10;
+			<request>&#10;
+				<url>/cmartv1/search?</url>&#10;
+				<data name="userID">19244</data>&#10;
+				<data name="searchTerm">such painting jordan</data>&#10;
+				<data name="authToken">[B@6b204187</data>&#10;
+				<type>POST</type>&#10;
+			</request>&#10;
+		</action>&#10;
+		<action id="3">&#10;
+			<currentPage>16</currentPage>&#10;
+			<nextPage>End Date</nextPage>&#10;
+			<thinkTime>4194</thinkTime>&#10;
+			<request>&#10;
+				<type>GET</type>&#10;
+				<url>/cmartv1/search?userID=19244&amp;authToken=&#10;
+				[B@6b204187&amp;pageNo=0&amp;itemsPP=25&amp;sortCol=2&#10;
+				&amp;sortDec=0&amp;searchTerm=such pfaltzgraff</url>&#10;
+			</request>&#10;
+		</action>&#10;
+		<action id="4">&#10;
+			<currentPage>16</currentPage>&#10;
+			<nextPage>Sell</nextPage>&#10;
+			<thinkTime>11607</thinkTime>&#10;
+			<request>&#10;
+				<type>GET</type>&#10;
+				<url>/cmartv1/sellitem?userID=19244&amp;authToken=&#10;
+				[B@6b204187</url>&#10;
+			</request>&#10;
+		</action>&#10;
+		<action id="5">&#10;
+			<currentPage>6</currentPage>&#10;
+			<nextPage>Sell</nextPage>&#10;
+			<thinkTime>109151</thinkTime>&#10;
+			<request>&#10;
+				<url>/cmartv1/sellitem</url>&#10;
+				<data name="buyNowPrice">16.08</data>&#10;
+				<data name="userID">19244</data>&#10;
+				<data name="categoryID">12892</data>&#10;
+				<data name="description">see an new handmade author house&#10;
+				packaging retail have see return be accessories intended 6 for&#10;
+				description handmade original tape minimal highlighting medium&#10;
+				attached fuzzy the and pant tags wnstern new plastic not of&#10;
+				spirituality&#10;
+				of the new pages any retail in </data>&#10;
+				<data name="name">2012 new top best 14k subliminal&#10;
+				2 v yamaha</data>&#10;
+				<data name="authToken">[B@6b204187</data>&#10;
+				<data name="endDate">2012-08-29 10:37:17</data>&#10;
+				<data name="quantity">1</data>&#10;
+				<data name="startPrice">2.16</data>&#10;
+				<data name="reservePrice">2.38</data>&#10;
+				<type>POST</type>&#10;
+			</request>&#10;
+		</action>&#10;
+		<action id="6">&#10;
+			<currentPage>11</currentPage>&#10;
+			<nextPage>uploadImages</nextPage>&#10;
+			<thinkTime>22119</thinkTime>&#10;
+			<request>&#10;
+				<url>/cmartv1/sellitemimages</url>&#10;
+				<data name="userID">19244</data>&#10;
+				<data name="itemID">30126</data>&#10;
+				<data name="authToken">[B@6b204187</data>&#10;
+				<pic>20</pic>&#10;
+				<type>POST</type>&#10;
+			</request>&#10;
+		</action>&#10;
+		<action id="7">&#10;
+			<currentPage>8</currentPage>&#10;
+			<nextPage>Search</nextPage>&#10;
+			<thinkTime>4325</thinkTime>&#10;
+			<request>&#10;
+				<url>/cmartv1/search?</url>&#10;
+				<data name="userID">19244</data>&#10;
+				<data name="searchTerm">morison</data>&#10;
+				<data name="authToken">[B@6b204187</data>&#10;
+				<type>POST</type>&#10;
+			</request>&#10;
+		</action>&#10;
+		<action id="8">&#10;
+			<currentPage>16</currentPage>&#10;
+			<nextPage>Logout</nextPage>&#10;
+			<thinkTime>16046</thinkTime>&#10;
+			<request>&#10;
+				<type>GET</type>&#10;
+				<url>/cmartv1/logout?userID=19244&amp;authToken=[B@6b204187</url>&#10;
+			</request>&#10;
+		</action>&#10;
+		<action id="9">&#10;
+			<currentPage>14</currentPage>&#10;
+			<nextPage>exit</nextPage>&#10;
+			<thinkTime>66</thinkTime>&#10;
+			<request>&#10;
+				<type>exit</type>&#10;
+			</request>&#10;
+		</action>&#10;
+	</actions>&#10;
+</Client>
+		  </textarea>
+		  
+		  <p> The client<em>n</em>.xml document contains details on the clients actions and interactions with the C-MART website. The top of the document contains data on the client's userID, username, and password. This is followed by the actions which the client takes. Each action is indexed by an id number which lets the workload generator which action to take. Each action contains the currentPage reference type, the nextPage action, and the required think time before the action is to be done. Each action contains data on the request. This includes whether it was a GET or POST request and the url of the request. If it is a POST request, then the request object will also contain the data that was sent in the POST.
+		  </p>
+		  
+		  <p>Due to concurrency issues at the C-MART server it may be impossible to exactly duplicate a run. For example, consider the situation where one client attempts to bid on an item and another client attempts to buy the same item, and the requests are submitted simultaneously. If the bid is processed before the buy, then the first client successfully bids on the item and then the second client successfully buys the item. However if the buy is processed before the bid then the second client successfully buys the item and the first client receives an error message saying that he is attempting to bid on an item that is no longer up for auction. Each of these actions will result in different subsequent actions for each client. If the bid-then-buy order is processed in the original benchmark experiment but the buy-then-bid order is processed in the repeated experiment, then the experiment is no longer repeatable. We provide a statistic for how many clients are unable to repeat their original sequence of actions.
+		  </p>
+		  <p>To try and avoid some of the concurrency issues we allow clients to slightly modify the data in their allowable actions. A client may modify the bid price for example if the original bid price is no longer valid. Similarly, the client may want to access an item from a Browse Page that is no longer available. In this situation we allow the user to open a different item. By doing this the repeated experiment stays as close to the original as possible. However the next action (page request type) must always remain the same and the client will exit with an error from the repeatability experiment if this is not possible.
+		  </p>
+		  
+		  
+        </div>
+      </div>
+    </div>
+    <div class="container">	
+      <div class="row">
+        <div class="twelve columns">
+          <center> &copy; 2012 TheONE Network Research Group </center>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;
+      charset=ISO-8859-1">
+    <title>C-MART</title>
+    <link rel="stylesheet" type="text/css"
+      href="css/jquery-ui-1.8.11.custom.css" media="screen">
+    <script src="js/jquery-1.6.3.min.js" type="text/javascript"></script>
+    <script src="js/jquery-ui-1.8.11.custom.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css"
+      href="stylesheets/foundation.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="eight columns"> <a class="mainlogo-link"
+            href="http://theone.ece.cmu.edu/wordpress" title="theONE"><img
+              class="mainlogo-img" src="images/banner.png" alt="theONE"
+              width="450"></a> </div>
+        <div class="four columns"> <a class="ece-logo"
+            href="http://www.ece.cmu.edu" title="cmuECE"><img
+              class="ece-logo" src="images/logo-ece.jpg" alt="cmuECE"
+              align="right" width="200"></a> </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="twelve columns">
+          <center>
+            <h1>C-MART</h1>
+            <h3>Benchmarking the Cloud</h3>
+          </center>
+        </div>
+      </div>
+    </div>
+    <br>
+    <br>
+    <div class="container">
+      <div class="row">
+        <div class="three columns"> <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+      <li>Overview</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="cmart_overview.html">C-MART overview</a></li>
+        <li><a href="../cmart-1/">C-MART online</a></li>
+		<li><a href="pagedescriptions.html">Web Page Descriptions</a></li>
+		<li><a href="C-MART.11.26.2012.pdf">Presentation Slides</a></li>
+		<li><a href="IEEE_C-MART.pdf">IEEE TPDS Paper</a></li>
+      </ul>
+
+	  <li>Virtual Machine Configuration</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="initial_config.html">Initial Configuration</a></li>
+      </ul>
+      <li>Populate Data</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="populate.html">Populate quick start</a></li>
+        <li><a href="populate_details.html">Populate details</a></li>
+        <li><a href="populate_distributions.html">Populate distributions</a></li>
+        <li><a href="populate_additional.html">Additional operations</a></li>
+      </ul>
+	  <li>Client Generator</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="client.html">Client quick start</a></li>
+        <li><a href="client_details.html">Client Generator details</a></li>
+		<li><a href="CG_output.html">Output File Description</a></li>
+		<li><a href="client_repeat.html">Experiment Repeatability</a></li>
+      </ul>
+</div>
+        <div class="nine columns">
+          <center>
+            <h4>Client</h4>
+          </center>
+          The C-MART client emulator access the website to create load
+          on the servers. The emulated clients emulate modern browsing
+          behaviors such as tabbed browsing, using AJAX, and upload and
+          download images. The clients configuration is specified in
+          CGconfig.txt.<br>
+          <br>
+          <h5><span style="font-weight: bold;">Quick start<br>
+            </span></h5>
+          <br style="font-weight: bold;">
+          <span style="font-weight: bold;"> 1. Configure the site IP
+            address</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;">full_url1=http://10.1.1.1:80/cmart-0.1<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          This variable tells the emulated clients which URL to use to
+          open the C-MART application.<br>
+          <br>
+          <span style="font-weight: bold;">2. Configure the data
+            directories</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;">
+                  distributions_folder=C:\cmart\client\Distributions</td>
+              </tr>
+            </tbody>
+          </table>
+          The emulated clients use distributions taken from production
+          websites to interact with the C-MART site. The location of the
+          distribution files and the images used to send to the site and
+          be found in the 'Distributions' folder of C-MART.<br>
+          <br>
+          <span style="font-weight: bold;">3. Configure the output
+            directory</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;">
+                  output_site_data_file=C:\cmart_output\</td>
+              </tr>
+            </tbody>
+          </table>
+          This variable specifies the directory used to output the
+          response time, page hits and other statistics collected by the
+          emulated clients throughout their sessions.<br>
+          <br>
+          <span style="font-weight: bold;">4. Configure the number of
+            clients</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> clients_per_minute=50<br>
+                  peak_users=50 </td>
+              </tr>
+            </tbody>
+          </table>
+          The clients_per_minute variable controls the ramp-up rate of
+          the clients. This allows the web servers to 'warm up' before
+          the peak number of users arrive. The peak_users variable
+          controls the maximum number of emulated clients that access
+          the site at any one time.<br>
+          <br>
+          <span style="font-weight: bold;">5. Configure the run length</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> run_length=60<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          The run_length variable is the number of minutes that the
+          emulated clients will run before before they terminate, i.e.
+          the experiment length.<br>
+          <br>
+          <span style="font-weight: bold;">6. Run the emulated clients</span><br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;"> java -jar cmartclient.jar<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          As the number of images becomes very large it is likely the
+          images will need to be stored on a dedicated or distributed
+          storage system. Additionally, as multiple application servers
+          will need to accesses the images they must be stored on shared
+          storage.<br>
+          &nbsp;<br>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="twelve columns">
+          <center> &copy; 2012 TheONE Network Research Group </center>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

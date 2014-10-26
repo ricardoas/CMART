@@ -1,0 +1,384 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html;
+      charset=ISO-8859-1">
+    <title>C-MART</title>
+    <link rel="stylesheet" type="text/css"
+      href="css/jquery-ui-1.8.11.custom.css" media="screen">
+    <script src="js/jquery-1.6.3.min.js" type="text/javascript"></script>
+    <script src="js/jquery-ui-1.8.11.custom.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" type="text/css"
+      href="stylesheets/foundation.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="eight columns"> <a class="mainlogo-link"
+            href="http://theone.ece.cmu.edu/wordpress" title="theONE"><img
+              class="mainlogo-img" src="images/banner.png" alt="theONE"
+              width="450"></a> </div>
+        <div class="four columns"> <a class="ece-logo"
+            href="http://www.ece.cmu.edu" title="cmuECE"><img
+              class="ece-logo" src="images/logo-ece.jpg" alt="cmuECE"
+              align="right" width="200"></a> </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="twelve columns">
+          <center>
+            <h1>C-MART</h1>
+            <h3>Benchmarking the Cloud</h3>
+          </center>
+        </div>
+      </div>
+    </div>
+    <br>
+    <br>
+    <div class="container">
+      <div class="row">
+        <div class="three columns"> <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+      <li>Overview</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="cmart_overview.html">C-MART overview</a></li>
+        <li><a href="../cmart-1/">C-MART online</a></li>
+		<li><a href="pagedescriptions.html">Web Page Descriptions</a></li>
+		<li><a href="C-MART.11.26.2012.pdf">Presentation Slides</a></li>
+		<li><a href="IEEE_C-MART.pdf">IEEE TPDS Paper</a></li>
+      </ul>
+
+	  <li>Virtual Machine Configuration</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="initial_config.html">Initial Configuration</a></li>
+      </ul>
+      <li>Populate Data</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="populate.html">Populate quick start</a></li>
+        <li><a href="populate_details.html">Populate details</a></li>
+        <li><a href="populate_distributions.html">Populate distributions</a></li>
+        <li><a href="populate_additional.html">Additional operations</a></li>
+      </ul>
+	  <li>Client Generator</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="client.html">Client quick start</a></li>
+        <li><a href="client_details.html">Client Generator details</a></li>
+		<li><a href="CG_output.html">Output File Description</a></li>
+		<li><a href="client_repeat.html">Experiment Repeatability</a></li>
+      </ul>
+</div>
+        <div class="nine columns">
+          <center>
+            <h4>Client</h4>
+          </center>
+          The C-MART client emulator access the website to create load
+          on the servers. The emulated clients emulate modern browsing
+          behaviors such as tabbed browsing, using AJAX, and upload and
+          download images. The clients configuration is specified in
+          CGconfig.txt. This document describes the files and statistics
+          that are output during and after each run of the Client
+          Generator.<br>
+          <br>
+          <br style="font-weight: bold;">
+          <span style="font-weight: bold;"> </span>
+          <h5>ClientSessionStats</h5>
+          <br>
+          ClientSessionStats is a list of values describing each
+          client's session. Each row in the table represents a different
+          client. The column structure is as follows:<br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;">numPagesOpened<br>
+                </td>
+                <td style=" vertical-align: top;">RT avg<br>
+                </td>
+                <td style=" vertical-align: top;">requestErrors<br>
+                </td>
+                <td style=" vertical-align: top;">sessionLength<br>
+                </td>
+                <td style=" vertical-align: top;">exitDueToError<br>
+                </td>
+                <td style=" vertical-align: top;">dissatisfiedProb<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <ul>
+            <li> <span style="font-weight: bold;">numPagesOpened</span>
+              - The number of webpages the client opened during the
+              session<br>
+            </li>
+            <li><span style="font-weight: bold;">RT avg</span> - The
+              average response time the client received from all page
+              requests<br>
+            </li>
+            <li><span style="font-weight: bold;">requestErrors </span>-
+              The nnumber of errors the client had on page requests<br>
+            </li>
+            <li><span style="font-weight: bold;">sessionLength </span>-
+              The time length of the session in milliseconds<br>
+            </li>
+            <li><span style="font-weight: bold;">exitDueToError</span> -
+              Whether or not the client exited due to errors in the
+              C-MART system<br>
+            </li>
+            <li><span style="font-weight: bold;">dissatisfiedProb</span>
+              - The probability that the client left C-MART due to
+              disatisfaction with the service</li>
+          </ul>
+          <p><span style="font-weight: bold;"><br>
+            </span></p>
+          <h5>numReqs</h5>
+          <br>
+          numReqs is a list of the number of active clients in the
+          C-MART system and the number of requests they make during each
+          10-second interval. Each row in the table is a new 10-second
+          time interval. The document is updated with a new row every 10
+          seconds. The column structure is as follows:<br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;">activeClients<br>
+                </td>
+                <td style=" vertical-align: top;">numRequests<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <ul>
+            <li> <span style="font-weight: bold;">activeClients</span>
+              - The number of active clients in C-MART at the end of the
+              10-second time interval<br>
+            </li>
+            <li><span style="font-weight: bold;">numRequests</span> -
+              The total number of requests made by all clients during
+              the 10-second time interval</li>
+          </ul>
+          <p><br>
+          </p>
+          <h5>pageFreq</h5>
+          <br>
+          pageFreq is the number of each type of page request during
+          each 10-second period. The document is updated every 10
+          seconds. The column structure is as follows:<br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;">Browse<br>
+                </td>
+                <td style=" vertical-align: top;">Buy Item<br>
+                </td>
+                <td style=" vertical-align: top;">Confirm Bid<br>
+                </td>
+                <td style=" vertical-align: top;">Confirm Buy<br>
+                </td>
+                <td style=" vertical-align: top;">Confirm Sell<br>
+                </td>
+                <td style=" vertical-align: top;">Home<br>
+                </td>
+                <td style=" vertical-align: top;">Login<br>
+                </td>
+                <td style=" vertical-align: top;">Logout<br>
+                </td>
+                <td style=" vertical-align: top;">My Account<br>
+                </td>
+                <td style=" vertical-align: top;">Register User<br>
+                </td>
+                <td style=" vertical-align: top;">Search<br>
+                </td>
+                <td style=" vertical-align: top;">Sell Item<br>
+                </td>
+                <td style=" vertical-align: top;">Sell Item Images<br>
+                </td>
+                <td style=" vertical-align: top;">Update User Details<br>
+                </td>
+                <td style=" vertical-align: top;">View Item<br>
+                </td>
+                <td style=" vertical-align: top;">Ask Question<br>
+                </td>
+                <td style=" vertical-align: top;">Leave Comment<br>
+                </td>
+                <td style=" vertical-align: top;">Confirm Comment<br>
+                </td>
+                <td style=" vertical-align: top;">Total Requests<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p><br>
+          </p>
+          <h5>pageRTHistograms</h5>
+          <br>
+          pageRTHistograms gives a histogram of the response times for
+          each page type. Each row corresponds to a different page type
+          and each column is the number of values in the histogram bin.
+          The bin size is 2 milliseconds. The row structure
+          corresponding to the page types is as follows:<br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;">Login page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">Register page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">View Item Page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">My Account page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">Update User Details
+                  page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">Sell Item page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">Bid Confirm page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">Sell Item Confirm page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">Browse page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">Buy Item page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">Sell Item Images page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">View User page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">Confirm Buy Item page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">Logout page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">Home page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">Search page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">Bid History page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">Ask Question page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">Leave Comment page<br>
+                </td>
+              </tr>
+              <tr>
+                <td style="vertical-align: top;">Confirm Comment page<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <br>
+          <br>
+          <br>
+          <h5>thinkTimes</h5>
+          <br>
+          thinkTimes is a histogram of the think times of all the
+          clients for the entire experiment run. The column structure is
+          as follows:<br>
+          <br>
+          <table style=" text-align: left; width: 80%; margin-left:
+            auto; margin-right: auto; background-color: rgb(221, 221,
+            221);" border="2" cellpadding="2" cellspacing="2">
+            <tbody>
+              <tr>
+                <td style=" vertical-align: top;">thinkTimeBin<br>
+                </td>
+                <td style=" vertical-align: top;">numValues<br>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <ul>
+            <li> <span style="font-weight: bold;">thinkTimeBin</span> -
+              The bin value in milliseconds of the think times.<br>
+            </li>
+            <li><span style="font-weight: bold;">numValues</span> - The
+              number of instances of think times during the entire
+              experiment that fell into the respective thinkTimeBin
+              value.</li>
+          </ul>
+          <p><br>
+          </p>
+          <h5>responseTimes</h5>
+          <br>
+          responseTimes gives the time values for the response times for
+          all clients for every 5th percentile in each 10-second
+          interval. There are 20 columns in the table, corresponding to
+          the 5, 10, 15, ... 90, 95, 100th percentile values for the
+          response time in the time interval. Each row corresponds to a
+          new 10-second time interval and the table is updated every 10
+          seconds.<br>
+          <br>
+          <br>
+          <h5>siteData</h5>
+          <br>
+          siteData gives histograms on how long it takes to create each
+          webpage. For each page type a histogram is given for how long
+          it took to process the page parameters, access the database,
+          process the database data, render the page, and the total for
+          the entire process. The histograms are given by the columns
+          where each column is a 10 millisecond interval. This data is
+          only valid for when output_stats is set to false.<br>
+          <br>
+          <p><br>
+          </p>
+          <br>
+          <br>
+          &nbsp;<br>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="twelve columns">
+          <center> &copy; 2012 TheONE Network Research Group </center>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>C-MART</title>
+
+<link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.11.custom.css" media="screen">
+<script src="js/jquery-1.6.3.min.js" type="text/javascript"></script>
+<script src="js/jquery-ui-1.8.11.custom.min.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="stylesheets/foundation.css">
+</head>
+
+<body>
+<div class="container">
+<div class="row">
+<div class="eight columns"><a class="mainlogo-link" href="http://theone.ece.cmu.edu/wordpress" title="theONE"><img class="mainlogo-img" src="images/banner.png" alt="theONE" width="450"></a></div>
+<div class="four columns"><a class="ece-logo" href="http://www.ece.cmu.edu" title="cmuECE"><img class="ece-logo" src="images/logo-ece.jpg" alt="cmuECE" align="right" width="200"></a>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="row">
+<div class="twelve columns">
+<center>
+<h1>C-MART</h1>
+<h3>Benchmarking the Cloud</h3>
+</center>
+</div>
+</div>
+</div>
+<br>
+<br>
+<div class="container">
+<div class="row">
+<div class="three columns"><ul style="list-style-image: url(images/orbit/bullets.jpg)">
+      <li>Overview</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="cmart_overview.html">C-MART overview</a></li>
+        <li><a href="../cmart-1/">C-MART online</a></li>
+		<li><a href="pagedescriptions.html">Web Page Descriptions</a></li>
+		<li><a href="C-MART.11.26.2012.pdf">Presentation Slides</a></li>
+		<li><a href="IEEE_C-MART.pdf">IEEE TPDS Paper</a></li>
+      </ul>
+
+	  <li>Virtual Machine Configuration</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="initial_config.html">Initial Configuration</a></li>
+      </ul>
+      <li>Populate Data</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="populate.html">Populate quick start</a></li>
+        <li><a href="populate_details.html">Populate details</a></li>
+        <li><a href="populate_distributions.html">Populate distributions</a></li>
+        <li><a href="populate_additional.html">Additional operations</a></li>
+      </ul>
+	  <li>Client Generator</li>
+      <ul style="list-style-image: url(images/orbit/bullets.jpg)">
+        <li><a href="client.html">Client quick start</a></li>
+        <li><a href="client_details.html">Client Generator details</a></li>
+		<li><a href="CG_output.html">Output File Description</a></li>
+		<li><a href="client_repeat.html">Experiment Repeatability</a></li>
+      </ul>
+</div>
+<div class="nine columns">
+<center>
+<center>
+<h4>Deploy</h4>
+</center>
+<div style="text-align: left;"> The C-MART deployer can
+copy and perform some configuration on VM images to reduce the time
+taken to setup the benchmark.<br>
+<br>
+<h5><span style="font-weight: bold;">Quick start</span></h5>
+.<br>
+<span style="font-weight: bold;">1. Build the deployment
+and client and server jars</span><br>
+<br>
+<table style="text-align: left; width: 80%; margin-left: auto; margin-right: auto; background-color: rgb(221, 221, 221);" border="2" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="vertical-align: top;">cd
+/cmart/deploy/client<br>
+ant clean<br>
+ant dist<br>
+cd /cmart/deploy/server<br>
+ant clean<br>
+ant dist<br>
+</td>
+</tr>
+</tbody>
+</table>
+<span style="font-weight: bold;">2. Configure the IP
+addresses and VM image types in the xml descriptor</span><br>
+<br>
+<table style="text-align: left; width: 80%; margin-left: auto; margin-right: auto; background-color: rgb(221, 221, 221);" border="2" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="vertical-align: top;">vi
+/cmart/deploy/full.xml<br>
+<br>
+&lt;Host IP="10.1.8.5" Gateway="10.1.0.2" port="4444" OS="Fedora"
+beginIP="10.22.1.1" deployPath="/root/"&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;Host IP="10.1.9.4"&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;Type&gt;FrontEnd&lt;/Type&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;OSType&gt;Fedora&lt;/OSType&gt;<br>
+&nbsp;&nbsp;&nbsp; &nbsp; &nbsp;&lt;VMType
+Type="Application" RAMSIZE="1024"&gt;&lt;/VMType&gt;<br>
+&nbsp;&nbsp; &nbsp; &nbsp; &lt;VMType Type="Client"
+RAMSIZE="1024"&gt;&lt;/VMType&gt;<br>
+&nbsp;&nbsp; &nbsp; &nbsp; &lt;VMType Type="GFS"
+RAMSIZE="1024"&gt;&lt;/VMType&gt;<br>
+&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp; &nbsp; &nbsp;
+&lt;UserName&gt;root&lt;/UserName&gt;<br>
+&nbsp; &nbsp; &nbsp;&nbsp;
+&lt;Password&gt;testtest&lt;/Password&gt;<br>
+&nbsp; &nbsp;&nbsp; &nbsp;
+&lt;BaseFolder&gt;/customroot&lt;/BaseFolder&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;/Host&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;VMImageSetting
+Type="Application"&gt;<br>
+&nbsp;&nbsp; &nbsp; &nbsp;
+&lt;ImagePath&gt;/root/vmImages/&lt;/ImagePath&gt;<br>
+&nbsp;&nbsp; &nbsp; &nbsp;
+&lt;XMLPath&gt;/root/vmImages/&lt;/XMLPath&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;/VMImageSetting&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;VMImageSetting Type="SQL"&gt;<br>
+&nbsp;&nbsp; &nbsp; &nbsp;
+&lt;ImagePath&gt;/root/vmImages/&lt;/ImagePath&gt;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;
+&nbsp;&lt;XMLPath&gt;/root/vmImages/&lt;/XMLPath&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;/VMImageSetting&gt;<br>
+&lt;/Host&gt;<br>
+</td>
+</tr>
+</tbody>
+</table>
+The first host is the host that you are running the deployment server
+from. The subsequents are the hosts that will have VM images deployed
+to them. The base folder is the folder that the VM images will be
+copied to on the host. The VMImageSettings are the location of the
+C-MART VM images that will be copied to each host. You can edit these
+images, the changes will then be replicated to all deployed VMs as they
+are based off of a copy of these images. The beginIP parameter in the
+server host allows the start IP address of the VMs to be set. The
+deployment server will set VMs' IP addresses in increments from this
+value.<br>
+<br>
+<span style="font-weight: bold;">3. Run the deployment
+server</span><br>
+<br>
+<table style="text-align: left; width: 80%; margin-left: auto; margin-right: auto; background-color: rgb(221, 221, 221);" border="2" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="vertical-align: top;">cd
+/cmart/deploy/server<br>
+java -jar deployserver.jar /cmart/deploy/full.xml<br>
+</td>
+</tr>
+</tbody>
+</table>
+This will deploy the VMs to the hosts. The console will displays errors
+if any are present.<br>
+<br>
+<h5>Additional options</h5>
+<br>
+<span style="font-weight: bold;">Include new
+cmartconfig.txt</span><br>
+To over write the /cmartconfig.txt in the VM images a new file can be
+passed as a second parameter. This allows the cmartconfig.txt file to
+be easily configured without having to edit the VM images.<br>
+<br>
+<table style="text-align: left; width: 80%; margin-left: auto; margin-right: auto; background-color: rgb(221, 221, 221);" border="2" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="vertical-align: top;">cd
+/cmart/deploy/server<br>
+java -jar deployserver.jar /cmart/deploy/full.xml /new_cmart_config.txt<br>
+</td>
+</tr>
+</tbody>
+</table>
+<span style="font-weight: bold;"><br>
+Edit current
+cmartconfig.txt</span><br>
+To make small changes to the cmart config you can include configure
+values in the deployment XML file. This will override the values
+specified in the current or new cmartconfig.txt file.<br>
+<br>
+<table style="text-align: left; width: 80%; margin-left: auto; margin-right: auto; background-color: rgb(221, 221, 221);" border="2" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="vertical-align: top;">&lt;ExtraConfigSetting
+Type="Application"&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;Setting Key="solr_enabled"
+Value="0"/&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;Setting
+Key="solr_max_conns_per_host" Value="400"/&gt;<br>
+&nbsp;&nbsp;&lt;/ExtraConfigSetting&gt;<br>
+</td>
+</tr>
+</tbody>
+</table>
+<span style="font-weight: bold;">Edit my.cnf</span><br>
+To configure additional MySQL values you can set additional properties
+in the deployment XML file. The values will overwrite those present in
+the VM's /etc/my.cnf file.<br>
+<br>
+<table style="text-align: left; width: 80%; margin-left: auto; margin-right: auto; background-color: rgb(221, 221, 221);" border="2" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="vertical-align: top;">&lt;ExtraConfigSetting
+Type="SQL"&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;Setting Key="max_connections"
+Value="200"/&gt;<br>
+&nbsp;&lt;/ExtraConfigSetting&gt;<br>
+</td>
+</tr>
+</tbody>
+</table>
+<span style="font-weight: bold;">Edit CGconfig.txt</span><br>
+Additional client generator configuration can also be specified in the
+deployment XML file. This will edit the values in
+/cmart/client/CGconfig.txt<br>
+<br>
+<table style="text-align: left; width: 80%; margin-left: auto; margin-right: auto; background-color: rgb(221, 221, 221);" border="2" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="vertical-align: top;">&lt;ExtraConfigSetting Type="Client"&gt;<br>&nbsp;&nbsp;&nbsp; &lt;Setting Key="run_length" Value="2"/&gt;<br>&nbsp;&nbsp;&nbsp; &lt;Setting Key="peak_users" Value="30"/&gt;<br>&nbsp;&nbsp;&nbsp; &lt;Setting Key="rampup_time" Value="1"/&gt;<br>&nbsp;&nbsp;&nbsp; &lt;Setting Key="speedup_factor" Value="1"/&gt;<br>&lt;/ExtraConfigSetting&gt;<br>
+</td>
+</tr>
+</tbody>
+</table>
+<br>
+</div>
+</center>
+</div>
+</div>
+</div>
+<div class="container">
+<div class="row">
+<div class="twelve columns">
+<center>© 2012 TheONE Network Research Group
+</center>
+</div>
+</div>
+</div>
+</body></html>
