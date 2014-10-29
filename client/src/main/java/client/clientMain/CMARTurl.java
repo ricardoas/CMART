@@ -46,8 +46,16 @@ public class CMARTurl {
 	 * Returns the IP address of the website
 	 * @return
 	 */
+	@Deprecated
 	public StringBuilder getIpURL(){
 		return ipURL;
+	}
+	/**
+	 * Returns the IP address of the website
+	 * @return
+	 */
+	public String getIpURLString(){
+		return ipURL.toString();
 	}
 	/**
 	 * Returns the name of the application

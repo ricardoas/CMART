@@ -367,13 +367,7 @@ public class ClientGenerator extends Thread{
 		for (int i=0;i<=20;i++)
 			pageRTHistograms.add(new Histogram(20000,2));
 		if(RunSettings.isOutputSiteData()){
-			try {
-				new SiteData(cmarturl).collectStats();				// clears the data from the statistics page
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			new SiteData(cmarturl).collectStats();				// clears the data from the statistics page
 		}
 
 		try {
@@ -789,13 +783,7 @@ public class ClientGenerator extends Thread{
 		threadExecutorRC.shutdownNow();
 		System.out.println("ALL CLIENTS SHUTDOWN");
 		if(RunSettings.isOutputSiteData()){
-			try {
-				new SiteData(RunSettings.getOutputSiteDataFile(),cmarturl).collectStats();		// output data from Statistics page to csv
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			new SiteData(cmarturl).collectStats();		// output data from Statistics page to csv
 		}
 		new OutputPageRT(pageRTHistograms,RunSettings.getOutputSiteDataFile());
 		stats.exitStats();		// exit stats - no more collecting response times
