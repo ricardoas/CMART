@@ -42,9 +42,9 @@ import client.clientMain.*;
 
 public class Page {
 	ClientGenerator cg;		// client generator that created the client on the page
-	StringBuffer url;		// URL of current page
-	StringBuffer html;		// HTML (or JSON) of current page
-	StringBuffer lastURL;	// url of previously accessed page
+	StringBuilder url;		// URL of current page
+	StringBuilder html;		// HTML (or JSON) of current page
+	StringBuilder lastURL;	// url of previously accessed page
 	int pageType;			// page type of the page
 	int lastPageType;		// page type of the previous page
 	Client client;			// client on the page
@@ -55,7 +55,7 @@ public class Page {
 	long responseTime;						// response time of the page	
 	int activeConnections=0;				// number of active TCP connections opened from this page
 	int httpRequestAttempts=0;				// number of times the client has attempted to make an http request (for failed requests)
-	HashMap<String, StringBuffer> searchData=new HashMap<String, StringBuffer>();		// data used for the search form
+	HashMap<String, StringBuilder> searchData=new HashMap<String, StringBuilder>();		// data used for the search form
 	double numTabsMean=8.0;					// average number of tabs to be opened
 	int typingErrorThinkTime=0;				// think time added from typing errors
 	ArrayList<String>searchTermWords=new ArrayList<String>();	// list of words in a search query
@@ -131,7 +131,7 @@ public class Page {
 	 * @param lastURL - url of last page
 	 * @param client - client opening page
 	 */
-	public Page(StringBuffer url, int lastPageType, StringBuffer lastURL, Client client, ClientGenerator cg) throws UnknownHostException, IOException, InterruptedException, URISyntaxException{
+	public Page(StringBuilder url, int lastPageType, StringBuilder lastURL, Client client, ClientGenerator cg) throws UnknownHostException, IOException, InterruptedException, URISyntaxException{
 		this.url=url;
 		this.lastPageType=lastPageType;
 		this.lastURL=lastURL;
@@ -146,20 +146,20 @@ public class Page {
 				this.html=openURL(url);
 			}
 			else{
-				StringBuffer rootURL=new StringBuffer();
+				StringBuilder rootURL=new StringBuilder();
 				if(url.indexOf("/myaccount?")!=-1)
-					rootURL=new StringBuffer(client.getCMARTurl().getAppURL()).append("/myaccount.html");
+					rootURL=new StringBuilder(client.getCMARTurl().getAppURL()).append("/myaccount.html");
 				else if(url.indexOf("/browsecategory?")!=-1)
-					rootURL=new StringBuffer(client.getCMARTurl().getAppURL()).append("/browse.html");
+					rootURL=new StringBuilder(client.getCMARTurl().getAppURL()).append("/browse.html");
 				else if(url.indexOf("/search?")!=-1)
-					rootURL=new StringBuffer(client.getCMARTurl().getAppURL()).append("/search.html");
+					rootURL=new StringBuilder(client.getCMARTurl().getAppURL()).append("/search.html");
 				else if(url.indexOf("/updateuserdetails?")!=-1)
-					rootURL=new StringBuffer(client.getCMARTurl().getAppURL()).append("/updateuserdetails.html");
+					rootURL=new StringBuilder(client.getCMARTurl().getAppURL()).append("/updateuserdetails.html");
 				else if(url.indexOf("/viewitem?")!=-1||url.indexOf("ITEM")!=-1)
-					rootURL=new StringBuffer(client.getCMARTurl().getAppURL()).append("/viewitem.html");
+					rootURL=new StringBuilder(client.getCMARTurl().getAppURL()).append("/viewitem.html");
 				else if(url.indexOf("/index.html")!=-1&&client.isLoggedIn()){
 					rootURL=url;
-					url=new StringBuffer(client.getCMARTurl().getAppURL()).append("/index?userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&getRecommendation=1&recommendationPageNo=0");
+					url=new StringBuilder(client.getCMARTurl().getAppURL()).append("/index?userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&getRecommendation=1&recommendationPageNo=0");
 				}
 				else{
 					rootURL=url;
@@ -198,7 +198,7 @@ public class Page {
 	 * @param pageOpenTime - time that the page was opened
 	 * @param lastURL - url of previous page
 	 */
-	public Page(StringBuffer url,StringBuffer html,Client client, int pageType, long pageOpenTime,int lastPageType, StringBuffer lastURL,ClientGenerator cg){
+	public Page(StringBuilder url,StringBuilder html,Client client, int pageType, long pageOpenTime,int lastPageType, StringBuilder lastURL,ClientGenerator cg){
 		this.url=url;
 		this.html=html;
 		this.client=client;
@@ -229,7 +229,7 @@ public class Page {
 	 * @param line - HTML of the page to find the pageType number on
 	 * @return
 	 */
-	public int getPageType(StringBuffer line) throws JsonParseException, JsonMappingException, IOException{
+	public int getPageType(StringBuilder line) throws JsonParseException, JsonMappingException, IOException{
 		return getPageType2(line);
 	}
 
@@ -238,7 +238,7 @@ public class Page {
 	 * Uses the page number index defined in Page.java
 	 * @return The page type index
 	 */
-	public int getPageType2(StringBuffer line) throws JsonParseException, JsonMappingException, IOException{
+	public int getPageType2(StringBuilder line) throws JsonParseException, JsonMappingException, IOException{
 		int pageType=0;
 		if(line.indexOf(HTTP_RESPONSE_ERROR)!=-1)
 			return pageType;
@@ -423,8 +423,8 @@ public class Page {
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
-	protected StringBuffer openURL(StringBuffer urlString) throws ClientProtocolException, IOException, URISyntaxException{
-		StringBuffer ret = new StringBuffer();		// the source code of the page
+	protected StringBuilder openURL(StringBuilder urlString) throws ClientProtocolException, IOException, URISyntaxException{
+		StringBuilder ret = new StringBuilder();		// the source code of the page
 		if(verbose)System.out.println("URLSTRING "+urlString);
 		String inputLine;	// each line being read in
 
@@ -476,7 +476,7 @@ public class Page {
 				System.err.println("HTTP request error: "+urlString);
 				client.setExit(true);
 				client.setExitDueToError(true);
-				return new StringBuffer(HTTP_RESPONSE_ERROR);
+				return new StringBuilder(HTTP_RESPONSE_ERROR);
 
 			}
 
@@ -490,7 +490,7 @@ public class Page {
 
 			sw.start();
 			if(urlString.indexOf("index?")!=-1&&client.isLoggedIn())
-				client.setMessage(openAJAXRequest(new StringBuffer(urlString).append("&getRecommendation=1&recommendationPageNo=0")).toString());
+				client.setMessage(openAJAXRequest(new StringBuilder(urlString).append("&getRecommendation=1&recommendationPageNo=0")).toString());
 
 			this.responseTime=sw.stop();	// stops the Stopwatch and determines the final response time
 			cg.getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
@@ -514,7 +514,7 @@ public class Page {
 			threadExecutor.shutdown();
 			client.setExit(true);
 			client.setExitDueToError(true);
-			return new StringBuffer(HTTP_RESPONSE_ERROR);
+			return new StringBuilder(HTTP_RESPONSE_ERROR);
 		}catch(NoHttpResponseException e){
 			System.err.println("Could not create connection");
 			System.err.println(urlString);
@@ -526,7 +526,7 @@ public class Page {
 			threadExecutor.shutdown();
 			client.setExit(true);
 			client.setExitDueToError(true);
-			return new StringBuffer(HTTP_RESPONSE_ERROR);
+			return new StringBuilder(HTTP_RESPONSE_ERROR);
 		}
 	}
 
@@ -537,7 +537,7 @@ public class Page {
 	 * @param scriptString - url of the AJAX request used to populate the HTML page with data
 	 * @return Returns the response from the scriptString url AJAX request
 	 */
-	protected StringBuffer openHTML5Page(StringBuffer urlString,StringBuffer scriptString) throws UnknownHostException, IOException, InterruptedException{
+	protected StringBuilder openHTML5Page(StringBuilder urlString,StringBuilder scriptString) throws UnknownHostException, IOException, InterruptedException{
 		PageTimePair finalPagePair=new PageTimePair(null,null);
 		boolean error=false;
 
@@ -554,14 +554,14 @@ public class Page {
 				}
 			}
 			else{
-				finalPagePair.setPage(new StringBuffer(client.getClientInfo().getHTML5Cache().get(urlRoot)));
+				finalPagePair.setPage(new StringBuilder(client.getClientInfo().getHTML5Cache().get(urlRoot)));
 			}
 		}
 
 		if(!client.getClientInfo().getHTML5Cache().containsKey("populated")){
-			StringBuffer savePage=new StringBuffer(finalPagePair.getPage());
-			finalPagePair=openURLHTML5(new StringBuffer(client.getCMARTurl().getAppURL()).append("/getbulkdata?useHTML5=1"),finalPagePair.getSw());
-			client.getClientInfo().addHTML5Cache("populated", new StringBuffer("1"));
+			StringBuilder savePage=new StringBuilder(finalPagePair.getPage());
+			finalPagePair=openURLHTML5(new StringBuilder(client.getCMARTurl().getAppURL()).append("/getbulkdata?useHTML5=1"),finalPagePair.getSw());
+			client.getClientInfo().addHTML5Cache("populated", new StringBuilder("1"));
 			finalPagePair.setPage(savePage);
 		}
 
@@ -601,9 +601,9 @@ public class Page {
 	/**
 	 * Opens an HTML5 page with knowledge that there will be a redirect from the C-MART server if request is sucessfully completed
 	 * @param urlString - url of the requested page
-	 * @return Returns the response as StringBuffer from the redirected page
+	 * @return Returns the response as StringBuilder from the redirected page
 	 */
-	protected StringBuffer openHTML5PageWithRedirect(StringBuffer urlString){
+	protected StringBuilder openHTML5PageWithRedirect(StringBuilder urlString){
 		//		ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
 		//		cm.setMaxTotal(100);
 		//		HttpClient httpclient = new DefaultHttpClient(cm);
@@ -619,7 +619,7 @@ public class Page {
 			if(urlString.indexOf("/viewitem")!=-1){
 				boolean success=node.get("success").getBooleanValue();
 				if(success==true){
-					StringBuffer redirectURL=new StringBuffer(client.getCMARTurl().getAppURL());
+					StringBuilder redirectURL=new StringBuilder(client.getCMARTurl().getAppURL());
 					long itemID=node.get("item").get("id").getLongValue();
 					ItemCG item=client.getClientInfo().getHTML5ItemCache().get(itemID);
 					item.setBidder(true);
@@ -631,7 +631,7 @@ public class Page {
 						client.getClientInfo().addHTML5Cache(redirectURL.toString(), finalPagePair.getPage());
 					}
 					else{
-						finalPagePair.setPage(new StringBuffer(client.getClientInfo().getHTML5Cache().get(redirectURL.toString())));
+						finalPagePair.setPage(new StringBuilder(client.getClientInfo().getHTML5Cache().get(redirectURL.toString())));
 					}
 
 				}
@@ -645,21 +645,21 @@ public class Page {
 						item.setCurrentBid(node.get("item").get("currentBid").getDoubleValue());
 						client.getClientInfo().addHTML5ItemCache(item);
 						client.addToItemsOfInterest(itemID, item);
-						//finalPagePair.setPage(new StringBuffer("ITEM").append(itemID));
+						//finalPagePair.setPage(new StringBuilder("ITEM").append(itemID));
 					}
 				}
 			}
 			else if(urlString.indexOf("/buyitem")!=-1&&urlString.indexOf("cvv=")==-1){
 				boolean success=node.get("success").getBooleanValue();
 				if(success==true){
-					StringBuffer redirectURL=new StringBuffer(client.getCMARTurl().getAppURL());
+					StringBuilder redirectURL=new StringBuilder(client.getCMARTurl().getAppURL());
 					redirectURL.append("/buyitem.html");
 					if(client.getClientInfo().inHTML5Cache(redirectURL.toString())==false){
 						finalPagePair=openURLHTML5(redirectURL,finalPagePair.getSw());
 						client.getClientInfo().addHTML5Cache(redirectURL.toString(),finalPagePair.getPage());
 					}
 					else{
-						finalPagePair.setPage(new StringBuffer(client.getClientInfo().getHTML5Cache().get(redirectURL.toString())));
+						finalPagePair.setPage(new StringBuilder(client.getClientInfo().getHTML5Cache().get(redirectURL.toString())));
 					}
 				}
 				else{
@@ -671,14 +671,14 @@ public class Page {
 			else if(urlString.indexOf("/buyitem")!=-1&&urlString.indexOf("cvv=")!=-1){
 				boolean success=node.get("success").getBooleanValue();
 				if(success==true){
-					StringBuffer redirectURL=new StringBuffer(client.getCMARTurl().getAppURL());
+					StringBuilder redirectURL=new StringBuilder(client.getCMARTurl().getAppURL());
 					redirectURL.append("/confirmbuy.html");
 					if(client.getClientInfo().inHTML5Cache(redirectURL.toString())==false){
 						finalPagePair=openURLHTML5(redirectURL,finalPagePair.getSw());
 						client.getClientInfo().addHTML5Cache(redirectURL.toString(), finalPagePair.getPage());
 					}
 					else{
-						finalPagePair.setPage(new StringBuffer(client.getClientInfo().getHTML5Cache().get(redirectURL.toString())));
+						finalPagePair.setPage(new StringBuilder(client.getClientInfo().getHTML5Cache().get(redirectURL.toString())));
 					}
 				}
 				else{
@@ -692,7 +692,7 @@ public class Page {
 				if(success==true){
 					long itemId=node.get("itemid").getLongValue();
 					client.setLastItemID(itemId);
-					StringBuffer redirectURL=new StringBuffer(client.getCMARTurl().getAppURL());
+					StringBuilder redirectURL=new StringBuilder(client.getCMARTurl().getAppURL());
 					redirectURL.append("/sellitemimages.html?itemID=").append(itemId);
 					finalPagePair=openURLHTML5(redirectURL,finalPagePair.getSw());
 				}
@@ -706,23 +706,23 @@ public class Page {
 				long userID=node.get("userID").getLongValue();
 				if(userID!=-1){
 					client.setLoggedIn(true);
-					client.getClientInfo().addHTML5Cache("userID", new StringBuffer(Long.toString(userID)));
+					client.getClientInfo().addHTML5Cache("userID", new StringBuilder(Long.toString(userID)));
 					client.setClientID(node.get("userID").getLongValue());
-					StringBuffer redirectURL=new StringBuffer(client.getCMARTurl().getAppURL());
+					StringBuilder redirectURL=new StringBuilder(client.getCMARTurl().getAppURL());
 					redirectURL.append("/myaccount.html");
 					if(client.getClientInfo().inHTML5Cache(redirectURL.toString())==false){
 						finalPagePair=openURLHTML5(redirectURL,finalPagePair.getSw());
 						client.getClientInfo().addHTML5Cache(redirectURL.toString(), finalPagePair.getPage());
 					}
-					HashMap<String,StringBuffer> redirectData=new HashMap<String,StringBuffer>();
-					redirectData.put("useHTML5",new StringBuffer("1"));
-					redirectData.put("userID", new StringBuffer(node.get("userID").getValueAsText()));
-					redirectData.put("authToken", new StringBuffer(node.get("authToken").getValueAsText()));
-					redirectData.put("ts",new StringBuffer(Long.toString(new Date().getTime())));
+					HashMap<String,StringBuilder> redirectData=new HashMap<String,StringBuilder>();
+					redirectData.put("useHTML5",new StringBuilder("1"));
+					redirectData.put("userID", new StringBuilder(node.get("userID").getValueAsText()));
+					redirectData.put("authToken", new StringBuilder(node.get("authToken").getValueAsText()));
+					redirectData.put("ts",new StringBuilder(Long.toString(new Date().getTime())));
 
 					client.getClientInfo().addHTML5Cache("userID", redirectData.get("userID"));
-					client.getClientInfo().addHTML5Cache("authToken", new StringBuffer(node.get("authToken").getValueAsText()));
-					finalPagePair=openURLHTML5(new StringBuffer(client.getCMARTurl().getAppURL()).append("/myaccount?").append(createURL(redirectData)),finalPagePair.getSw());
+					client.getClientInfo().addHTML5Cache("authToken", new StringBuilder(node.get("authToken").getValueAsText()));
+					finalPagePair=openURLHTML5(new StringBuilder(client.getCMARTurl().getAppURL()).append("/myaccount?").append(createURL(redirectData)),finalPagePair.getSw());
 				}
 				else{
 					for(int i=0;i<node.get("errors").size();i++){
@@ -735,22 +735,22 @@ public class Page {
 				if(success==true){
 					client.setLoggedIn(true);
 					client.getClientInfo().setRegistered(true);
-					StringBuffer redirectURL=new StringBuffer(client.getCMARTurl().getAppURL());
+					StringBuilder redirectURL=new StringBuilder(client.getCMARTurl().getAppURL());
 					redirectURL.append("/myaccount.html");
 					if(client.getClientInfo().inHTML5Cache(redirectURL.toString())==false){
 						finalPagePair=openURLHTML5(redirectURL,finalPagePair.getSw());
 						client.getClientInfo().addHTML5Cache(redirectURL.toString(), finalPagePair.getPage());
 					}
-					HashMap<String,StringBuffer> redirectData=new HashMap<String,StringBuffer>();
+					HashMap<String,StringBuilder> redirectData=new HashMap<String,StringBuilder>();
 					client.setClientID(node.get("userID").getLongValue());
-					redirectData.put("useHTML5",new StringBuffer("1"));
-					redirectData.put("userID", new StringBuffer(node.get("userID").getValueAsText()));
-					redirectData.put("authToken", new StringBuffer(node.get("authToken").getValueAsText()));
-					redirectData.put("ts",new StringBuffer(Long.toString(new Date().getTime())));
+					redirectData.put("useHTML5",new StringBuilder("1"));
+					redirectData.put("userID", new StringBuilder(node.get("userID").getValueAsText()));
+					redirectData.put("authToken", new StringBuilder(node.get("authToken").getValueAsText()));
+					redirectData.put("ts",new StringBuilder(Long.toString(new Date().getTime())));
 
 					client.getClientInfo().addHTML5Cache("userID", redirectData.get("userID"));
-					client.getClientInfo().addHTML5Cache("authToken", new StringBuffer(node.get("authToken").getValueAsText()));
-					finalPagePair=openURLHTML5(new StringBuffer(client.getCMARTurl().getAppURL()).append("/myaccount?").append(createURL(redirectData)),finalPagePair.getSw());
+					client.getClientInfo().addHTML5Cache("authToken", new StringBuilder(node.get("authToken").getValueAsText()));
+					finalPagePair=openURLHTML5(new StringBuilder(client.getCMARTurl().getAppURL()).append("/myaccount?").append(createURL(redirectData)),finalPagePair.getSw());
 				}
 				else{
 					for(int i=0;i<node.get("errors").size();i++){
@@ -761,19 +761,19 @@ public class Page {
 			else if(urlString.indexOf("/updateuserdetails")!=-1){
 				boolean success=node.get("success").getBooleanValue();
 				if(success==true){
-					StringBuffer redirectURL=new StringBuffer(client.getCMARTurl().getAppURL());
+					StringBuilder redirectURL=new StringBuilder(client.getCMARTurl().getAppURL());
 					redirectURL.append("/myaccount.html");
 					if(client.getClientInfo().inHTML5Cache(redirectURL.toString())==false){
 						finalPagePair=openURLHTML5(redirectURL,finalPagePair.getSw());
 						client.getClientInfo().addHTML5Cache(redirectURL.toString(), finalPagePair.getPage());
 					}
-					HashMap<String,StringBuffer> redirectData=new HashMap<String,StringBuffer>();
-					redirectData.put("useHTML5",new StringBuffer("1"));
-					redirectData.put("userID", new StringBuffer(node.get("userID").getValueAsText()));
-					redirectData.put("authToken", new StringBuffer(node.get("authToken").getValueAsText()));
-					redirectData.put("ts", new StringBuffer(Long.toString(new Date().getTime())));
+					HashMap<String,StringBuilder> redirectData=new HashMap<String,StringBuilder>();
+					redirectData.put("useHTML5",new StringBuilder("1"));
+					redirectData.put("userID", new StringBuilder(node.get("userID").getValueAsText()));
+					redirectData.put("authToken", new StringBuilder(node.get("authToken").getValueAsText()));
+					redirectData.put("ts", new StringBuilder(Long.toString(new Date().getTime())));
 
-					finalPagePair=openURLHTML5(new StringBuffer(client.getCMARTurl().getAppURL()).append("/myaccount?").append(createURL(redirectData)),finalPagePair.getSw());
+					finalPagePair=openURLHTML5(new StringBuilder(client.getCMARTurl().getAppURL()).append("/myaccount?").append(createURL(redirectData)),finalPagePair.getSw());
 				}
 				else{
 					for(int i=0;i<node.get("errors").size();i++){
@@ -794,21 +794,21 @@ public class Page {
 					question.setResponseTo(node.get("question").get("responseTo").getLongValue());
 					question.setContent(node.get("question").get("content").getTextValue());
 					client.getClientInfo().addHTML5QuestionCache(question);
-					StringBuffer redirectURL=new StringBuffer(client.getCMARTurl().getAppURL());
+					StringBuilder redirectURL=new StringBuilder(client.getCMARTurl().getAppURL());
 					redirectURL.append("/viewitem.html").append(client.getLastItemID());
 					if(client.getClientInfo().inHTML5Cache(redirectURL.toString())==false){
 						redirectURL.append("?").append(client.getLastItemID());
 						finalPagePair=openURLHTML5(redirectURL,finalPagePair.getSw());
 						client.getClientInfo().addHTML5Cache(redirectURL.toString(), finalPagePair.getPage());
 					}
-					HashMap<String,StringBuffer> redirectData=new HashMap<String,StringBuffer>();
-					redirectData.put("useHTML5",new StringBuffer("1"));
-					redirectData.put("itemID", new StringBuffer().append(client.getLastItemID()));
+					HashMap<String,StringBuilder> redirectData=new HashMap<String,StringBuilder>();
+					redirectData.put("useHTML5",new StringBuilder("1"));
+					redirectData.put("itemID", new StringBuilder().append(client.getLastItemID()));
 
 					if(client.getClientInfo().getHTML5ItemCache().get(client.getLastItemID()).getTs()>=(new Date().getTime()-300000))				
-						finalPagePair.setPage(new StringBuffer("ITEM").append(client.getLastItemID()));
+						finalPagePair.setPage(new StringBuilder("ITEM").append(client.getLastItemID()));
 					else
-						finalPagePair=openURLHTML5(new StringBuffer(client.getCMARTurl().getAppURL()).append("/viewitem?").append(createURL(redirectData)),finalPagePair.getSw());
+						finalPagePair=openURLHTML5(new StringBuilder(client.getCMARTurl().getAppURL()).append("/viewitem?").append(createURL(redirectData)),finalPagePair.getSw());
 				}
 				else{
 					for(int i=0;i<node.get("errors").size();i++){
@@ -857,8 +857,8 @@ public class Page {
 	 * @param sw stopwatch that is to be continued when timing the opening of the page
 	 * @return PageTimePair of the resulting opened webpage and a stopwatch set to the original time plus the amount required to open the webpage
 	 */
-	private PageTimePair openURLHTML5(StringBuffer urlString, Stopwatch sw) throws UnknownHostException, IOException, InterruptedException{
-		StringBuffer ret = new StringBuffer();		// the source code of the page
+	private PageTimePair openURLHTML5(StringBuilder urlString, Stopwatch sw) throws UnknownHostException, IOException, InterruptedException{
+		StringBuilder ret = new StringBuilder();		// the source code of the page
 		PageTimePair finalPair;
 		if(verbose)System.out.println("URLSTRING "+urlString);
 		String inputLine;	// each line being read in
@@ -911,7 +911,7 @@ public class Page {
 				System.err.println("HTTP request error: "+urlString);
 				client.setExit(true);
 				client.setExitDueToError(true);
-				return new PageTimePair(new StringBuffer(HTTP_RESPONSE_ERROR),sw);
+				return new PageTimePair(new StringBuilder(HTTP_RESPONSE_ERROR),sw);
 
 			}
 
@@ -940,7 +940,7 @@ public class Page {
 			//httpclient.getConnectionManager().shutdown();
 			client.setExit(true);
 			client.setExitDueToError(true);
-			return new PageTimePair(new StringBuffer(HTTP_RESPONSE_ERROR),sw);
+			return new PageTimePair(new StringBuilder(HTTP_RESPONSE_ERROR),sw);
 		}catch(SocketException e){
 			System.err.println("Could not create connection");
 			System.err.println(urlString);
@@ -953,7 +953,7 @@ public class Page {
 			//	httpclient.getConnectionManager().shutdown();
 			client.setExit(true);
 			client.setExitDueToError(true);
-			return new PageTimePair(new StringBuffer(HTTP_RESPONSE_ERROR),sw);
+			return new PageTimePair(new StringBuilder(HTTP_RESPONSE_ERROR),sw);
 		} catch (NoHttpResponseException e){
 			System.err.println("Could not create connection");
 			System.err.println(urlString);
@@ -966,11 +966,11 @@ public class Page {
 			//	httpclient.getConnectionManager().shutdown();
 			client.setExit(true);
 			client.setExitDueToError(true);
-			return new PageTimePair(new StringBuffer(HTTP_RESPONSE_ERROR),sw);
+			return new PageTimePair(new StringBuilder(HTTP_RESPONSE_ERROR),sw);
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 			System.err.println("HTTP request error: "+urlString);
-			return new PageTimePair(new StringBuffer(HTTP_RESPONSE_ERROR),sw);
+			return new PageTimePair(new StringBuilder(HTTP_RESPONSE_ERROR),sw);
 		}
 	}
 
@@ -982,11 +982,11 @@ public class Page {
 	 * @return The query in UTF-8 form
 	 * @throws UnsupportedEncodingException
 	 */
-	protected String createURL(HashMap<String, StringBuffer> data) throws UnsupportedEncodingException{
-		StringBuffer content = new StringBuffer();
+	protected String createURL(HashMap<String, StringBuilder> data) throws UnsupportedEncodingException{
+		StringBuilder content = new StringBuilder();
 		int i=0;
 
-		for(Entry<String,StringBuffer> e:data.entrySet()){
+		for(Entry<String,StringBuilder> e:data.entrySet()){
 			if(i!=0) {
 				content.append("&");
 			}
@@ -1004,11 +1004,11 @@ public class Page {
 	 * @param formAction
 	 * @return Returns a HashMap of the form data, (name,value) pairings
 	 */
-	protected HashMap<String, StringBuffer> getFormData(String formAction){
+	protected HashMap<String, StringBuilder> getFormData(String formAction){
 		String name;
-		StringBuffer value =new StringBuffer();
+		StringBuilder value =new StringBuilder();
 		int start=0;
-		HashMap<String, StringBuffer>data=new HashMap<String,StringBuffer>();
+		HashMap<String, StringBuilder>data=new HashMap<String,StringBuilder>();
 		start=html.indexOf("action=\""+formAction);
 		if (start!=-1){
 			start=html.indexOf("POST",start)+("POST").length();
@@ -1025,7 +1025,7 @@ public class Page {
 						if(end!=-1)
 							start=html.lastIndexOf(VALUE_TEXT,end)+(VALUE_TEXT).length();
 						else{
-							value=new StringBuffer("0");
+							value=new StringBuilder("0");
 						}
 					}
 					else{
@@ -1034,7 +1034,7 @@ public class Page {
 					}
 
 					if(end!=-1)
-						value=new StringBuffer(html.subSequence(start,end));
+						value=new StringBuilder(html.subSequence(start,end));
 					data.put(name,value);
 
 				}
@@ -1052,8 +1052,8 @@ public class Page {
 	 * @param str - original string
 	 * @return string with typing errors (if any occured)
 	 */
-	protected StringBuffer typingError(StringBuffer str){
-		str=new StringBuffer(str);
+	protected StringBuilder typingError(StringBuilder str){
+		str=new StringBuilder(str);
 		double unnoticedError=0.05;
 		for (int i=0;i<str.length();i++){
 			if (rand.nextDouble()>(1-client.getTypingErrorRate())){
@@ -1105,15 +1105,15 @@ public class Page {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	protected StringBuffer doSubmit(StringBuffer url,HashMap<String, StringBuffer> data) throws UnsupportedEncodingException, IOException, InterruptedException{
+	protected StringBuilder doSubmit(StringBuilder url,HashMap<String, StringBuilder> data) throws UnsupportedEncodingException, IOException, InterruptedException{
 		threadExecutor = Executors.newFixedThreadPool(RunSettings.getConnPerPage());
-		StringBuffer urlOrig=new StringBuffer(url);
-		StringBuffer ret = new StringBuffer();		// the source code of the page
+		StringBuilder urlOrig=new StringBuilder(url);
+		StringBuilder ret = new StringBuilder();		// the source code of the page
 		if(verbose)System.out.println("URL "+url);
 		String inputLine;	// each line being read in
 
 		ArrayList<NameValuePair> formparams = new ArrayList<NameValuePair>();
-		for (Entry<String, StringBuffer> e:data.entrySet()){
+		for (Entry<String, StringBuilder> e:data.entrySet()){
 			formparams.add(new BasicNameValuePair(e.getKey(),e.getValue().toString()));
 		}
 		URI uri;
@@ -1164,7 +1164,7 @@ public class Page {
 				System.err.println("HTTP request error: "+url+" "+data);
 				client.setExit(true);
 				client.setExitDueToError(true);
-				return new StringBuffer(HTTP_RESPONSE_ERROR);
+				return new StringBuilder(HTTP_RESPONSE_ERROR);
 			}
 
 			if(RunSettings.isGetExtras()){
@@ -1196,7 +1196,7 @@ public class Page {
 			//httpclient.getConnectionManager().shutdown();
 			client.setExit(true);
 			client.setExitDueToError(true);
-			return new StringBuffer(HTTP_RESPONSE_ERROR);
+			return new StringBuilder(HTTP_RESPONSE_ERROR);
 		}catch (SocketException e){
 			System.err.println("Could not create connection");
 			System.err.println(urlOrig);
@@ -1209,7 +1209,7 @@ public class Page {
 			//httpclient.getConnectionManager().shutdown();
 			client.setExit(true);
 			client.setExitDueToError(true);
-			return new StringBuffer(HTTP_RESPONSE_ERROR);
+			return new StringBuilder(HTTP_RESPONSE_ERROR);
 		}
 
 		return ret;
@@ -1225,10 +1225,10 @@ public class Page {
 	 * @param pics - pictures to be uploaded
 	 * @return Returns the HTTP response body after the form is submitted
 	 */
-	protected StringBuffer doSubmitPic(String url,HashMap<String, StringBuffer> data,ArrayList<File> pics) throws org.apache.http.ParseException, IOException, InterruptedException{
+	protected StringBuilder doSubmitPic(String url,HashMap<String, StringBuilder> data,ArrayList<File> pics) throws org.apache.http.ParseException, IOException, InterruptedException{
 		String urlOrig=url;
 		String inputLine;
-		StringBuffer ret=new StringBuffer();
+		StringBuilder ret=new StringBuilder();
 
 
 		URI uri;
@@ -1237,7 +1237,7 @@ public class Page {
 
 			HttpPost httppost=new HttpPost(uri);
 			MultipartEntity reqEntity = new MultipartEntity();
-			for (Entry<String,StringBuffer> e:data.entrySet()){
+			for (Entry<String,StringBuilder> e:data.entrySet()){
 				reqEntity.addPart(e.getKey(),new StringBody(e.getValue().toString()));
 			}
 			int n=1;
@@ -1287,7 +1287,7 @@ public class Page {
 				System.err.println("HTTP request error: "+url);
 				client.setExit(true);
 				client.setExitDueToError(true);
-				return new StringBuffer(HTTP_RESPONSE_ERROR);
+				return new StringBuilder(HTTP_RESPONSE_ERROR);
 			}
 
 			if(RunSettings.isGetExtras()){
@@ -1297,7 +1297,7 @@ public class Page {
 
 			if(!HTML4){	// redirect for HTML5
 				if(ret.indexOf("\"success\":true,")!=-1){
-					StringBuffer redirectURL=new StringBuffer(client.getCMARTurl().getAppURL());
+					StringBuilder redirectURL=new StringBuilder(client.getCMARTurl().getAppURL());
 					redirectURL.append("/confirmsellitem.html");
 					PageTimePair finalPagePair=openURLHTML5(redirectURL,sw);
 					ret=finalPagePair.getPage();
@@ -1329,7 +1329,7 @@ public class Page {
 			//httpclient.getConnectionManager().shutdown();
 			client.setExit(true);
 			client.setExitDueToError(true);
-			return new StringBuffer(HTTP_RESPONSE_ERROR);
+			return new StringBuilder(HTTP_RESPONSE_ERROR);
 		}
 
 		return ret;
@@ -1341,8 +1341,8 @@ public class Page {
 	 * @param urlString - URL of AJAX request
 	 * @return XML, or String returned from AJAX response
 	 */
-	protected StringBuffer openAJAXRequest(StringBuffer urlString){
-		StringBuffer ret = new StringBuffer();		// the source code of the page
+	protected StringBuilder openAJAXRequest(StringBuilder urlString){
+		StringBuilder ret = new StringBuilder();		// the source code of the page
 		if(verbose)System.out.println("AJAXURLSTRING "+urlString);
 		String inputLine;	// each line being read in
 		String urlStringS=urlString.toString().replace(" ", "%20");
@@ -1453,11 +1453,11 @@ public class Page {
 	 * @param map - a map of the distribution of form (probability, string)
 	 * @return The randomly chosen string
 	 */
-	protected StringBuffer getRandomStringBufferFromDist(TreeMap<Double,StringBuffer> map){
+	protected StringBuilder getRandomStringBuilderFromDist(TreeMap<Double,StringBuilder> map){
 
 		double index=binarySearch((Double[])map.keySet().toArray(new Double[map.size()]),rand.nextDouble(),0,map.size()-1);
 
-		StringBuffer ret=new StringBuffer(map.get(index));
+		StringBuilder ret=new StringBuilder(map.get(index));
 		return ret;
 	}
 
@@ -1582,7 +1582,7 @@ public class Page {
 			int attempts=0;
 			while(attempts<3){
 				try {			
-					URI uri = URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), new StringBuffer(client.getCMARTurl().getAppURL()).append("/").append(suffix).toString().replace(" ", "%20"), null, null);
+					URI uri = URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), new StringBuilder(client.getCMARTurl().getAppURL()).append("/").append(suffix).toString().replace(" ", "%20"), null, null);
 
 					HttpGet httpget = new HttpGet(uri);
 
@@ -1633,7 +1633,7 @@ public class Page {
 					e.printStackTrace();
 				}catch(ConnectException e){
 					System.err.println("Could not create connection");
-					System.err.println(new StringBuffer(client.getCMARTurl().getAppURL()).append("/").append(suffix).toString().replace(" ", "%20"));
+					System.err.println(new StringBuilder(client.getCMARTurl().getAppURL()).append("/").append(suffix).toString().replace(" ", "%20"));
 					attempts++;
 					if (httpRequestAttempts==3){
 						threadExecutor.shutdown();
@@ -1642,7 +1642,7 @@ public class Page {
 					}
 				} catch(SocketException e){
 					System.err.println("Could not create connection");
-					System.err.println(new StringBuffer(client.getCMARTurl().getAppURL()).append("/").append(suffix).toString().replace(" ", "%20"));
+					System.err.println(new StringBuilder(client.getCMARTurl().getAppURL()).append("/").append(suffix).toString().replace(" ", "%20"));
 					attempts++;
 					if (httpRequestAttempts==3){
 						threadExecutor.shutdown();
@@ -1674,7 +1674,7 @@ public class Page {
 	private class GetJSCSSNew extends Thread{
 		String suffix;
 		Client client;
-		StringBuffer line=new StringBuffer();
+		StringBuilder line=new StringBuilder();
 		String newline;
 		DefaultHttpClient httpclient;
 		boolean inCache;
@@ -1690,7 +1690,7 @@ public class Page {
 			while(attempts<3){
 				try {			
 
-					URI uri = URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), new StringBuffer(client.getCMARTurl().getAppURL()).append("/").append(suffix).toString().replace(" ", "%20"), null, null);
+					URI uri = URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), new StringBuilder(client.getCMARTurl().getAppURL()).append("/").append(suffix).toString().replace(" ", "%20"), null, null);
 
 					HttpGet httpget = new HttpGet(uri);
 
@@ -1731,7 +1731,7 @@ public class Page {
 					e.printStackTrace();
 				}catch(ConnectException e){
 					System.err.println("Could not create connection");
-					System.err.println(new StringBuffer(client.getCMARTurl().getAppURL()).append("/").append(suffix).toString().replace(" ", "%20"));
+					System.err.println(new StringBuilder(client.getCMARTurl().getAppURL()).append("/").append(suffix).toString().replace(" ", "%20"));
 					attempts++;
 					if (httpRequestAttempts==3){
 						threadExecutor.shutdown();
@@ -1740,7 +1740,7 @@ public class Page {
 					}
 				} catch(SocketException e){
 					System.err.println("Could not create connection");
-					System.err.println(new StringBuffer(client.getCMARTurl().getAppURL()).append("/").append(suffix).toString().replace(" ", "%20"));
+					System.err.println(new StringBuilder(client.getCMARTurl().getAppURL()).append("/").append(suffix).toString().replace(" ", "%20"));
 					attempts++;
 					if (httpRequestAttempts==3){
 						threadExecutor.shutdown();
@@ -1789,7 +1789,7 @@ public class Page {
 	 * @return	Returns the stop watch with the added time it took to get the js
 	 * @throws InterruptedException
 	 */
-	private synchronized Stopwatch getJsCssNew(StringBuffer str, Stopwatch sw) throws InterruptedException{
+	private synchronized Stopwatch getJsCssNew(StringBuilder str, Stopwatch sw) throws InterruptedException{
 
 		int end=str.indexOf(JS_TEXTQ)+JS_TEXT.length();
 		int end2=str.indexOf(CSS_TEXTQ)+CSS_TEXT.length();
@@ -1844,7 +1844,7 @@ public class Page {
 	 * @param sw - stopwatch timing total response time of the page
 	 * @return	Returns the stop watch with the added time it took to get the jpgs
 	 */
-	private synchronized Stopwatch getImagesNew(StringBuffer str, Stopwatch sw) throws JsonParseException, JsonMappingException, IOException{
+	private synchronized Stopwatch getImagesNew(StringBuilder str, Stopwatch sw) throws JsonParseException, JsonMappingException, IOException{
 
 		int end=str.indexOf(JPG_TEXTQ)+JPG_TEXT.length();
 		int end2=str.indexOf(PNG_TEXTQ)+PNG_TEXT.length();
@@ -2163,7 +2163,7 @@ public class Page {
 	 * Returns the URL used to open page
 	 * @return
 	 */
-	public StringBuffer getURL(){
+	public StringBuilder getURL(){
 		return this.url;
 	}
 
@@ -2171,9 +2171,9 @@ public class Page {
 	 * Begins a search action on C-MART when no previous search term has already been specified
 	 * @param data - user data to include in search query
 	 * @param action - action in xmlDocument to add data too on the request
-	 * @return Returns the StringBuffer that is returned after the C-MART search query
+	 * @return Returns the StringBuilder that is returned after the C-MART search query
 	 */
-	protected StringBuffer search (HashMap<String,StringBuffer> data, Element action) throws UnsupportedEncodingException, IOException, InterruptedException{
+	protected StringBuilder search (HashMap<String,StringBuilder> data, Element action) throws UnsupportedEncodingException, IOException, InterruptedException{
 		return search(null,data,action);
 	}
 
@@ -2182,9 +2182,9 @@ public class Page {
 	 * @param data - POST data required for the search form
 	 * @return Returns the page containing the search results
 	 */
-	protected StringBuffer search(StringBuffer initialSearchTerm, HashMap<String,StringBuffer> data,Element action) throws UnsupportedEncodingException, IOException, InterruptedException{
-		StringBuffer newPage;
-		StringBuffer searchTerm=new StringBuffer();
+	protected StringBuilder search(StringBuilder initialSearchTerm, HashMap<String,StringBuilder> data,Element action) throws UnsupportedEncodingException, IOException, InterruptedException{
+		StringBuilder newPage;
+		StringBuilder searchTerm=new StringBuilder();
 		Element request=xmlDocument.createElement("request");
 
 		if(RunSettings.isRepeatedRun()==false){		// if it is a new run
@@ -2192,7 +2192,7 @@ public class Page {
 				int numWordsToSearch=getRandomIntFromDist(RunSettings.getNumSearchWords());		// get the number of words in the search term
 				// create the search term with words from the item description distribution
 				for (int i=0;i<numWordsToSearch;i++){
-					searchTerm.append(getRandomStringBufferFromDist(RunSettings.getItemSpecificsDescWords()));
+					searchTerm.append(getRandomStringBuilderFromDist(RunSettings.getItemSpecificsDescWords()));
 					if (i!=numWordsToSearch-1)
 						searchTerm.append(" ");
 				}
@@ -2203,7 +2203,7 @@ public class Page {
 				searchTerm.append(initialSearchTerm);
 				for (int i=0;i<additionalWords;i++){
 					searchTerm.append(" ");
-					searchTerm.append(typingError(getRandomStringBufferFromDist(RunSettings.getItemSpecificsDescWords())));
+					searchTerm.append(typingError(getRandomStringBuilderFromDist(RunSettings.getItemSpecificsDescWords())));
 
 				}
 				data.put("searchTerm",searchTerm);
@@ -2223,9 +2223,9 @@ public class Page {
 
 		if(RunSettings.isRepeatedRun()==false){		// if it is a new run document the search action
 			Element child=xmlDocument.createElement("url");
-			child.setTextContent(new StringBuffer(client.getCMARTurl().getAppURL()).append("/search?").toString());
+			child.setTextContent(new StringBuilder(client.getCMARTurl().getAppURL()).append("/search?").toString());
 			request.appendChild(child);
-			for (Entry<String,StringBuffer> e:data.entrySet()){
+			for (Entry<String,StringBuilder> e:data.entrySet()){
 				child=xmlDocument.createElement("data");
 				child.setAttribute("name", e.getKey());
 				child.setTextContent(e.getValue().toString());
@@ -2235,13 +2235,13 @@ public class Page {
 				child=xmlDocument.createElement("type");
 				child.setTextContent("POST");
 				request.appendChild(child);
-				newPage=doSubmit(new StringBuffer(client.getCMARTurl().getAppURL()).append("/search?"),data);
+				newPage=doSubmit(new StringBuilder(client.getCMARTurl().getAppURL()).append("/search?"),data);
 			}
 			else{
 				child=xmlDocument.createElement("type");
 				child.setTextContent("GET");
 				request.appendChild(child);
-				newPage=openHTML5Page(new StringBuffer(client.getCMARTurl().getAppURL()).append("/search.html"),new StringBuffer(client.getCMARTurl().getAppURL()).append("/search?").append(createURL(data)));
+				newPage=openHTML5Page(new StringBuilder(client.getCMARTurl().getAppURL()).append("/search.html"),new StringBuilder(client.getCMARTurl().getAppURL()).append("/search?").append(createURL(data)));
 			}
 
 			child=xmlDocument.createElement("thinkTime");
@@ -2251,10 +2251,10 @@ public class Page {
 			client.addXMLAction(action);
 		}else{
 			if(HTML4){
-				newPage=doSubmit(new StringBuffer(client.getCMARTurl().getAppURL()).append("/search?"),data);
+				newPage=doSubmit(new StringBuilder(client.getCMARTurl().getAppURL()).append("/search?"),data);
 			}
 			else{
-				newPage=openHTML5Page(new StringBuffer(client.getCMARTurl().getAppURL()).append("/search.html"),new StringBuffer(client.getCMARTurl().getAppURL()).append("/search?").append(createURL(data)));
+				newPage=openHTML5Page(new StringBuilder(client.getCMARTurl().getAppURL()).append("/search.html"),new StringBuilder(client.getCMARTurl().getAppURL()).append("/search?").append(createURL(data)));
 			}
 		}
 		return newPage;
@@ -2266,7 +2266,7 @@ public class Page {
 	 * @param searchTerm - the search query
 	 * @return
 	 */
-	private int getSearchThinkTime(StringBuffer searchTerm){
+	private int getSearchThinkTime(StringBuilder searchTerm){
 		int thinkTime=(int)expDist(initialThinkTime+5000);
 		if(RunSettings.isRepeatedRun()==false){
 			thinkTime+=typingErrorThinkTime;
@@ -2288,7 +2288,7 @@ public class Page {
 	 * Gets an array of the words in the previous search query
 	 */
 	protected void getSearchTermWords(){
-		StringBuffer searchTerm=new StringBuffer(client.getPreviousSearchTerm());
+		StringBuilder searchTerm=new StringBuilder(client.getPreviousSearchTerm());
 		int spaceIndex=searchTerm.indexOf(" ");
 		do{
 			if(spaceIndex==-1){
@@ -2307,10 +2307,10 @@ public class Page {
 	/**
 	 * For HTML5/SQLite
 	 * Gets the list of most recent 250 items that the client had seen
-	 * @return Returns a StringBuffer as CSV of the up-to-250 most recently seen items
+	 * @return Returns a StringBuilder as CSV of the up-to-250 most recently seen items
 	 */
-	protected StringBuffer getHasItems(){
-		StringBuffer hasItems=new StringBuffer();
+	protected StringBuilder getHasItems(){
+		StringBuilder hasItems=new StringBuilder();
 		long oldestTime=Long.MAX_VALUE;;
 		long oldestItem=0;
 		long currentTime=new Date().getTime();

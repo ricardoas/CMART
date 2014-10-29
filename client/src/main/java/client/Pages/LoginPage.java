@@ -20,7 +20,7 @@ import client.clientMain.*;
  */
 
 public class LoginPage extends Page{
-	HashMap<String, StringBuffer> data = new HashMap<String, StringBuffer>();	// data to be sent to the login page
+	HashMap<String, StringBuilder> data = new HashMap<String, StringBuilder>();	// data to be sent to the login page
 	double pageRTFactor=1.0;
 
 	public LoginPage(Page page){
@@ -36,9 +36,9 @@ public class LoginPage extends Page{
 	 * @throws IOException 
 	 * @throws UnsupportedEncodingException 
 	 */
-	public StringBuffer makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
-		StringBuffer nextLink=new StringBuffer(client.getCMARTurl().getAppURL());	// link to send the login data to
-		StringBuffer nextURL=new StringBuffer();	// the response page returned after the login attempt
+	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
+		StringBuilder nextLink=new StringBuilder(client.getCMARTurl().getAppURL());	// link to send the login data to
+		StringBuilder nextURL=new StringBuilder();	// the response page returned after the login attempt
 
 		if(RunSettings.isRepeatedRun()==false){
 			searchData=getFormData("search");
@@ -59,7 +59,7 @@ public class LoginPage extends Page{
 				data.put("username", typingError(client.getClientInfo().getUsername()));
 				data.put("password", typingError(client.getClientInfo().getPassword()));
 				if(!HTML4)
-					data.put("useHTML5", new StringBuffer("1"));
+					data.put("useHTML5", new StringBuilder("1"));
 				client.incLoginAttempts();	// increases the amount of login attempts
 
 				// Think Time
@@ -70,9 +70,9 @@ public class LoginPage extends Page{
 				}
 
 				Element child=xmlDocument.createElement("url");
-				child.setTextContent(new StringBuffer(nextLink).append("/login").toString());
+				child.setTextContent(new StringBuilder(nextLink).append("/login").toString());
 				request.appendChild(child);
-				for (Entry<String,StringBuffer> e:data.entrySet()){
+				for (Entry<String,StringBuilder> e:data.entrySet()){
 					child=xmlDocument.createElement("data");
 					child.setAttribute("name", e.getKey());
 					child.setTextContent(e.getValue().toString());
@@ -116,15 +116,15 @@ public class LoginPage extends Page{
 				client.setExitDueToRepeatChange(true);
 				return null;
 			}
-			nextLink=new StringBuffer(action.getElementsByTagName("nextPage").item(0).getTextContent());
+			nextLink=new StringBuilder(action.getElementsByTagName("nextPage").item(0).getTextContent());
 			request=(Element)((Element)action).getElementsByTagName("request").item(0);
-			nextURL=new StringBuffer(request.getElementsByTagName("url").item(0).getTextContent());
+			nextURL=new StringBuilder(request.getElementsByTagName("url").item(0).getTextContent());
 			data.clear();
 			NodeList dataList=request.getElementsByTagName("data");
 			for(int i=0;i<dataList.getLength();i++){
 				Node n=dataList.item(i);
 				String key=n.getAttributes().item(0).getTextContent();
-				StringBuffer value=new StringBuffer(((Element)n).getTextContent());
+				StringBuilder value=new StringBuilder(((Element)n).getTextContent());
 				data.put(key, value);
 			}
 			if(nextURL.indexOf("authToken=")!=-1){

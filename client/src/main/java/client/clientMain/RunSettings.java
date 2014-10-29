@@ -11,8 +11,8 @@ import java.util.Map.Entry;
  */
 
 public class RunSettings {
-	private static StringBuffer csvFolder=new StringBuffer();		// folder the CSV distributions are in
-	private static StringBuffer repeatedXmlFolder=new StringBuffer();
+	private static StringBuilder csvFolder=new StringBuilder();		// folder the CSV distributions are in
+	private static StringBuilder repeatedXmlFolder=new StringBuilder();
 	private static boolean verbose;					// output debug information
 	private static boolean outputStats;				// output Stats from the run
 	private static boolean outputMatlab;			// if the data should be output in .mat form
@@ -54,19 +54,19 @@ public class RunSettings {
 	private static TreeMap<Double,Integer>numHeaderImages=new TreeMap<Double,Integer>();	// number of images per item
 	private static ArrayList<String>itemPics=new ArrayList<String>();						// pictures to upload for an item
 	private static TreeMap<Double,Integer>titleTotalWords=new TreeMap<Double,Integer>();	// number of words in the title
-	private static TreeMap<Double,StringBuffer>titleWords=new TreeMap<Double,StringBuffer>();	// frequency of words in the title
+	private static TreeMap<Double,StringBuilder>titleWords=new TreeMap<Double,StringBuilder>();	// frequency of words in the title
 	private static TreeMap<Double,Integer>itemSpecificsCat=new TreeMap<Double,Integer>();		// number of words in the categories
-	private static TreeMap<Double,StringBuffer>itemSpecificsCatWords=new TreeMap<Double,StringBuffer>();	// frequency of words i nthe categories
+	private static TreeMap<Double,StringBuilder>itemSpecificsCatWords=new TreeMap<Double,StringBuilder>();	// frequency of words i nthe categories
 	private static TreeMap<Double,Integer>itemSpecificsDesc=new TreeMap<Double,Integer>();		// number of words in the description
-	private static TreeMap<Double,StringBuffer>itemSpecificsDescWords=new TreeMap<Double,StringBuffer>();	// frequency of words in the description
-	private static TreeMap<Double,StringBuffer>maleFirstNames=new TreeMap<Double,StringBuffer>();			// distribution of male first names
-	private static TreeMap<Double,StringBuffer>femaleFirstNames=new TreeMap<Double,StringBuffer>();			// distribution of female first names
-	private static TreeMap<Double,StringBuffer>lastNames=new TreeMap<Double,StringBuffer>();				// distribution of last names
-	private static TreeMap<Double,StringBuffer>streetNames=new TreeMap<Double,StringBuffer>();				// distribution of street names
-	private static TreeMap<Double,StringBuffer>USStates=new TreeMap<Double,StringBuffer>();					// distribution of US States
-	private static TreeMap<Double,StringBuffer>cities=new TreeMap<Double,StringBuffer>();					// distribution of cities
-	private static TreeMap<String,StringBuffer>cityStates=new TreeMap<String,StringBuffer>();				// mapping cities to their respective states
-	private static TreeMap<Double,StringBuffer>auctionType=new TreeMap<Double,StringBuffer>();				// whether the item for sale is auction/buyNow/both
+	private static TreeMap<Double,StringBuilder>itemSpecificsDescWords=new TreeMap<Double,StringBuilder>();	// frequency of words in the description
+	private static TreeMap<Double,StringBuilder>maleFirstNames=new TreeMap<Double,StringBuilder>();			// distribution of male first names
+	private static TreeMap<Double,StringBuilder>femaleFirstNames=new TreeMap<Double,StringBuilder>();			// distribution of female first names
+	private static TreeMap<Double,StringBuilder>lastNames=new TreeMap<Double,StringBuilder>();				// distribution of last names
+	private static TreeMap<Double,StringBuilder>streetNames=new TreeMap<Double,StringBuilder>();				// distribution of street names
+	private static TreeMap<Double,StringBuilder>USStates=new TreeMap<Double,StringBuilder>();					// distribution of US States
+	private static TreeMap<Double,StringBuilder>cities=new TreeMap<Double,StringBuilder>();					// distribution of cities
+	private static TreeMap<String,StringBuilder>cityStates=new TreeMap<String,StringBuilder>();				// mapping cities to their respective states
+	private static TreeMap<Double,StringBuilder>auctionType=new TreeMap<Double,StringBuilder>();				// whether the item for sale is auction/buyNow/both
 	private static TreeMap<Double,Double>buyNowPrice=new TreeMap<Double,Double>();							// distribution of initial buy now prices
 	private static TreeMap<Double,Double>buyNowPriceReverse=new TreeMap<Double,Double>();					// reverse distribution of the buyNow prices
 	private static TreeMap<Double,Double>startingBid=new TreeMap<Double,Double>();							// distribution of starting bids
@@ -77,6 +77,10 @@ public class RunSettings {
 	private static TreeMap<Integer,ArrayList<Double>> transitionProbabilities=new TreeMap<Integer,ArrayList<Double>>();
 
 	public static void main(String[] args){
+		
+		// FIX PROBLEM WHEN RUNNING CLIENT ON NON-ENGLISH LOCALE
+		Locale.setDefault(Locale.ENGLISH);
+		System.out.println("START= " + System.currentTimeMillis());
 
 		System.out.println("Initializing Distributions");
 		String configFileName="CGconfig.txt";
@@ -104,6 +108,7 @@ public class RunSettings {
 			}
 			exitSystem(cg);
 		}
+		System.out.println("END= " + System.currentTimeMillis());
 	}
 
 	/**
@@ -223,12 +228,12 @@ public class RunSettings {
 	/**
 	 * Loads a distribution of strings from a file
 	 * @param file
-	 * @return cdf of stringbuffers
+	 * @return cdf of StringBuilders
 	 * @throws IOException
 	 */
-	private static TreeMap<Double,StringBuffer> loadCSV_DS(String file) throws IOException{
-		TreeMap<Double,StringBuffer> map=new TreeMap<Double,StringBuffer>();
-		TreeMap<Double,StringBuffer> map2=new TreeMap<Double,StringBuffer>();
+	private static TreeMap<Double,StringBuilder> loadCSV_DS(String file) throws IOException{
+		TreeMap<Double,StringBuilder> map=new TreeMap<Double,StringBuilder>();
+		TreeMap<Double,StringBuilder> map2=new TreeMap<Double,StringBuilder>();
 		double probSum=0.;
 		FileReader fstream = new FileReader(csvFolder+file+".csv");
 		BufferedReader in = new BufferedReader(fstream);
@@ -236,7 +241,7 @@ public class RunSettings {
 		String s;
 		while((s=in.readLine())!=null){
 			int commaIndex=s.indexOf(',');
-			StringBuffer value=new StringBuffer(s.substring(0,commaIndex));
+			StringBuilder value=new StringBuilder(s.substring(0,commaIndex));
 			double key=Double.parseDouble(s.substring(commaIndex+1));
 			probSum+=key;
 			map.put(probSum, value);
@@ -253,20 +258,20 @@ public class RunSettings {
 	}
 
 	/**
-	 * Loads a mapping of strings to stringbuffers from a file
+	 * Loads a mapping of strings to StringBuilders from a file
 	 * @param file
 	 * @return
 	 * @throws IOException
 	 */
-	private static TreeMap<String,StringBuffer> loadCSV_SS(String file) throws IOException{
-		TreeMap<String,StringBuffer> map=new TreeMap<String,StringBuffer>();
+	private static TreeMap<String,StringBuilder> loadCSV_SS(String file) throws IOException{
+		TreeMap<String,StringBuilder> map=new TreeMap<String,StringBuilder>();
 		FileReader fstream = new FileReader(csvFolder+file+".csv");
 		BufferedReader in = new BufferedReader(fstream);
 		String s;
 		while((s=(in.readLine()))!=null){
 			int commaIndex=s.indexOf(",");
 			String key=s.substring(0,commaIndex);
-			StringBuffer value=new StringBuffer(s.substring(commaIndex+1,s.length()));
+			StringBuilder value=new StringBuilder(s.substring(commaIndex+1,s.length()));
 			map.put(key, value);
 		}
 
@@ -391,7 +396,7 @@ public class RunSettings {
 	 * Gets the distribution of the frequency of words in an item title
 	 * @return
 	 */
-	public static TreeMap<Double,StringBuffer> getTitleWords() {
+	public static TreeMap<Double,StringBuilder> getTitleWords() {
 		return titleWords;
 	}
 
@@ -400,7 +405,7 @@ public class RunSettings {
 	 * 
 	 * @param titleWords
 	 */
-	private static void setTitleWords(TreeMap<Double,StringBuffer> titleWords) {
+	private static void setTitleWords(TreeMap<Double,StringBuilder> titleWords) {
 		RunSettings.titleWords = titleWords;
 	}
 
@@ -424,7 +429,7 @@ public class RunSettings {
 	 * Gets the distribution of the frequency of words in the item description
 	 * @return
 	 */
-	public static TreeMap<Double,StringBuffer> getItemSpecificsCatWords() {
+	public static TreeMap<Double,StringBuilder> getItemSpecificsCatWords() {
 		return itemSpecificsCatWords;
 	}
 
@@ -432,7 +437,7 @@ public class RunSettings {
 	 * Sets the distribution of the frequency of words in the item description
 	 * @param itemSpecificsCatWords
 	 */
-	private static void setItemSpecificsCatWords(TreeMap<Double,StringBuffer> itemSpecificsCatWords) {
+	private static void setItemSpecificsCatWords(TreeMap<Double,StringBuilder> itemSpecificsCatWords) {
 		RunSettings.itemSpecificsCatWords = itemSpecificsCatWords;
 	}
 
@@ -456,7 +461,7 @@ public class RunSettings {
 	 * Gets the distribution of the frequency of words in the item description
 	 * @return
 	 */
-	public static TreeMap<Double,StringBuffer> getItemSpecificsDescWords() {
+	public static TreeMap<Double,StringBuilder> getItemSpecificsDescWords() {
 		return itemSpecificsDescWords;
 	}
 
@@ -464,7 +469,7 @@ public class RunSettings {
 	 * Sets the distribution of the frequency of words in the item description
 	 * @param itemSpecificsDescWords
 	 */
-	private static void setItemSpecificsDescWords(TreeMap<Double,StringBuffer> itemSpecificsDescWords) {
+	private static void setItemSpecificsDescWords(TreeMap<Double,StringBuilder> itemSpecificsDescWords) {
 		RunSettings.itemSpecificsDescWords = itemSpecificsDescWords;
 	}
 
@@ -472,7 +477,7 @@ public class RunSettings {
 	 * Gets the distribution of male first names
 	 * @return
 	 */
-	public static TreeMap<Double,StringBuffer> getMaleFirstNames() {
+	public static TreeMap<Double,StringBuilder> getMaleFirstNames() {
 		return maleFirstNames;
 	}
 
@@ -480,7 +485,7 @@ public class RunSettings {
 	 * Sets the distribution of male first names
 	 * @param maleFirstNames
 	 */
-	private static void setMaleFirstNames(TreeMap<Double,StringBuffer> maleFirstNames) {
+	private static void setMaleFirstNames(TreeMap<Double,StringBuilder> maleFirstNames) {
 		RunSettings.maleFirstNames = maleFirstNames;
 	}
 
@@ -488,7 +493,7 @@ public class RunSettings {
 	 * Gets the distribution of female first names
 	 * @return
 	 */
-	public static TreeMap<Double,StringBuffer> getFemaleFirstNames() {
+	public static TreeMap<Double,StringBuilder> getFemaleFirstNames() {
 		return femaleFirstNames;
 	}
 
@@ -496,7 +501,7 @@ public class RunSettings {
 	 * Sets the distribution of female first names
 	 * @param femaleFirstNames
 	 */
-	private static void setFemaleFirstNames(TreeMap<Double,StringBuffer> femaleFirstNames) {
+	private static void setFemaleFirstNames(TreeMap<Double,StringBuilder> femaleFirstNames) {
 		RunSettings.femaleFirstNames = femaleFirstNames;
 	}
 
@@ -504,7 +509,7 @@ public class RunSettings {
 	 * Gets the distribution of last names
 	 * @return
 	 */
-	public static TreeMap<Double,StringBuffer> getLastNames() {
+	public static TreeMap<Double,StringBuilder> getLastNames() {
 		return lastNames;
 	}
 
@@ -512,7 +517,7 @@ public class RunSettings {
 	 * Sets the distribution of last names
 	 * @param lastNames
 	 */
-	private static void setLastNames(TreeMap<Double,StringBuffer> lastNames) {
+	private static void setLastNames(TreeMap<Double,StringBuilder> lastNames) {
 		RunSettings.lastNames = lastNames;
 	}
 
@@ -520,7 +525,7 @@ public class RunSettings {
 	 * Gets the distribution of street names
 	 * @return
 	 */
-	public static TreeMap<Double,StringBuffer> getStreetNames() {
+	public static TreeMap<Double,StringBuilder> getStreetNames() {
 		return streetNames;
 	}
 
@@ -528,7 +533,7 @@ public class RunSettings {
 	 * Sets the distribution of street names
 	 * @param streetNames
 	 */
-	private static void setStreetNames(TreeMap<Double,StringBuffer> streetNames) {
+	private static void setStreetNames(TreeMap<Double,StringBuilder> streetNames) {
 		RunSettings.streetNames = streetNames;
 	}
 
@@ -536,7 +541,7 @@ public class RunSettings {
 	 * Gets the distribution of US states
 	 * @return
 	 */
-	public static TreeMap<Double,StringBuffer> getUSStates() {
+	public static TreeMap<Double,StringBuilder> getUSStates() {
 		return USStates;
 	}
 
@@ -544,7 +549,7 @@ public class RunSettings {
 	 * Sets the distribution of US States
 	 * @param uSStates
 	 */
-	private static void setUSStates(TreeMap<Double,StringBuffer> uSStates) {
+	private static void setUSStates(TreeMap<Double,StringBuilder> uSStates) {
 		USStates = uSStates;
 	}
 
@@ -552,7 +557,7 @@ public class RunSettings {
 	 * Gets the distribution of US cities
 	 * @return
 	 */
-	public static TreeMap<Double,StringBuffer> getCities() {
+	public static TreeMap<Double,StringBuilder> getCities() {
 		return cities;
 	}
 
@@ -560,7 +565,7 @@ public class RunSettings {
 	 * Sets the distribution of US cities
 	 * @param cities
 	 */
-	private static void setCities(TreeMap<Double,StringBuffer> cities) {
+	private static void setCities(TreeMap<Double,StringBuilder> cities) {
 		RunSettings.cities = cities;
 	}
 
@@ -568,7 +573,7 @@ public class RunSettings {
 	 * Gets the mapping of the cities to their respective states
 	 * @return
 	 */
-	public static TreeMap<String,StringBuffer> getCityStates() {
+	public static TreeMap<String,StringBuilder> getCityStates() {
 		return cityStates;
 	}
 
@@ -576,7 +581,7 @@ public class RunSettings {
 	 * Sets the mapping of cities to their respective states
 	 * @param cityStates
 	 */
-	private static void setCityStates(TreeMap<String,StringBuffer> cityStates) {
+	private static void setCityStates(TreeMap<String,StringBuilder> cityStates) {
 		RunSettings.cityStates = cityStates;
 	}
 
@@ -584,7 +589,7 @@ public class RunSettings {
 	 * Gets the map of the probability of being what type of auction (bid, buyNow, both)
 	 * @return
 	 */
-	public static TreeMap<Double,StringBuffer> getAuctionType() {
+	public static TreeMap<Double,StringBuilder> getAuctionType() {
 		return auctionType;
 	}
 
@@ -592,7 +597,7 @@ public class RunSettings {
 	 * Sets the distribution of auction types (auction/buyNow/both)
 	 * @param auctionType
 	 */
-	private static void setAuctionType(TreeMap<Double,StringBuffer> auctionType) {
+	private static void setAuctionType(TreeMap<Double,StringBuilder> auctionType) {
 		RunSettings.auctionType = auctionType;
 	}
 
@@ -744,14 +749,13 @@ public class RunSettings {
 		/*
 		 * Read in the configuration values
 		 */
-		try{
-			FileInputStream fin = new FileInputStream(configFileName);
-			DataInputStream din = new DataInputStream(fin);
-			BufferedReader bin = new BufferedReader(new InputStreamReader(din));
+		try (FileInputStream fin = new FileInputStream(configFileName);
+				BufferedReader bin = new BufferedReader(new InputStreamReader(fin));) {
+			
 			String line;
 			String commentLine = "#";
 			TreeMap<String, String> config = new TreeMap<String, String>();
-			StringBuffer valueBuffer = new StringBuffer();
+			StringBuilder valueBuffer = new StringBuilder();
 
 			while(bin.ready()){
 				// Read in a line, if it is a comment ignore, otherwise we'll parse it for a value/key pair
@@ -892,7 +896,7 @@ public class RunSettings {
 			// CSV Folder
 			value = config.get("distributions_folder");
 			if(value != null){
-				csvFolder=new StringBuffer(checkFolderName(value));
+				csvFolder=new StringBuilder(checkFolderName(value));
 				File theDir = new File(csvFolder.toString());
 				if(!theDir.exists()){
 					ableToRun=false;
@@ -907,7 +911,7 @@ public class RunSettings {
 			// Repeated XML Folder
 			value = config.get("repeated_xml");
 			if(value != null){
-				setRepeatedXmlFolder(new StringBuffer(checkFolderName(value)));
+				setRepeatedXmlFolder(new StringBuilder(checkFolderName(value)));
 				File theDir = new File(repeatedXmlFolder.toString());
 				if(!theDir.exists()){
 					System.out.println("Creating Directory: "+repeatedXmlFolder);
@@ -929,7 +933,7 @@ public class RunSettings {
 			int numFullURL=1;
 			while (config.containsKey("full_url"+numFullURL)){
 				value = config.get("full_url"+numFullURL);
-				URLs.add(new CMARTurl(new StringBuffer(value)));
+				URLs.add(new CMARTurl(new StringBuilder(value)));
 				numFullURL++;
 			}
 
@@ -1262,14 +1266,14 @@ public class RunSettings {
 	/**
 	 * @return the repeatedXmlFolder
 	 */
-	public static StringBuffer getRepeatedXmlFolder() {
+	public static StringBuilder getRepeatedXmlFolder() {
 		return repeatedXmlFolder;
 	}
 
 	/**
 	 * @param repeatedXmlFolder the repeatedXmlFolder to set
 	 */
-	public static void setRepeatedXmlFolder(StringBuffer repeatedXmlFolder) {
+	public static void setRepeatedXmlFolder(StringBuilder repeatedXmlFolder) {
 		RunSettings.repeatedXmlFolder = repeatedXmlFolder;
 	}
 

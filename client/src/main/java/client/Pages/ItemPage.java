@@ -30,13 +30,13 @@ import client.clientMain.*;
 public class ItemPage extends Page{
 	ItemCG item=new ItemCG(client);		// the item on the current page
 	boolean reservePriceMet=true;		// if the reserve price for the item has been met
-	HashMap<String, StringBuffer> bidData=new HashMap<String,StringBuffer>();				// data for the POST if a bid is made
-	HashMap<String, StringBuffer> buyNowData=new HashMap<String, StringBuffer>();			// data for the POST if a buyNow is made
-	TreeMap<Double,StringBuffer> nextPageProbabilities=new TreeMap<Double,StringBuffer>();	// page transition probabilities
+	HashMap<String, StringBuilder> bidData=new HashMap<String,StringBuilder>();				// data for the POST if a bid is made
+	HashMap<String, StringBuilder> buyNowData=new HashMap<String, StringBuilder>();			// data for the POST if a buyNow is made
+	TreeMap<Double,StringBuilder> nextPageProbabilities=new TreeMap<Double,StringBuilder>();	// page transition probabilities
 	long itemID;									// id of item on page
 	double origBidPrice=0;							// the current bid price of the item when the page is first loaded
-	StringBuffer sellerName=new StringBuffer();		// name of the seller of the item
-	StringBuffer nextLink=new StringBuffer();		// next action to be made
+	StringBuilder sellerName=new StringBuilder();		// name of the seller of the item
+	StringBuilder nextLink=new StringBuilder();		// next action to be made
 	boolean tabbed=false;							// if the item page was opened in a tab
 	Timer timer;									// timer for the AJAX requests
 	long ajaxRequestPeriod=5000;					// time period of the AJAX requests to update the bid price
@@ -45,12 +45,12 @@ public class ItemPage extends Page{
 		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL,page.cg);
 		//TODO: What is this?
 		if(lastURL.indexOf("/askquestion?")!=-1){
-			this.url=new StringBuffer(client.getCMARTurl().getAppURL()).append("/viewitem").append(lastURL.substring(lastURL.indexOf("?")));
+			this.url=new StringBuilder(client.getCMARTurl().getAppURL()).append("/viewitem").append(lastURL.substring(lastURL.indexOf("?")));
 		}
 		if((url.indexOf("202 The bid is less than the current bid")!=-1||url.indexOf("201 The max bid is less than the bid")!=-1)&&HTML4){
 			int start=html.indexOf("Bidding History</td><td><a href=\"./bidhistory")+"Bidding History</td><td><a href=\"./bidhistory".length();
 			int end=html.indexOf("\">",start);
-			this.url=new StringBuffer(client.getCMARTurl().getAppURL()).append("/viewitem").append(html.subSequence(start, end));
+			this.url=new StringBuilder(client.getCMARTurl().getAppURL()).append("/viewitem").append(html.subSequence(start, end));
 		}
 
 		timer=new Timer();		// starts AJAX requests if the item is still for sale/valid
@@ -114,7 +114,7 @@ public class ItemPage extends Page{
 				start=html.indexOf("<label for=\"seller\">",end)+"<label for=\"seller\">".length();
 				end=html.indexOf("</a>",start);
 				start=html.lastIndexOf("\">",end)+"\">".length();
-				sellerName=new StringBuffer(html.subSequence(start,end));
+				sellerName=new StringBuilder(html.subSequence(start,end));
 				start=html.indexOf("Seller rating",end);
 				start=html.indexOf("<td>",start)+4;
 				end=html.indexOf("</label>",start);
@@ -292,16 +292,16 @@ public class ItemPage extends Page{
 	 * @throws UnsupportedEncodingException 
 	 * @throws ParseException 
 	 */
-	public StringBuffer makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException, ParseException{
+	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException, ParseException{
 
 		client.setLastItemID(itemID);
-		StringBuffer nextPage=new StringBuffer(client.getCMARTurl().getAppURL());
+		StringBuilder nextPage=new StringBuilder(client.getCMARTurl().getAppURL());
 
 		updateProbabilities();
 
 		if(RunSettings.isRepeatedRun()==false){
 
-			nextLink=new StringBuffer(getRandomStringBufferFromDist(nextPageProbabilities));
+			nextLink=new StringBuilder(getRandomStringBuilderFromDist(nextPageProbabilities));
 			String nextLinkS=nextLink.toString();
 			if(verbose)System.out.println("Next Link: "+nextLink);
 
@@ -330,23 +330,23 @@ public class ItemPage extends Page{
 					return makeDecision();
 				}
 
-				bidData.put("quantity", new StringBuffer("1"));
-				bidData.put("bid", new StringBuffer(Double.toString(((double)Math.ceil((item.getCurrentBid()*1.1+0.01)/100))/100)));
+				bidData.put("quantity", new StringBuilder("1"));
+				bidData.put("bid", new StringBuilder(Double.toString(((double)Math.ceil((item.getCurrentBid()*1.1+0.01)/100))/100)));
 				if(rand.nextDouble()>0.5)
-					bidData.put("maxBid", new StringBuffer(Double.toString(((double)Math.ceil((item.getCurrentBid()*1.1+0.01)/100))/100)));
+					bidData.put("maxBid", new StringBuilder(Double.toString(((double)Math.ceil((item.getCurrentBid()*1.1+0.01)/100))/100)));
 				else
-					bidData.put("maxBid", new StringBuffer(Double.toString(((double)Math.ceil((item.getCurrentBid()*1.15+0.01)/100))/100)));
+					bidData.put("maxBid", new StringBuilder(Double.toString(((double)Math.ceil((item.getCurrentBid()*1.15+0.01)/100))/100)));
 				if(HTML4==false){
-					bidData.put("useHTML5",new StringBuffer("1"));
+					bidData.put("useHTML5",new StringBuilder("1"));
 					bidData.put("userID", client.getClientInfo().getHTML5Cache().get("userID"));
 					bidData.put("authToken", client.getClientInfo().getHTML5Cache().get("authToken"));
-					bidData.put("itemID", new StringBuffer(Long.toString(itemID)));
+					bidData.put("itemID", new StringBuilder(Long.toString(itemID)));
 				}
 
 				Element child=xmlDocument.createElement("url");
-				child.setTextContent(new StringBuffer(nextPage).append("/viewitem").toString());
+				child.setTextContent(new StringBuilder(nextPage).append("/viewitem").toString());
 				request.appendChild(child);
-				for (Entry<String,StringBuffer> e:bidData.entrySet()){
+				for (Entry<String,StringBuilder> e:bidData.entrySet()){
 					child=xmlDocument.createElement("data");
 					child.setAttribute("name", e.getKey());
 					child.setTextContent(e.getValue().toString());
@@ -376,9 +376,9 @@ public class ItemPage extends Page{
 			else if(nextLinkS.equals("buyNow")){
 				if(HTML4){
 					Element child=xmlDocument.createElement("url");
-					child.setTextContent(new StringBuffer(nextPage).append("/buyitem").toString());
+					child.setTextContent(new StringBuilder(nextPage).append("/buyitem").toString());
 					request.appendChild(child);
-					for (Entry<String,StringBuffer> e:buyNowData.entrySet()){
+					for (Entry<String,StringBuilder> e:buyNowData.entrySet()){
 						child=xmlDocument.createElement("data");
 						child.setAttribute("name", e.getKey());
 						child.setTextContent(e.getValue().toString());
@@ -390,15 +390,15 @@ public class ItemPage extends Page{
 					nextPage=doSubmit(nextPage.append("/buyitem"),buyNowData);
 				}else{
 					Element child=xmlDocument.createElement("url");
-					child.setTextContent(new StringBuffer(nextPage).append("/buyitem.html?itemID=").append(itemID).toString());
+					child.setTextContent(new StringBuilder(nextPage).append("/buyitem.html?itemID=").append(itemID).toString());
 					request.appendChild(child);
 					child=xmlDocument.createElement("type");
 					child.setTextContent("GET");
 					request.appendChild(child);
-					//				buyNowData.put("useHTML5",new StringBuffer("1"));
+					//				buyNowData.put("useHTML5",new StringBuilder("1"));
 					//				buyNowData.put("userID", client.getClientInfo().getHTML5Cache().get("userID"));
 					//				buyNowData.put("authToken", client.getClientInfo().getHTML5Cache().get("authToken"));
-					//				buyNowData.put("itemID", new StringBuffer(Long.toString(itemID)));
+					//				buyNowData.put("itemID", new StringBuilder(Long.toString(itemID)));
 					//
 					//				nextPage=openHTML5PageWithRedirect(nextPage.append("/buyitem?").append(createURL(buyNowData)));
 					nextPage.append("/buyitem.html?itemID=").append(itemID);
@@ -432,7 +432,7 @@ public class ItemPage extends Page{
 						client.addXMLAction(action);
 
 						timer.cancel();
-						return new StringBuffer(CLOSE_TAB);
+						return new StringBuilder(CLOSE_TAB);
 					}
 					else if (nextLinkS.equals(SEARCH_TEXT)){
 						timer.cancel();
@@ -465,10 +465,10 @@ public class ItemPage extends Page{
 						client.addXMLAction(action);
 
 						timer.cancel();
-						return new StringBuffer(CLOSE_TAB);
+						return new StringBuilder(CLOSE_TAB);
 					}
 					else if(nextLinkS.equals(MY_ACCOUNT_TEXT)){
-						nextPage.append("/myaccount?useHTML5=1&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&ts=").append(new StringBuffer(Long.toString(new Date().getTime())));
+						nextPage.append("/myaccount?useHTML5=1&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&ts=").append(new StringBuilder(Long.toString(new Date().getTime())));
 					}
 					else if(nextLinkS.equals(BROWSE_TEXT)){
 						nextPage.append("/browsecategory?useHTML5=1&categoryID=0&pageNo=0&itemsPP=25&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&catTs=").append(new Date().getTime()).append("&hasItems=").append(getHasItems());
@@ -483,11 +483,11 @@ public class ItemPage extends Page{
 						nextPage.append("/index.html");
 					}
 					else if(nextLinkS.equals(SEARCH_TEXT)){
-						searchData.put("userID", new StringBuffer(client.getClientInfo().getHTML5Cache().get("userID")));
-						searchData.put("authToken", new StringBuffer(client.getClientInfo().getHTML5Cache().get("authToken")));
-						searchData.put("useHTML5", new StringBuffer("1"));
-						searchData.put("pageNo", new StringBuffer("0"));
-						searchData.put("itemsPP",new StringBuffer("25"));
+						searchData.put("userID", new StringBuilder(client.getClientInfo().getHTML5Cache().get("userID")));
+						searchData.put("authToken", new StringBuilder(client.getClientInfo().getHTML5Cache().get("authToken")));
+						searchData.put("useHTML5", new StringBuilder("1"));
+						searchData.put("pageNo", new StringBuilder("0"));
+						searchData.put("itemsPP",new StringBuilder("25"));
 						searchData.put("hasItems", getHasItems());
 						timer.cancel();
 						return search(searchData,action);
@@ -511,7 +511,7 @@ public class ItemPage extends Page{
 			action.appendChild(request);
 			client.addXMLAction(action);
 		}else{
-			HashMap<String, StringBuffer> data=new HashMap<String,StringBuffer>();
+			HashMap<String, StringBuilder> data=new HashMap<String,StringBuilder>();
 			//action=(Element)((Element)client.getReadXmlDocument().getElementsByTagName("action")).getAttributeNode(client.getActionNum());
 			findAction();
 			if(pageType!=Integer.parseInt(action.getElementsByTagName("currentPage").item(0).getTextContent())){
@@ -521,9 +521,9 @@ public class ItemPage extends Page{
 				return null;
 			}
 			String nextLinkS=(action.getElementsByTagName("nextPage").item(0).getTextContent());
-			//StringBuffer nextLink=new StringBuffer(nextLinkS);
+			//StringBuilder nextLink=new StringBuilder(nextLinkS);
 			request=(Element)((Element)action).getElementsByTagName("request").item(0);
-			StringBuffer nextURL=new StringBuffer(request.getElementsByTagName("url").item(0).getTextContent());
+			StringBuilder nextURL=new StringBuilder(request.getElementsByTagName("url").item(0).getTextContent());
 
 			if(!nextPageProbabilities.containsValue(nextLinkS)){
 				client.setExit(true);
@@ -538,20 +538,20 @@ public class ItemPage extends Page{
 			for(int i=0;i<dataList.getLength();i++){
 				Node n=dataList.item(i);
 				String key=n.getAttributes().item(0).getTextContent();
-				StringBuffer value=new StringBuffer(((Element)n).getTextContent());
+				StringBuilder value=new StringBuilder(((Element)n).getTextContent());
 				data.put(key, value);
 			}
 			if(data.containsKey("authToken"))
 				data.put("authToken",client.getClientInfo().getAuthToken());
 			if(data.containsKey("itemID")){
 				if(itemID!=Long.parseLong(data.get("itemID").toString())){
-					data.put("itemID", new StringBuffer(Long.toString(itemID)));
+					data.put("itemID", new StringBuilder(Long.toString(itemID)));
 					client.setChangeDueToRepeatChange(true);
 				}
 			}
 			if(nextLinkS.equals("bid")){
 				if(item.getCurrentBid()>=Double.parseDouble(data.get("bid").toString())){
-					data.put("bid", new StringBuffer(Double.toString(((double)Math.ceil((item.getCurrentBid()*1.1+0.01)/100))/100)));	
+					data.put("bid", new StringBuilder(Double.toString(((double)Math.ceil((item.getCurrentBid()*1.1+0.01)/100))/100)));	
 					client.setChangeDueToRepeatChange(true);
 				}
 				if(item.getCurrentBid()>=Double.parseDouble(data.get("maxBid").toString())){
@@ -580,7 +580,7 @@ public class ItemPage extends Page{
 				nextURL.replace(start, end, client.getClientInfo().getAuthToken().toString());
 			}
 			if(data.containsKey("userID"))
-				data.put("userID",new StringBuffer(Long.toString(client.getClientID())));
+				data.put("userID",new StringBuilder(Long.toString(client.getClientID())));
 			if(nextURL.indexOf("userID=")!=-1){
 				int start=nextURL.indexOf("&userID=")+"&userID=".length();
 				int end=nextURL.indexOf("&",start);
@@ -609,7 +609,7 @@ public class ItemPage extends Page{
 					nextPage=openHTML5PageWithRedirect(nextURL.append("?").append(createURL(data)));
 				}
 			}else if(reqType.equals("CLOSE_TAB")){
-				nextPage=new StringBuffer(CLOSE_TAB);
+				nextPage=new StringBuilder(CLOSE_TAB);
 			}else{
 				nextPage=nextURL;
 			}
@@ -768,7 +768,7 @@ public class ItemPage extends Page{
 		}
 		client.setRestProb(actualProbSum-logOutProb);
 		for (Entry<String, Double> e:allOptions.entrySet()){
-			nextPageProbabilities.put(probSum, new StringBuffer(e.getKey()));
+			nextPageProbabilities.put(probSum, new StringBuilder(e.getKey()));
 			probSum-=(e.getValue()/actualProbSum);
 		}
 		if(verbose)System.out.println(nextPageProbabilities);
@@ -787,13 +787,13 @@ public class ItemPage extends Page{
 
 		public void run(){
 			if(html.indexOf("The bidding on this item has finished.")==-1&&url.indexOf("old=1")==-1){
-				StringBuffer AJAXurl=new StringBuffer(url).append("&itemCurrentBid=1");
+				StringBuilder AJAXurl=new StringBuilder(url).append("&itemCurrentBid=1");
 				if(!HTML4&&url.charAt(0)=='{'){
 					try {
 						ObjectMapper mapper = new ObjectMapper();
 						JsonNode node = mapper.readValue(html.toString(), JsonNode.class);
 						long id=node.get("itemID").getLongValue();
-						AJAXurl=new StringBuffer(client.getCMARTurl().getAppURL()).append("/viewitem?itemID=").append(id).append("&itemCurrentBid=1");
+						AJAXurl=new StringBuilder(client.getCMARTurl().getAppURL()).append("/viewitem?itemID=").append(id).append("&itemCurrentBid=1");
 					} catch (JsonParseException e) {
 						e.printStackTrace();
 					} catch (JsonMappingException e) {
@@ -805,7 +805,7 @@ public class ItemPage extends Page{
 
 				//TODO: replace this - i think it comes up when there is a bad bid made
 				if(AJAXurl.indexOf("</HTML>")==-1){
-					StringBuffer itemPrice=openAJAXRequest(AJAXurl);
+					StringBuilder itemPrice=openAJAXRequest(AJAXurl);
 
 					if(itemPrice!=null&&itemPrice.length()>0){
 						if(itemPrice.charAt(0)=='$'){

@@ -35,8 +35,8 @@ public class Client extends Thread{
 	private Random rand=new Random();		// random seed
 	private ClientInfo clientInfo;			// info of the client
 	private boolean loggedIn=false;			// if the client is logged in
-	private StringBuffer currentURL;		// URL the client is currently viewing
-	private StringBuffer lastURL;			// URL of previous page
+	private StringBuilder currentURL;		// URL the client is currently viewing
+	private StringBuilder lastURL;			// URL of previous page
 	private int currentPageType=0;			// Page type of the current page
 	private int lastPageType=0;				// page number of the previous page opened
 	private  TreeMap<Long,ItemCG> currentBids=new TreeMap<Long,ItemCG>();			// tracks items from the client is currently bidding on
@@ -84,7 +84,7 @@ public class Client extends Thread{
 	private double answersFactor=0.4;
 
 	private String message="";
-	private StringBuffer previousSearchTerm=new StringBuffer();			// the query last searched for
+	private StringBuilder previousSearchTerm=new StringBuilder();			// the query last searched for
 	private long[] last4RT=new long[4];	// the response times of the last four pages opened
 	private int RTthreshold;			// the RT threshold (ms) above which the logout probability increases, and below which the number of tabs to open increases
 	private long clientID;				// id of the client in the database
@@ -130,7 +130,7 @@ public class Client extends Thread{
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	Client(ClientInfo userInfo, StringBuffer startURL,CMARTurl cmarturl,ClientGenerator cg) throws UnknownHostException, IOException{
+	Client(ClientInfo userInfo, StringBuilder startURL,CMARTurl cmarturl,ClientGenerator cg) throws UnknownHostException, IOException{
 		this.cg=cg;
 		this.cmarturl=cmarturl;
 		this.clientInfo=userInfo;
@@ -220,7 +220,7 @@ public class Client extends Thread{
 
 		try {
 			if(RunSettings.isRepeatedRun()){	// loads the xml document for a repeated run
-				readXmlDocument=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(new StringBuffer(RunSettings.getRepeatedXmlFolder()).append("client").append(clientInfo.getClientIndex()).append(".xml").toString()));
+				readXmlDocument=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(new StringBuilder(RunSettings.getRepeatedXmlFolder()).append("client").append(clientInfo.getClientIndex()).append(".xml").toString()));
 			}else{
 				// prepares the xml document for the client's actions
 				xmlDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
@@ -646,7 +646,7 @@ public class Client extends Thread{
 	/**
 	 * @return the previousSearchTerm
 	 */
-	public StringBuffer getPreviousSearchTerm() {
+	public StringBuilder getPreviousSearchTerm() {
 		return previousSearchTerm;
 	}
 
@@ -667,8 +667,8 @@ public class Client extends Thread{
 	/**
 	 * @param previousSearchTerm the previousSearchTerm to set
 	 */
-	public void setPreviousSearchTerm(StringBuffer previousSearchTerm) {
-		this.previousSearchTerm = new StringBuffer(previousSearchTerm);
+	public void setPreviousSearchTerm(StringBuilder previousSearchTerm) {
+		this.previousSearchTerm = new StringBuilder(previousSearchTerm);
 	}
 
 	/**
@@ -1018,7 +1018,7 @@ public class Client extends Thread{
 	private void outputClientXML(){
 		if(RunSettings.isRepeatedRun()==false){
 			try{
-				FileWriter fstreamA = new FileWriter(new StringBuffer(RunSettings.getRepeatedXmlFolder()).append("client").append(clientInfo.getClientIndex()).append(".xml").toString(),true);
+				FileWriter fstreamA = new FileWriter(new StringBuilder(RunSettings.getRepeatedXmlFolder()).append("client").append(clientInfo.getClientIndex()).append(".xml").toString(),true);
 				BufferedWriter out = new BufferedWriter(fstreamA);
 
 				Transformer transformer = TransformerFactory.newInstance().newTransformer();

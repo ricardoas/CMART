@@ -17,10 +17,10 @@ import client.clientMain.*;
 
 
 public class BidHistoryPage extends Page {
-	HashMap<String, StringBuffer> data=new HashMap<String, StringBuffer>();
+	HashMap<String, StringBuilder> data=new HashMap<String, StringBuilder>();
 	String userName;
 	int sellerRating=0;
-	TreeMap<Double,StringBuffer> nextPageProbabilities=new TreeMap<Double,StringBuffer>();
+	TreeMap<Double,StringBuilder> nextPageProbabilities=new TreeMap<Double,StringBuilder>();
 
 
 	public BidHistoryPage(Page page){
@@ -35,8 +35,8 @@ public class BidHistoryPage extends Page {
 	 * @return the URL or HTML of the next link, depending on whether
 	 * 		   the previous entry contained a form or not
 	 */
-	public StringBuffer makeDecision(){
-		StringBuffer nextLink=getRandomStringBufferFromDist(nextPageProbabilities);
+	public StringBuilder makeDecision(){
+		StringBuilder nextLink=getRandomStringBuilderFromDist(nextPageProbabilities);
 
 		// Think Time
 		try{Thread.sleep(getThinkTime());}

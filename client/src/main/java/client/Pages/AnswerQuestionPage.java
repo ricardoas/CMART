@@ -18,8 +18,8 @@ import client.clientMain.*;
  */
 
 public class AnswerQuestionPage extends Page{
-	HashMap<String, StringBuffer> data = new HashMap<String, StringBuffer>();	// data to be sent to the login page
-	StringBuffer answer=new StringBuffer();
+	HashMap<String, StringBuilder> data = new HashMap<String, StringBuilder>();	// data to be sent to the login page
+	StringBuilder answer=new StringBuilder();
 	double pageRTFactor=1.;
 
 	public AnswerQuestionPage(Page page){
@@ -36,9 +36,9 @@ public class AnswerQuestionPage extends Page{
 	 * @throws UnsupportedEncodingException 
 	 * @throws URISyntaxException 
 	 */
-	public StringBuffer makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException, URISyntaxException{
-		StringBuffer nextLink=new StringBuffer(client.getCMARTurl().getAppURL());	// link to send the login data to
-		StringBuffer nextURL=new StringBuffer();	// the response page returned after the login attempt
+	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException, URISyntaxException{
+		StringBuilder nextLink=new StringBuilder(client.getCMARTurl().getAppURL());	// link to send the login data to
+		StringBuilder nextURL=new StringBuilder();	// the response page returned after the login attempt
 
 		if(RunSettings.isRepeatedRun()==false){
 			if(HTML4){
@@ -62,7 +62,7 @@ public class AnswerQuestionPage extends Page{
 				numWordsInQuestion=(int)Math.round(rand.nextGaussian()*5+10);
 			}while(numWordsInQuestion<=0);
 			for (int i=0;i<numWordsInQuestion;i++){
-				answer.append(getRandomStringBufferFromDist(RunSettings.getTitleWords()));
+				answer.append(getRandomStringBuilderFromDist(RunSettings.getTitleWords()));
 				if (i!=numWordsInQuestion-1)
 					answer.append(" ");
 				else
@@ -86,11 +86,11 @@ public class AnswerQuestionPage extends Page{
 					//TODO: get questionID from JSON
 				}
 				
-				data.put("useHTML5", new StringBuffer("1"));
+				data.put("useHTML5", new StringBuilder("1"));
 				data.put("userID", client.getClientInfo().getHTML5Cache().get("userID"));
 				data.put("authToken", client.getClientInfo().getHTML5Cache().get("authToken"));
-				data.put("itemID",new StringBuffer().append(client.getLastItemID()));
-				data.put("questionID", new StringBuffer().append(questionID));
+				data.put("itemID",new StringBuilder().append(client.getLastItemID()));
+				data.put("questionID", new StringBuilder().append(questionID));
 			}
 			
 		}else{
@@ -100,16 +100,16 @@ public class AnswerQuestionPage extends Page{
 				client.setExitDueToRepeatChange(true);
 				return null;
 			}
-			//nextLink=new StringBuffer(action.getElementsByTagName("nextPage").item(0).getTextContent());
+			//nextLink=new StringBuilder(action.getElementsByTagName("nextPage").item(0).getTextContent());
 			request=(Element)action.getElementsByTagName("request").item(0);
-			nextLink=new StringBuffer(request.getElementsByTagName("url").item(0).getTextContent());
+			nextLink=new StringBuilder(request.getElementsByTagName("url").item(0).getTextContent());
 			nextURL=nextLink;
 			data.clear();
 			NodeList dataList=request.getElementsByTagName("data");
 			for(int i=0;i<dataList.getLength();i++){
 				Node n=dataList.item(i);
 				String key=n.getAttributes().item(0).getTextContent();
-				StringBuffer value=new StringBuffer(((Element)n).getTextContent());
+				StringBuilder value=new StringBuilder(((Element)n).getTextContent());
 				data.put(key, value);
 			}
 			if(data.containsKey("authToken"))
@@ -122,7 +122,7 @@ public class AnswerQuestionPage extends Page{
 				nextURL.replace(start, end, client.getClientInfo().getAuthToken().toString());
 			}
 			if(data.containsKey("userID"))
-				data.put("userID",new StringBuffer(Long.toString(client.getClientID())));
+				data.put("userID",new StringBuilder(Long.toString(client.getClientID())));
 			if(nextURL.indexOf("userID=")!=-1){
 				int start=nextURL.indexOf("&userID=")+"&userID=".length();
 				int end=nextURL.indexOf("&",start);
@@ -139,7 +139,7 @@ public class AnswerQuestionPage extends Page{
 				itemID=(url.substring(start,nextURL.indexOf("&",start)));
 			if(data.containsKey("itemID")){
 				if(!itemID.equals(data.get("itemID").toString())){
-					data.put("itemID", new StringBuffer(itemID));
+					data.put("itemID", new StringBuilder(itemID));
 					client.setChangeDueToRepeatChange(true);
 				}
 			}
@@ -167,9 +167,9 @@ public class AnswerQuestionPage extends Page{
 
 		if(RunSettings.isRepeatedRun()==false){
 			Element child=xmlDocument.createElement("url");
-			child.setTextContent(new StringBuffer(nextLink).append("/answerquestion").toString());
+			child.setTextContent(new StringBuilder(nextLink).append("/answerquestion").toString());
 			request.appendChild(child);
-			for (Entry<String,StringBuffer> e:data.entrySet()){
+			for (Entry<String,StringBuilder> e:data.entrySet()){
 				child=xmlDocument.createElement("data");
 				child.setAttribute("name", e.getKey());
 				child.setTextContent(e.getValue().toString());

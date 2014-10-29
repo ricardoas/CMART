@@ -24,7 +24,7 @@ import client.clientMain.CMARTurl;
  */
 
 public class SiteData {
-	StringBuffer ret=new StringBuffer();	// the html returned from the statistics page
+	StringBuilder ret=new StringBuilder();	// the html returned from the statistics page
 	String outputFileLocation;				// the location to output the csv file
 	boolean toOutput=false;					// if the csv file is to be output
 	CMARTurl cmarturl;
@@ -61,7 +61,7 @@ public class SiteData {
 			try{
 				Socket socket=new Socket(cmarturl.getIpURL().toString(),cmarturl.getAppPort());
 				PrintStream out=new PrintStream(socket.getOutputStream());
-				out.println(new StringBuffer("GET ").append(cmarturl.getAppURL()).append("/statistics HTTP/1.0\r\n"));
+				out.println(new StringBuilder("GET ").append(cmarturl.getAppURL()).append("/statistics HTTP/1.0\r\n"));
 				out.flush();
 
 				BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));

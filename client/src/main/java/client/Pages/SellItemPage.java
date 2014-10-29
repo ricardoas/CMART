@@ -24,7 +24,7 @@ import client.clientMain.*;
  */
 
 public class SellItemPage extends Page {
-	TreeMap<Double,StringBuffer> nextPageProbabilities=new TreeMap<Double,StringBuffer>();
+	TreeMap<Double,StringBuilder> nextPageProbabilities=new TreeMap<Double,StringBuilder>();
 	double startPrice=0;
 	double reservePrice=0;
 	double buyNowPrice=0;
@@ -32,7 +32,7 @@ public class SellItemPage extends Page {
 	double pageRTFactor=1.;
 	int bonusCharacters=0;
 
-	HashMap<String,StringBuffer>data=new HashMap<String,StringBuffer>();
+	HashMap<String,StringBuilder>data=new HashMap<String,StringBuilder>();
 
 	public SellItemPage(Page page){
 		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL,page.cg);
@@ -47,8 +47,8 @@ public class SellItemPage extends Page {
 	 * @throws IOException 
 	 * @throws UnsupportedEncodingException 
 	 */
-	public StringBuffer makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
-		StringBuffer nextPage=new StringBuffer(client.getCMARTurl().getAppURL());
+	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
+		StringBuilder nextPage=new StringBuilder(client.getCMARTurl().getAppURL());
 
 
 		if(HTML4){
@@ -59,7 +59,7 @@ public class SellItemPage extends Page {
 		updateProbabilities();
 
 		if(RunSettings.isRepeatedRun()==false){
-			StringBuffer nextLink=getRandomStringBufferFromDist(nextPageProbabilities);
+			StringBuilder nextLink=getRandomStringBuilderFromDist(nextPageProbabilities);
 
 			action=xmlDocument.createElement("action");
 			action.setAttribute("id",client.getActionNum());
@@ -73,17 +73,17 @@ public class SellItemPage extends Page {
 
 			if (nextLink.toString().equals(SEARCH_TEXT)){
 				if(!HTML4){
-					searchData.put("userID", new StringBuffer(client.getClientInfo().getHTML5Cache().get("userID")));
-					searchData.put("authToken", new StringBuffer(client.getClientInfo().getHTML5Cache().get("authToken")));
-					searchData.put("useHTML5", new StringBuffer("1"));
-					searchData.put("pageNo", new StringBuffer("0"));
-					searchData.put("itemsPP",new StringBuffer("25"));
+					searchData.put("userID", new StringBuilder(client.getClientInfo().getHTML5Cache().get("userID")));
+					searchData.put("authToken", new StringBuilder(client.getClientInfo().getHTML5Cache().get("authToken")));
+					searchData.put("useHTML5", new StringBuilder("1"));
+					searchData.put("pageNo", new StringBuilder("0"));
+					searchData.put("itemsPP",new StringBuilder("25"));
 					searchData.put("hasItems", getHasItems());
 				}
 				return search(searchData,action);
 			}
 			else if (nextLink.toString().equals("Sell")){
-				StringBuffer auctionType=getRandomStringBufferFromDist(RunSettings.getAuctionType());
+				StringBuilder auctionType=getRandomStringBuilderFromDist(RunSettings.getAuctionType());
 				String auctionTypeS=auctionType.toString();
 
 				SimpleDateFormat obDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -101,9 +101,9 @@ public class SellItemPage extends Page {
 				int numWords=getRandomIntFromDist(RunSettings.getTitleTotalWords());;
 
 
-				StringBuffer itemTitle=new StringBuffer();
+				StringBuilder itemTitle=new StringBuilder();
 				for (int i=0;i<numWords;i++){
-					itemTitle.append(getRandomStringBufferFromDist(RunSettings.getTitleWords()));
+					itemTitle.append(getRandomStringBuilderFromDist(RunSettings.getTitleWords()));
 					if (i!=numWords-1)
 						itemTitle.append(" ");
 				}
@@ -130,9 +130,9 @@ public class SellItemPage extends Page {
 				}
 
 				int numWordsDescription=getRandomIntFromDist(RunSettings.getItemSpecificsDesc());
-				StringBuffer itemSpecifics=new StringBuffer();
+				StringBuilder itemSpecifics=new StringBuilder();
 				for (int i=0;i<numWordsDescription;i++){
-					itemSpecifics.append(getRandomStringBufferFromDist(RunSettings.getItemSpecificsDescWords()));
+					itemSpecifics.append(getRandomStringBuilderFromDist(RunSettings.getItemSpecificsDescWords()));
 					if (i!=numWords-1)
 						itemSpecifics.append(" ");
 				}
@@ -140,14 +140,14 @@ public class SellItemPage extends Page {
 
 				data.put("name", typingError(itemTitle));
 				data.put("description", typingError(itemSpecifics));
-				data.put("startPrice", new StringBuffer(Double.toString(((double)Math.round(100*startPrice))/100)));
-				data.put("reservePrice", new StringBuffer(Double.toString(((double)Math.round(100*reservePrice))/100)));
-				data.put("buyNowPrice", new StringBuffer(Double.toString(((double)Math.round(100*buyNowPrice))/100)));
-				data.put("categoryID", new StringBuffer(Integer.toString(getRandomIntFromDist(RunSettings.getCategories()))));
-				data.put("quantity", new StringBuffer("1"));
-				data.put("endDate",new StringBuffer(obDateFormat.format(sellTime.getTime())));
+				data.put("startPrice", new StringBuilder(Double.toString(((double)Math.round(100*startPrice))/100)));
+				data.put("reservePrice", new StringBuilder(Double.toString(((double)Math.round(100*reservePrice))/100)));
+				data.put("buyNowPrice", new StringBuilder(Double.toString(((double)Math.round(100*buyNowPrice))/100)));
+				data.put("categoryID", new StringBuilder(Integer.toString(getRandomIntFromDist(RunSettings.getCategories()))));
+				data.put("quantity", new StringBuilder("1"));
+				data.put("endDate",new StringBuilder(obDateFormat.format(sellTime.getTime())));
 				if(!HTML4){
-					data.put("useHTML5",new StringBuffer("1"));
+					data.put("useHTML5",new StringBuilder("1"));
 					data.put("userID", client.getClientInfo().getHTML5Cache().get("userID"));
 					data.put("authToken", client.getClientInfo().getHTML5Cache().get("authToken"));
 				}
@@ -167,7 +167,7 @@ public class SellItemPage extends Page {
 						nextPage.append("/browsecategory?useHTML5=1&categoryID=0&pageNo=0&itemsPP=25&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&catTs=").append(new Date().getTime()).append("&hasItems=").append(getHasItems());
 					}
 					else if(nextLinkS.equals(MY_ACCOUNT_TEXT)){
-						nextPage.append("/myaccount?useHTML5=1&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&ts=").append(new StringBuffer(Long.toString(new Date().getTime())));
+						nextPage.append("/myaccount?useHTML5=1&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&ts=").append(new StringBuilder(Long.toString(new Date().getTime())));
 					}
 					else if(nextLinkS.equals(HOME_TEXT)){
 						nextPage.append("/index.html");
@@ -176,11 +176,11 @@ public class SellItemPage extends Page {
 						nextPage.append("/logout.html");
 					}
 					else if(nextLinkS.equals(SEARCH_TEXT)){
-						searchData.put("userID", new StringBuffer(client.getClientInfo().getHTML5Cache().get("userID")));
-						searchData.put("authToken", new StringBuffer(client.getClientInfo().getHTML5Cache().get("authToken")));
-						searchData.put("useHTML5", new StringBuffer("1"));
-						searchData.put("pageNo", new StringBuffer("0"));
-						searchData.put("itemsPP",new StringBuffer("25"));
+						searchData.put("userID", new StringBuilder(client.getClientInfo().getHTML5Cache().get("userID")));
+						searchData.put("authToken", new StringBuilder(client.getClientInfo().getHTML5Cache().get("authToken")));
+						searchData.put("useHTML5", new StringBuilder("1"));
+						searchData.put("pageNo", new StringBuilder("0"));
+						searchData.put("itemsPP",new StringBuilder("25"));
 						searchData.put("hasItems", getHasItems());
 						return search(searchData,action);
 					}
@@ -196,9 +196,9 @@ public class SellItemPage extends Page {
 
 			if(nextLink.toString().equals("Sell")){
 				Element child=xmlDocument.createElement("url");
-				child.setTextContent(new StringBuffer(client.getCMARTurl().getAppURL()).append("/sellitem").toString());
+				child.setTextContent(new StringBuilder(client.getCMARTurl().getAppURL()).append("/sellitem").toString());
 				request.appendChild(child);
-				for (Entry<String,StringBuffer> e:data.entrySet()){
+				for (Entry<String,StringBuilder> e:data.entrySet()){
 					child=xmlDocument.createElement("data");
 					child.setAttribute("name", e.getKey());
 					child.setTextContent(e.getValue().toString());
@@ -208,13 +208,13 @@ public class SellItemPage extends Page {
 					child=xmlDocument.createElement("type");
 					child.setTextContent("POST");
 					request.appendChild(child);
-					nextPage=doSubmit(new StringBuffer(client.getCMARTurl().getAppURL()).append("/sellitem?"),data);
+					nextPage=doSubmit(new StringBuilder(client.getCMARTurl().getAppURL()).append("/sellitem?"),data);
 				}
 				else{
 					child=xmlDocument.createElement("type");
 					child.setTextContent("GET");
 					request.appendChild(child);
-					nextPage=openHTML5PageWithRedirect(new StringBuffer(client.getCMARTurl().getAppURL()).append("/sellitem?").append(createURL(data)));
+					nextPage=openHTML5PageWithRedirect(new StringBuilder(client.getCMARTurl().getAppURL()).append("/sellitem?").append(createURL(data)));
 				}
 			}else{
 				Element child=xmlDocument.createElement("type");
@@ -239,19 +239,19 @@ public class SellItemPage extends Page {
 			}
 			String nextLink=action.getElementsByTagName("nextPage").item(0).getTextContent();
 			request=(Element)((Element)action).getElementsByTagName("request").item(0);
-			StringBuffer nextURL=new StringBuffer(request.getElementsByTagName("url").item(0).getTextContent());
+			StringBuilder nextURL=new StringBuilder(request.getElementsByTagName("url").item(0).getTextContent());
 				data.clear();
 				NodeList dataList=request.getElementsByTagName("data");
 				for(int i=0;i<dataList.getLength();i++){
 					Node n=dataList.item(i);
 					String key=n.getAttributes().item(0).getTextContent();
-					StringBuffer value=new StringBuffer(((Element)n).getTextContent());
+					StringBuilder value=new StringBuilder(((Element)n).getTextContent());
 					data.put(key, value);
 				}
 				if(data.containsKey("authToken"))
 					data.put("authToken",client.getClientInfo().getAuthToken());
 				if(data.containsKey("userID"))
-					data.put("userID",new StringBuffer(Long.toString(client.getClientID())));
+					data.put("userID",new StringBuilder(Long.toString(client.getClientID())));
 				if(nextURL.indexOf("userID=")!=-1){
 					int start=nextURL.indexOf("&userID=")+"&userID=".length();
 					int end=nextURL.indexOf("&",start);
@@ -354,7 +354,7 @@ public class SellItemPage extends Page {
 		client.setRestProb(actualProbSum-logOutProb);
 
 		for (Entry<String, Double> e:allOptions.entrySet()){
-			nextPageProbabilities.put(probSum, new StringBuffer(e.getKey()));
+			nextPageProbabilities.put(probSum, new StringBuilder(e.getKey()));
 			probSum-=(e.getValue()/actualProbSum);
 		}
 

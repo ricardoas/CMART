@@ -21,9 +21,11 @@ import com.jmatio.types.MLDouble;
  */
 
 public class ClientSessionStats {
-	ArrayList<ClientSessionData> csd=new ArrayList<ClientSessionData>();
 
+	private ArrayList<ClientSessionData> csd;
+	
 	public ClientSessionStats(){
+		csd = new ArrayList<ClientSessionData>();
 	}
 
 	public void addClientSession(int numPagesOpened,long totalRT,int requestErrors,long startTime,boolean exitDueToError,double annoyedLeaveProb){
@@ -31,37 +33,37 @@ public class ClientSessionStats {
 	}
 
 
-	public void output(String outputFile) throws IOException{
-		FileWriter fstreamA = new FileWriter(outputFile.concat("ClientSessionStats.csv"),true);
-		BufferedWriter out = new BufferedWriter(fstreamA);
+	public void output(String outputFile) {
 
-		out = new BufferedWriter(fstreamA);
-		for(ClientSessionData c:csd){
-			out.write(c.numPagesOpened+","+c.RTavg+","+c.requestErrors+","+c.sessionLength+","+c.exitDueToError+","+c.annoyedLeaveProb);
-			out.newLine();
-		}
-		out.close();
-		fstreamA.close();
-
-		if(RunSettings.isOutputMatlab()){
-			double[][] src=new double[csd.size()][6];
-			int i=0;
-			for (ClientSessionData c:csd){
-				src[i][0]=c.numPagesOpened;
-				src[i][1]=c.RTavg;
-				src[i][2]=c.requestErrors;
-				src[i][3]=c.sessionLength;
-				if(c.exitDueToError)
-					src[i][4]=1;
-				else
-					src[i][4]=0;
-				src[i][5]=c.annoyedLeaveProb;
-				i++;
+		try(BufferedWriter out = new BufferedWriter(new FileWriter(outputFile.concat("ClientSessionStats.csv"),true))){
+			for(ClientSessionData c:csd){
+				out.write(c.toString());
+				out.newLine();
 			}
-			MLDouble mlDouble=new MLDouble("ClientSessionStats",src);
-			ArrayList<MLArray> list=new ArrayList<MLArray>();
-			list.add(mlDouble);
-			MatFileWriter mfw=new MatFileWriter(outputFile.concat("ClientSessionStats.mat"),list);
+
+			if(RunSettings.isOutputMatlab()){
+				double[][] src=new double[csd.size()][6];
+				int i=0;
+				for (ClientSessionData c:csd){
+					src[i][0]=c.numPagesOpened;
+					src[i][1]=c.RTavg;
+					src[i][2]=c.requestErrors;
+					src[i][3]=c.sessionLength;
+					if(c.exitDueToError)
+						src[i][4]=1;
+					else
+						src[i][4]=0;
+					src[i][5]=c.annoyedLeaveProb;
+					i++;
+				}
+				MLDouble mlDouble=new MLDouble("ClientSessionStats",src);
+				ArrayList<MLArray> list=new ArrayList<MLArray>();
+				list.add(mlDouble);
+				new MatFileWriter(outputFile.concat("ClientSessionStats.mat"),list);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.err.println("Could not output page response time data");
 		}
 
 	}
@@ -82,6 +84,13 @@ public class ClientSessionStats {
 			this.sessionLength=new Date().getTime()-startTime;
 			this.exitDueToError=exitDueToError;
 			this.annoyedLeaveProb=annoyedLeaveProb;
+		}
+		
+		@Override
+		public String toString() {
+			return numPagesOpened + "," + RTavg + "," + requestErrors + ","
+					+ sessionLength + "," + exitDueToError + ","
+					+ annoyedLeaveProb;
 		}
 	}
 }

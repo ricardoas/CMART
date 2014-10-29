@@ -1,23 +1,23 @@
 package client.Tools;
 
 public class PageTimePair {
-	StringBuffer page;
+	StringBuilder page;
 	Stopwatch sw;
 
 	public PageTimePair(){
 
 	}
-	public PageTimePair(StringBuffer page,Stopwatch sw){
+	public PageTimePair(StringBuilder page,Stopwatch sw){
 		this.page=page;
 		this.sw=sw;
 	}
 
-	public void setPage(StringBuffer page){
-		this.page=new StringBuffer(page);
+	public void setPage(StringBuilder page){
+		this.page=new StringBuilder(page);
 	}
 
-	public StringBuffer getPage(){
-		return new StringBuffer(page);
+	public StringBuilder getPage(){
+		return new StringBuilder(page);
 	}
 
 	public void newSw(){

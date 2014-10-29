@@ -30,7 +30,7 @@ public class UpdateUserPage extends Page{
 	boolean updateEmail=false;
 	boolean updatePassword=false;
 	boolean updateAddress=false;
-	HashMap<String, StringBuffer>data=new HashMap<String,StringBuffer>();
+	HashMap<String, StringBuilder>data=new HashMap<String,StringBuilder>();
 	double pageRTFactor=1.1;
 	int bonusCharacters=0;
 
@@ -50,8 +50,8 @@ public class UpdateUserPage extends Page{
 	 * @throws JsonParseException 
 	 * @throws InterruptedException 
 	 */
-	public StringBuffer makeDecision() throws JsonParseException, JsonMappingException, IOException, InterruptedException{
-		StringBuffer nextPage=new StringBuffer();		// the HTTP response after submitting a request
+	public StringBuilder makeDecision() throws JsonParseException, JsonMappingException, IOException, InterruptedException{
+		StringBuilder nextPage=new StringBuilder();		// the HTTP response after submitting a request
 		if(RunSettings.isRepeatedRun()==false){
 			action=xmlDocument.createElement("action");
 			action.setAttribute("id",client.getActionNum());
@@ -86,21 +86,21 @@ public class UpdateUserPage extends Page{
 				data=getFormData(formAction);
 			}
 			else{
-				data.put("password1", new StringBuffer(node.get("user").get("password").getTextValue()));
-				data.put("password2", new StringBuffer(node.get("user").get("password").getTextValue()));
-				data.put("email1",new StringBuffer(node.get("user").get("email").getTextValue()));
-				data.put("email2",new StringBuffer(node.get("user").get("email").getTextValue()));
-				data.put("firstname",new StringBuffer(node.get("user").get("firstname").getTextValue()));
-				data.put("lastname",new StringBuffer(node.get("user").get("lastname").getTextValue()));
-				data.put("street",new StringBuffer(node.get("address").get("street").getTextValue()));
-				data.put("town",new StringBuffer(node.get("address").get("town").getTextValue()));
-				data.put("zip",new StringBuffer(node.get("address").get("zip").getTextValue()));
-				data.put("state",new StringBuffer(node.get("address").get("state").getTextValue()));
+				data.put("password1", new StringBuilder(node.get("user").get("password").getTextValue()));
+				data.put("password2", new StringBuilder(node.get("user").get("password").getTextValue()));
+				data.put("email1",new StringBuilder(node.get("user").get("email").getTextValue()));
+				data.put("email2",new StringBuilder(node.get("user").get("email").getTextValue()));
+				data.put("firstname",new StringBuilder(node.get("user").get("firstname").getTextValue()));
+				data.put("lastname",new StringBuilder(node.get("user").get("lastname").getTextValue()));
+				data.put("street",new StringBuilder(node.get("address").get("street").getTextValue()));
+				data.put("town",new StringBuilder(node.get("address").get("town").getTextValue()));
+				data.put("zip",new StringBuilder(node.get("address").get("zip").getTextValue()));
+				data.put("state",new StringBuilder(node.get("address").get("state").getTextValue()));
 
-				data.put("userID",new StringBuffer(client.getClientInfo().getHTML5Cache().get("userID")));
-				data.put("authToken",new StringBuffer(client.getClientInfo().getHTML5Cache().get("authToken")));
+				data.put("userID",new StringBuilder(client.getClientInfo().getHTML5Cache().get("userID")));
+				data.put("authToken",new StringBuilder(client.getClientInfo().getHTML5Cache().get("authToken")));
 
-				data.put("useHTML5",new StringBuffer("1"));
+				data.put("useHTML5",new StringBuilder("1"));
 
 			}
 			ArrayList<String>changes=new ArrayList<String>();		// determines and fields which need to be updated
@@ -125,7 +125,7 @@ public class UpdateUserPage extends Page{
 			// if the password is to be updated
 			if (updatePassword==true){
 				long numCharNewPassword=8+rand.nextInt(5);
-				StringBuffer newPassword=new StringBuffer();
+				StringBuilder newPassword=new StringBuilder();
 				for (int i=0;i<numCharNewPassword;i++){
 					newPassword.append(((char)(rand.nextInt(78)+48)));
 				}
@@ -183,7 +183,7 @@ public class UpdateUserPage extends Page{
 			}
 
 			Element child;
-			for (Entry<String,StringBuffer> e:data.entrySet()){
+			for (Entry<String,StringBuilder> e:data.entrySet()){
 				child=xmlDocument.createElement("data");
 				child.setAttribute("name", e.getKey());
 				child.setTextContent(e.getValue().toString());
@@ -192,21 +192,21 @@ public class UpdateUserPage extends Page{
 			// submits the HTTP request
 			if(HTML4){
 				child=xmlDocument.createElement("url");
-				child.setTextContent(new StringBuffer(client.getCMARTurl().getAppURL()).append("/").append(formAction).toString());
+				child.setTextContent(new StringBuilder(client.getCMARTurl().getAppURL()).append("/").append(formAction).toString());
 				request.appendChild(child);
 				child=xmlDocument.createElement("type");
 				child.setTextContent("POST");
 				request.appendChild(child);
-				nextPage=doSubmit(new StringBuffer(client.getCMARTurl().getAppURL()).append("/").append(formAction),data);
+				nextPage=doSubmit(new StringBuilder(client.getCMARTurl().getAppURL()).append("/").append(formAction),data);
 			}
 			else{
 				child=xmlDocument.createElement("url");
-				child.setTextContent(new StringBuffer(client.getCMARTurl().getAppURL()).append("/updateuserdetails").toString());
+				child.setTextContent(new StringBuilder(client.getCMARTurl().getAppURL()).append("/updateuserdetails").toString());
 				request.appendChild(child);
 				child=xmlDocument.createElement("type");
 				child.setTextContent("GET");
 				request.appendChild(child);
-				nextPage=openHTML5PageWithRedirect(new StringBuffer(client.getCMARTurl().getAppURL()).append("/updateuserdetails?").append(createURL(data)));
+				nextPage=openHTML5PageWithRedirect(new StringBuilder(client.getCMARTurl().getAppURL()).append("/updateuserdetails?").append(createURL(data)));
 			}
 
 			child=xmlDocument.createElement("thinkTime");
@@ -221,15 +221,15 @@ public class UpdateUserPage extends Page{
 				client.setExitDueToRepeatChange(true);
 				return null;
 			}
-			//	StringBuffer nextLink=new StringBuffer(action.getElementsByTagName("nextPage").item(0).getTextContent());
+			//	StringBuilder nextLink=new StringBuilder(action.getElementsByTagName("nextPage").item(0).getTextContent());
 			request=(Element)((Element)action).getElementsByTagName("request").item(0);
-			StringBuffer nextURL=new StringBuffer(request.getElementsByTagName("url").item(0).getTextContent());
+			StringBuilder nextURL=new StringBuilder(request.getElementsByTagName("url").item(0).getTextContent());
 			data.clear();
 			NodeList dataList=request.getElementsByTagName("data");
 			for(int i=0;i<dataList.getLength();i++){
 				Node n=dataList.item(i);
 				String key=n.getAttributes().item(0).getTextContent();
-				StringBuffer value=new StringBuffer(((Element)n).getTextContent());
+				StringBuilder value=new StringBuilder(((Element)n).getTextContent());
 				data.put(key, value);
 			}
 			if(data.containsKey("authToken"))
@@ -242,7 +242,7 @@ public class UpdateUserPage extends Page{
 				nextURL.replace(start, end, client.getClientInfo().getAuthToken().toString());
 			}
 			if(data.containsKey("userID"))
-				data.put("userID",new StringBuffer(Long.toString(client.getClientID())));
+				data.put("userID",new StringBuilder(Long.toString(client.getClientID())));
 			if(nextURL.indexOf("userID=")!=-1){
 				int start=nextURL.indexOf("&userID=")+"&userID=".length();
 				int end=nextURL.indexOf("&",start);

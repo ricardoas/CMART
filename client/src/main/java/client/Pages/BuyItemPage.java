@@ -22,8 +22,8 @@ import client.clientMain.RunSettings;
  */
 
 public class BuyItemPage extends Page{
-	HashMap<String, StringBuffer> data=new HashMap<String,StringBuffer>();					// data to be submitted when buying an item
-	TreeMap<Double,StringBuffer> nextPageProbabilities=new TreeMap<Double,StringBuffer>();	// map of probabilities of what the next page will be
+	HashMap<String, StringBuilder> data=new HashMap<String,StringBuilder>();					// data to be submitted when buying an item
+	TreeMap<Double,StringBuilder> nextPageProbabilities=new TreeMap<Double,StringBuilder>();	// map of probabilities of what the next page will be
 
 	ArrayList<String> changedData=new ArrayList<String>();
 	double pageRTFactor=1.2;
@@ -45,9 +45,9 @@ public class BuyItemPage extends Page{
 	 * @throws UnsupportedEncodingException 
 	 * @throws URISyntaxException 
 	 */
-	public StringBuffer makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException, URISyntaxException{
-		StringBuffer nextPage=new StringBuffer(client.getCMARTurl().getAppURL());
-		String nextLinkS=getRandomStringBufferFromDist(nextPageProbabilities).toString();		// randomly chooses the next link
+	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException, URISyntaxException{
+		StringBuilder nextPage=new StringBuilder(client.getCMARTurl().getAppURL());
+		String nextLinkS=getRandomStringBuilderFromDist(nextPageProbabilities).toString();		// randomly chooses the next link
 
 		if(RunSettings.isRepeatedRun()==false){
 			// prepares the xml document for output
@@ -70,54 +70,54 @@ public class BuyItemPage extends Page{
 				 * Checks if form data matches the client's profile
 				 */
 				if(data.containsKey("town")==false){
-					data.put("town",new StringBuffer(client.getClientInfo().getCity()));
+					data.put("town",new StringBuilder(client.getClientInfo().getCity()));
 					changedData.add("town");
 				}
 				else if (data.get("town").equals(client.getClientInfo().getCity())==false){
-					data.put("town",new StringBuffer(client.getClientInfo().getCity()));
+					data.put("town",new StringBuilder(client.getClientInfo().getCity()));
 					changedData.add("town");
 				}
 
 				if(data.containsKey("street")==false){
-					data.put("street",new StringBuffer(client.getClientInfo().getAddress()));
+					data.put("street",new StringBuilder(client.getClientInfo().getAddress()));
 					changedData.add("street");
 				}
 				else if (data.get("street").equals(client.getClientInfo().getAddress())==false){
-					data.put("street",new StringBuffer(client.getClientInfo().getAddress()));
+					data.put("street",new StringBuilder(client.getClientInfo().getAddress()));
 					changedData.add("street");
 				}
 
 				if(data.containsKey("zip")==false){
-					data.put("zip",new StringBuffer(client.getClientInfo().getZipcode()));
+					data.put("zip",new StringBuilder(client.getClientInfo().getZipcode()));
 					changedData.add("zip");
 				}
 				else if (data.get("zip").equals(client.getClientInfo().getZipcode())==false){
-					data.put("zip",new StringBuffer(client.getClientInfo().getZipcode()));
+					data.put("zip",new StringBuilder(client.getClientInfo().getZipcode()));
 					changedData.add("zip");
 				}
 
 				if(data.containsKey("state")==false){
-					data.put("state",new StringBuffer(client.getClientInfo().getUSStateCode()));
+					data.put("state",new StringBuilder(client.getClientInfo().getUSStateCode()));
 					changedData.add("state");
 				}
 				else if (data.get("state").equals(client.getClientInfo().getUSStateCode())==false){
-					data.put("state",new StringBuffer(client.getClientInfo().getUSStateCode()));
+					data.put("state",new StringBuilder(client.getClientInfo().getUSStateCode()));
 					changedData.add("state");
 				}
 
 
 
-				data.put("nameOnCard", new StringBuffer(client.getClientInfo().getFirstName()).append(" ").append(client.getClientInfo().getLastName()));
-				data.put("creditCardNo",new StringBuffer(client.getClientInfo().getCreditCardNum()));
-				data.put("cvv",new StringBuffer(client.getClientInfo().getCvv2()));
-				data.put("expirationDate",new StringBuffer(client.getClientInfo().getCreditCardExpiry()));
+				data.put("nameOnCard", new StringBuilder(client.getClientInfo().getFirstName()).append(" ").append(client.getClientInfo().getLastName()));
+				data.put("creditCardNo",new StringBuilder(client.getClientInfo().getCreditCardNum()));
+				data.put("cvv",new StringBuilder(client.getClientInfo().getCvv2()));
+				data.put("expirationDate",new StringBuilder(client.getClientInfo().getCreditCardExpiry()));
 				if(!HTML4){
-					data.put("useHTML5",new StringBuffer("1"));
-					data.put("quantity",new StringBuffer("1"));
+					data.put("useHTML5",new StringBuilder("1"));
+					data.put("quantity",new StringBuilder("1"));
 					data.put("userID",client.getClientInfo().getHTML5Cache().get("userID"));
 					data.put("authToken",client.getClientInfo().getHTML5Cache().get("authToken"));
-					//	data.put("itemID", new StringBuffer(Long.toString(client.getLastItemID())));
-					data.put("itemID", new StringBuffer(url.substring(url.indexOf("itemID=")+"itemID=".length())));
+					//	data.put("itemID", new StringBuilder(Long.toString(client.getLastItemID())));
+					data.put("itemID", new StringBuilder(url.substring(url.indexOf("itemID=")+"itemID=".length())));
 				}
 
 				// if the client information data in the form is different than saved then the user should next update their information
@@ -132,9 +132,9 @@ public class BuyItemPage extends Page{
 				}
 
 				Element child=xmlDocument.createElement("url");
-				child.setTextContent(new StringBuffer(client.getCMARTurl().getAppURL()).append("/buyitem").toString());
+				child.setTextContent(new StringBuilder(client.getCMARTurl().getAppURL()).append("/buyitem").toString());
 				request.appendChild(child);
-				for (Entry<String,StringBuffer> e:data.entrySet()){
+				for (Entry<String,StringBuilder> e:data.entrySet()){
 					child=xmlDocument.createElement("data");
 					child.setAttribute("name", e.getKey());
 					child.setTextContent(e.getValue().toString());
@@ -144,13 +144,13 @@ public class BuyItemPage extends Page{
 					child=xmlDocument.createElement("type");
 					child.setTextContent("POST");
 					request.appendChild(child);
-					nextPage=doSubmit(new StringBuffer(client.getCMARTurl().getAppURL()).append("/buyitem"),data);
+					nextPage=doSubmit(new StringBuilder(client.getCMARTurl().getAppURL()).append("/buyitem"),data);
 				}
 				else{
 					child=xmlDocument.createElement("type");
 					child.setTextContent("GET");
 					request.appendChild(child);
-					nextPage=openHTML5PageWithRedirect(new StringBuffer(client.getCMARTurl().getAppURL()).append("/buyitem?").append(createURL(data)));
+					nextPage=openHTML5PageWithRedirect(new StringBuilder(client.getCMARTurl().getAppURL()).append("/buyitem?").append(createURL(data)));
 				}
 			}
 			else{
@@ -167,7 +167,7 @@ public class BuyItemPage extends Page{
 				}
 				else{
 					if(nextLinkS.equals(MY_ACCOUNT_TEXT)){
-						nextPage.append("/myaccount?useHTML5=1&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&ts=").append(new StringBuffer(Long.toString(new Date().getTime())));
+						nextPage.append("/myaccount?useHTML5=1&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&ts=").append(new StringBuilder(Long.toString(new Date().getTime())));
 					}
 					else if(nextLinkS.equals(BROWSE_TEXT)){
 						nextPage.append("/browsecategory?useHTML5=1&categoryID=0&pageNo=0&itemsPP=25&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&catTs=").append(new Date().getTime()).append("&hasItems=").append(getHasItems());
@@ -182,11 +182,11 @@ public class BuyItemPage extends Page{
 						nextPage.append("/index.html");
 					}
 					else if(nextLinkS.equals(SEARCH_TEXT)){
-						searchData.put("userID", new StringBuffer(client.getClientInfo().getHTML5Cache().get("userID")));
-						searchData.put("authToken", new StringBuffer(client.getClientInfo().getHTML5Cache().get("authToken")));
-						searchData.put("useHTML5", new StringBuffer("1"));
-						searchData.put("pageNo", new StringBuffer("0"));
-						searchData.put("itemsPP",new StringBuffer("25"));
+						searchData.put("userID", new StringBuilder(client.getClientInfo().getHTML5Cache().get("userID")));
+						searchData.put("authToken", new StringBuilder(client.getClientInfo().getHTML5Cache().get("authToken")));
+						searchData.put("useHTML5", new StringBuilder("1"));
+						searchData.put("pageNo", new StringBuilder("0"));
+						searchData.put("itemsPP",new StringBuilder("25"));
 						searchData.put("hasItems", getHasItems());
 						return search(searchData,action);
 					}
@@ -215,13 +215,13 @@ public class BuyItemPage extends Page{
 			}
 			String nextLink=action.getElementsByTagName("nextPage").item(0).getTextContent();
 			request=(Element)((Element)action).getElementsByTagName("request").item(0);
-			StringBuffer nextURL=new StringBuffer(request.getElementsByTagName("url").item(0).getTextContent());
+			StringBuilder nextURL=new StringBuilder(request.getElementsByTagName("url").item(0).getTextContent());
 			data.clear();
 			NodeList dataList=request.getElementsByTagName("data");
 			for(int i=0;i<dataList.getLength();i++){
 				Node n=dataList.item(i);
 				String key=n.getAttributes().item(0).getTextContent();
-				StringBuffer value=new StringBuffer(((Element)n).getTextContent());
+				StringBuilder value=new StringBuilder(((Element)n).getTextContent());
 				data.put(key, value);
 			}
 			// makes sure the data in the URL and POST matches the client's info
@@ -235,7 +235,7 @@ public class BuyItemPage extends Page{
 				nextURL.replace(start, end, client.getClientInfo().getAuthToken().toString());
 			}
 			if(data.containsKey("userID"))
-				data.put("userID",new StringBuffer(Long.toString(client.getClientID())));
+				data.put("userID",new StringBuilder(Long.toString(client.getClientID())));
 			if(nextURL.indexOf("userID=")!=-1){
 				int start=nextURL.indexOf("&userID=")+"&userID=".length();
 				int end=nextURL.indexOf("&",start);
@@ -252,7 +252,7 @@ public class BuyItemPage extends Page{
 				itemID=(url.substring(start,nextURL.indexOf("&",start)));
 			if(data.containsKey("itemID")){
 				if(!itemID.equals(data.get("itemID").toString())){
-					data.put("itemID", new StringBuffer(itemID));
+					data.put("itemID", new StringBuilder(itemID));
 					client.setChangeDueToRepeatChange(true);
 				}
 			}
@@ -372,7 +372,7 @@ public class BuyItemPage extends Page{
 		client.setRestProb(actualProbSum-logoutProb);
 
 		for (Entry<String, Double> e:allOptions.entrySet()){
-			nextPageProbabilities.put(probSum, new StringBuffer(e.getKey()));
+			nextPageProbabilities.put(probSum, new StringBuilder(e.getKey()));
 			probSum-=(e.getValue()/actualProbSum);
 		}
 

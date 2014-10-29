@@ -10,7 +10,7 @@ import java.net.SocketException;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 
-import java.lang.StringBuffer;
+import java.lang.StringBuilder;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -66,7 +66,7 @@ public class ClientGenerator extends Thread{
 	private class RunClient extends Thread{
 		ClientInfo clientToRun=null;		// information of the client to run
 		CMARTurl cmarturl=RunSettings.getCMARTurl();
-		StringBuffer startPage=new StringBuffer(cmarturl.getAppURL()).append("/index"); 	// page the client starts on (home page)
+		StringBuilder startPage=new StringBuilder(cmarturl.getAppURL()).append("/index"); 	// page the client starts on (home page)
 		ClientGenerator cg;					// the client generator that created the client
 
 		public void run(){
@@ -153,14 +153,14 @@ public class ClientGenerator extends Thread{
 			}
 			cI.appendChild(cache);
 			cache=xmlDocument.createElement("jscssCache");
-			for(Entry<String,StringBuffer> e: clientToRun.getJscssCache().entrySet()){
+			for(Entry<String,StringBuilder> e: clientToRun.getJscssCache().entrySet()){
 				child=xmlDocument.createElement("jscss");
 				child.setTextContent(e.getKey());
 				cache.appendChild(child);
 			}
 			cI.appendChild(cache);
 			cache=xmlDocument.createElement("HTML5Cache");
-			for(Entry<String,StringBuffer> e: clientToRun.getHTML5Cache().entrySet()){
+			for(Entry<String,StringBuilder> e: clientToRun.getHTML5Cache().entrySet()){
 				child=xmlDocument.createElement("html5");
 				child.setTextContent(e.getKey());
 				cache.appendChild(child);
@@ -182,9 +182,9 @@ public class ClientGenerator extends Thread{
 			// Sets the client info according to that in the readXmlDocument
 			clientToRun.setClientIndex(Long.parseLong(((Element)client).getElementsByTagName("clientIndex").item(0).getTextContent()));
 			Element clientInfo=(Element)((Element)client).getElementsByTagName("clientInfo").item(0);
-			clientToRun.setUserID(new StringBuffer(clientInfo.getElementsByTagName("userID").item(0).getTextContent()));
-			clientToRun.setUsername(new StringBuffer(clientInfo.getElementsByTagName("username").item(0).getTextContent()));
-			clientToRun.setPassword(new StringBuffer(clientInfo.getElementsByTagName("password").item(0).getTextContent()));
+			clientToRun.setUserID(new StringBuilder(clientInfo.getElementsByTagName("userID").item(0).getTextContent()));
+			clientToRun.setUsername(new StringBuilder(clientInfo.getElementsByTagName("username").item(0).getTextContent()));
+			clientToRun.setPassword(new StringBuilder(clientInfo.getElementsByTagName("password").item(0).getTextContent()));
 			clientToRun.setRegistered(Boolean.parseBoolean(clientInfo.getElementsByTagName("registered").item(0).getTextContent()));
 		}
 
@@ -342,7 +342,7 @@ public class ClientGenerator extends Thread{
 
 			// if the run is repeated and read from XML files
 			if(RunSettings.isRepeatedRun()){
-				readXmlDocument=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(new StringBuffer(RunSettings.getRepeatedXmlFolder()).append("clientGenerator.xml").toString()));
+				readXmlDocument=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(new StringBuilder(RunSettings.getRepeatedXmlFolder()).append("clientGenerator.xml").toString()));
 			}
 
 		} catch (ParserConfigurationException e) {
@@ -391,13 +391,13 @@ public class ClientGenerator extends Thread{
 	 * @throws UnsupportedEncodingException
 	 */
 	public void populateUsers() throws UnsupportedEncodingException{
-		StringBuffer ret;		// returned page from C-MART
+		StringBuilder ret;		// returned page from C-MART
 		int pageLimit=600;		// highest page number which can be loaded (25 users per page)
 		int comma;				// index of commas (returned page is in CSV form)
 		ArrayList<String> userInfo=new ArrayList<String>();		// user info of clients loaded
 		ArrayList<Long>chosenPages=new ArrayList<Long>();		// tracks loaded user pages so there are no duplicates
 		long pageNo;			// page number of page to be opened
-		HashMap<String,StringBuffer> data=new HashMap<String,StringBuffer>();		// data for the URL of the page to open
+		HashMap<String,StringBuilder> data=new HashMap<String,StringBuilder>();		// data for the URL of the page to open
 
 		for(int k=0;k<31;k++){
 			do{
@@ -405,17 +405,17 @@ public class ClientGenerator extends Thread{
 			}while(chosenPages.contains(pageNo)==true);
 			chosenPages.add(pageNo);
 			data.clear();
-			data.put("pageNo",new StringBuffer(Long.toString(pageNo)));
-			data.put("itemsPP",new StringBuffer(Integer.toString(25)));
+			data.put("pageNo",new StringBuilder(Long.toString(pageNo)));
+			data.put("itemsPP",new StringBuilder(Integer.toString(25)));
 			if(k==0){
-				data.put("totalUsers",new StringBuffer(Integer.toString(1)));
+				data.put("totalUsers",new StringBuilder(Integer.toString(1)));
 			}
 
 			try{Thread.sleep(100);}
 			catch(InterruptedException e){
 			}
 
-			ret=openPopulateUser(new StringBuffer(cmarturl.getAppURL()).append("/getusers?").append(createURL(data)));
+			ret=openPopulateUser(new StringBuilder(cmarturl.getAppURL()).append("/getusers?").append(createURL(data)));
 			if(k==0){
 				try{
 				pageLimit=(int)(Math.floor((Long.parseLong(ret.toString())-1)/25)-1);
@@ -455,10 +455,10 @@ public class ClientGenerator extends Thread{
 	 * @return The query in UTF-8 form
 	 * @throws UnsupportedEncodingException
 	 */
-	private String createURL(HashMap<String, StringBuffer> data) throws UnsupportedEncodingException{
-		StringBuffer content = new StringBuffer();
+	private String createURL(HashMap<String, StringBuilder> data) throws UnsupportedEncodingException{
+		StringBuilder content = new StringBuilder();
 		int i=0;
-		for(Entry<String,StringBuffer> e:data.entrySet()){
+		for(Entry<String,StringBuilder> e:data.entrySet()){
 			if(i!=0)
 				content.append("&");
 			content.append(e.getKey()).append("=").append(URLEncoder.encode(e.getValue().toString(), "UTF-8"));
@@ -471,8 +471,8 @@ public class ClientGenerator extends Thread{
 	 * @param urlString - url to open
 	 * @return CSV of the returned users
 	 */
-	private StringBuffer openPopulateUser(StringBuffer urlString){
-		StringBuffer ret = new StringBuffer();		// the source code of the page
+	private StringBuilder openPopulateUser(StringBuilder urlString){
+		StringBuilder ret = new StringBuilder();		// the source code of the page
 		String inputLine;	// each line being read in
 		String urlStringS=urlString.toString().replace(" ", "%20");
 		if(RunSettings.isVerbose())System.out.println("PopulateUser "+urlString);
@@ -483,7 +483,7 @@ public class ClientGenerator extends Thread{
 
 
 			PrintStream out=new PrintStream(socket.getOutputStream());		// opens an output PrintStream to send the HTTP request
-			out.println(new StringBuffer("GET ").append(urlStringS).append(" HTTP/1.0\r\n"));
+			out.println(new StringBuilder("GET ").append(urlStringS).append(" HTTP/1.0\r\n"));
 			out.flush();
 
 			BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));	// opens a BufferedReader to read the response of the HTTP request
@@ -799,11 +799,7 @@ public class ClientGenerator extends Thread{
 		}
 		new OutputPageRT(pageRTHistograms,RunSettings.getOutputSiteDataFile());
 		stats.exitStats();		// exit stats - no more collecting response times
-		try {
-			csd.output(RunSettings.getOutputSiteDataFile().toString());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		csd.output(RunSettings.getOutputSiteDataFile().toString());
 
 		outputClientGeneratorXML();
 
@@ -997,7 +993,7 @@ public class ClientGenerator extends Thread{
 	private void outputClientGeneratorXML(){
 		if(RunSettings.isRepeatedRun()==false){
 			try{
-				FileWriter fstreamA = new FileWriter(new StringBuffer(RunSettings.getRepeatedXmlFolder()).append("clientGenerator.xml").toString(),true);
+				FileWriter fstreamA = new FileWriter(new StringBuilder(RunSettings.getRepeatedXmlFolder()).append("clientGenerator.xml").toString(),true);
 				BufferedWriter out = new BufferedWriter(fstreamA);
 
 				Transformer transformer = TransformerFactory.newInstance().newTransformer();

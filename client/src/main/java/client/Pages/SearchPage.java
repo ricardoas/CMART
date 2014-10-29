@@ -32,7 +32,7 @@ import client.clientMain.*;
  */
 
 public class SearchPage extends Page{
-	TreeMap<Double,StringBuffer> nextPageProbabilities=new TreeMap<Double,StringBuffer>();
+	TreeMap<Double,StringBuilder> nextPageProbabilities=new TreeMap<Double,StringBuilder>();
 	TreeMap<Long,ItemCG>listedItems=new TreeMap<Long,ItemCG>();
 	ExecutorService threadExecutor = Executors.newCachedThreadPool();
 	ArrayList<Long>openTabs=new ArrayList<Long>();
@@ -70,9 +70,9 @@ public class SearchPage extends Page{
 	 * @throws InterruptedException 
 	 * @throws URISyntaxException 
 	 */
-	public StringBuffer makeDecision() throws JsonParseException, JsonMappingException, IOException, ParseException, InterruptedException, URISyntaxException{
-		StringBuffer nextURL=new StringBuffer(client.getCMARTurl().getAppURL());
-		StringBuffer nextLink=new StringBuffer(getRandomStringBufferFromDist(nextPageProbabilities));
+	public StringBuilder makeDecision() throws JsonParseException, JsonMappingException, IOException, ParseException, InterruptedException, URISyntaxException{
+		StringBuilder nextURL=new StringBuilder(client.getCMARTurl().getAppURL());
+		StringBuilder nextLink=new StringBuilder(getRandomStringBuilderFromDist(nextPageProbabilities));
 		String nextLinkS=nextLink.toString();
 		boolean oneTab=false;
 		if(verbose)System.out.println("Next Link: "+nextLink);
@@ -89,11 +89,11 @@ public class SearchPage extends Page{
 
 			if (nextLinkS.equals(SEARCH_TEXT)){
 				if(!HTML4){
-					searchData.put("userID", new StringBuffer(client.getClientInfo().getHTML5Cache().get("userID")));
-					searchData.put("authToken", new StringBuffer(client.getClientInfo().getHTML5Cache().get("authToken")));
-					searchData.put("useHTML5", new StringBuffer("1"));
-					searchData.put("pageNo", new StringBuffer("0"));
-					searchData.put("itemsPP",new StringBuffer("25"));
+					searchData.put("userID", new StringBuilder(client.getClientInfo().getHTML5Cache().get("userID")));
+					searchData.put("authToken", new StringBuilder(client.getClientInfo().getHTML5Cache().get("authToken")));
+					searchData.put("useHTML5", new StringBuilder("1"));
+					searchData.put("pageNo", new StringBuilder("0"));
+					searchData.put("itemsPP",new StringBuilder("25"));
 					searchData.put("hasItems", getHasItems());
 				}
 				threadExecutor.shutdownNow();
@@ -156,7 +156,7 @@ public class SearchPage extends Page{
 					}
 					else{
 						if(listedItems.get(itemID).getTs()>=(new Date().getTime()-300000))				
-							nextURL=new StringBuffer("ITEM").append(itemID);
+							nextURL=new StringBuilder("ITEM").append(itemID);
 						else
 							nextURL.append("/viewitem?useHTML5=1&itemID=").append(itemID);	
 					}
@@ -207,7 +207,7 @@ public class SearchPage extends Page{
 						}while(repeat);
 					}
 					do{
-						nextLink=new StringBuffer(getRandomStringBufferFromDist(nextPageProbabilities));
+						nextLink=new StringBuilder(getRandomStringBuilderFromDist(nextPageProbabilities));
 						nextLinkS=nextLink.toString();
 						if(verbose)System.out.println("Next Link After Tabs: "+nextLinkS);
 					}while(nextLinkS.equals("tabs"));
@@ -221,18 +221,18 @@ public class SearchPage extends Page{
 					}
 					if (nextLinkS.equals(SEARCH_TEXT)){
 						if(!HTML4){
-							searchData.put("userID", new StringBuffer(client.getClientInfo().getHTML5Cache().get("userID")));
-							searchData.put("authToken", new StringBuffer(client.getClientInfo().getHTML5Cache().get("authToken")));
-							searchData.put("useHTML5", new StringBuffer("1"));
-							searchData.put("pageNo", new StringBuffer("0"));
-							searchData.put("itemsPP",new StringBuffer("25"));
+							searchData.put("userID", new StringBuilder(client.getClientInfo().getHTML5Cache().get("userID")));
+							searchData.put("authToken", new StringBuilder(client.getClientInfo().getHTML5Cache().get("authToken")));
+							searchData.put("useHTML5", new StringBuilder("1"));
+							searchData.put("pageNo", new StringBuilder("0"));
+							searchData.put("itemsPP",new StringBuilder("25"));
 							searchData.put("hasItems", getHasItems());
 						}
 						threadExecutor.shutdownNow();
 						return search(searchData,action);
 					}
 					else{
-						nextURL=new StringBuffer(client.getCMARTurl().getAppURL());
+						nextURL=new StringBuilder(client.getCMARTurl().getAppURL());
 						if(HTML4){
 							if (nextLinkS.equals(SEARCH_TEXT)){
 								threadExecutor.shutdownNow();
@@ -266,7 +266,7 @@ public class SearchPage extends Page{
 								nextURL.append("/browsecategory?useHTML5=1&categoryID=0&pageNo=0&itemsPP=25&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&catTs=").append(new Date().getTime()).append("&hasItems=").append(getHasItems());
 							}
 							else if(nextLinkS.equals(MY_ACCOUNT_TEXT)){
-								nextURL.append("/myaccount?useHTML5=1&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&ts=").append(new StringBuffer(Long.toString(new Date().getTime())));
+								nextURL.append("/myaccount?useHTML5=1&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&ts=").append(new StringBuilder(Long.toString(new Date().getTime())));
 							}
 							else if(nextLinkS.equals(LOGOUT_TEXT)){
 								nextURL.append("/logout.html");
@@ -281,11 +281,11 @@ public class SearchPage extends Page{
 								nextURL.append("/search?useHTML5=1").append("&pageNo=").append(pageNum-1).append("&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&itemsPP=25").append("&searchTerm=").append(client.getPreviousSearchTerm()).append("&hasItems=").append(getHasItems());
 							}
 							else if(nextLinkS.equals(SEARCH_TEXT)||nextLinkS.equals("Clarify Search")){
-								searchData.put("userID", new StringBuffer(client.getClientInfo().getHTML5Cache().get("userID")));
-								searchData.put("authToken", new StringBuffer(client.getClientInfo().getHTML5Cache().get("authToken")));
-								searchData.put("useHTML5", new StringBuffer("1"));
-								searchData.put("pageNo", new StringBuffer("0"));
-								searchData.put("itemsPP",new StringBuffer("25"));
+								searchData.put("userID", new StringBuilder(client.getClientInfo().getHTML5Cache().get("userID")));
+								searchData.put("authToken", new StringBuilder(client.getClientInfo().getHTML5Cache().get("authToken")));
+								searchData.put("useHTML5", new StringBuilder("1"));
+								searchData.put("pageNo", new StringBuilder("0"));
+								searchData.put("itemsPP",new StringBuilder("25"));
 								searchData.put("hasItems", getHasItems());
 								threadExecutor.shutdownNow();
 								if(nextLinkS.equals(SEARCH_TEXT))
@@ -355,7 +355,7 @@ public class SearchPage extends Page{
 					nextURL.append("/browsecategory?useHTML5=1&categoryID=0&pageNo=0&itemsPP=25&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&catTs=").append(new Date().getTime()).append("&hasItems=").append(getHasItems());
 				}
 				else if(nextLinkS.equals(MY_ACCOUNT_TEXT)){
-					nextURL.append("/myaccount?useHTML5=1&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&ts=").append(new StringBuffer(Long.toString(new Date().getTime())));
+					nextURL.append("/myaccount?useHTML5=1&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&ts=").append(new StringBuilder(Long.toString(new Date().getTime())));
 				}
 				else if(nextLinkS.equals(LOGOUT_TEXT)){
 					nextURL.append("/logout.html");
@@ -372,11 +372,11 @@ public class SearchPage extends Page{
 					nextURL.append("/search?useHTML5=1").append("&pageNo=").append(pageNum-1).append("&itemsPP=25").append("&searchTerm=").append(client.getPreviousSearchTerm()).append("&hasItems=").append(getHasItems());
 				}
 				else if(nextLinkS.equals(SEARCH_TEXT)||nextLinkS.equals("Clarify Search")){
-					searchData.put("userID", new StringBuffer(client.getClientInfo().getHTML5Cache().get("userID")));
-					searchData.put("authToken", new StringBuffer(client.getClientInfo().getHTML5Cache().get("authToken")));
-					searchData.put("useHTML5", new StringBuffer("1"));
-					searchData.put("pageNo", new StringBuffer("0"));
-					searchData.put("itemsPP",new StringBuffer("25"));
+					searchData.put("userID", new StringBuilder(client.getClientInfo().getHTML5Cache().get("userID")));
+					searchData.put("authToken", new StringBuilder(client.getClientInfo().getHTML5Cache().get("authToken")));
+					searchData.put("useHTML5", new StringBuilder("1"));
+					searchData.put("pageNo", new StringBuilder("0"));
+					searchData.put("itemsPP",new StringBuilder("25"));
 					searchData.put("hasItems", getHasItems());
 					threadExecutor.shutdownNow();
 					if(nextLinkS.equals(SEARCH_TEXT))
@@ -411,7 +411,7 @@ public class SearchPage extends Page{
 
 			}
 		}else{
-			HashMap<String, StringBuffer> data=new HashMap<String,StringBuffer>();
+			HashMap<String, StringBuilder> data=new HashMap<String,StringBuilder>();
 			findAction();
 			if(pageType!=Integer.parseInt(action.getElementsByTagName("currentPage").item(0).getTextContent())){
 				client.setExit(true);
@@ -421,12 +421,12 @@ public class SearchPage extends Page{
 			}
 			nextLinkS=action.getElementsByTagName("nextPage").item(0).getTextContent();
 			request=(Element)(action).getElementsByTagName("request").item(0);
-			nextURL=new StringBuffer(request.getElementsByTagName("url").item(0).getTextContent());
+			nextURL=new StringBuilder(request.getElementsByTagName("url").item(0).getTextContent());
 			NodeList dataList=request.getElementsByTagName("data");
 			for(int i=0;i<dataList.getLength();i++){
 				Node n=dataList.item(i);
 				String key=n.getAttributes().item(0).getTextContent();
-				StringBuffer value=new StringBuffer(((Element)n).getTextContent());
+				StringBuilder value=new StringBuilder(((Element)n).getTextContent());
 				data.put(key, value);
 			}
 			if(data.containsKey("authToken"))
@@ -439,7 +439,7 @@ public class SearchPage extends Page{
 				nextURL.replace(start, end, client.getClientInfo().getAuthToken().toString());
 			}
 			if(data.containsKey("userID"))
-				data.put("userID",new StringBuffer(Long.toString(client.getClientID())));
+				data.put("userID",new StringBuilder(Long.toString(client.getClientID())));
 			if(nextURL.indexOf("userID=")!=-1){
 				int start=nextURL.indexOf("&userID=")+"&userID=".length();
 				int end=nextURL.indexOf("&",start);
@@ -494,7 +494,7 @@ public class SearchPage extends Page{
 						}while(repeat);
 					}
 					Element req=(Element)requests.item(requests.getLength()-1);
-					nextURL=new StringBuffer(req.getElementsByTagName("url").item(0).getTextContent());
+					nextURL=new StringBuilder(req.getElementsByTagName("url").item(0).getTextContent());
 					if(nextURL.indexOf("authToken=")!=-1){
 						int start=nextURL.indexOf("&authToken=")+"&authToken=".length();
 						int end=nextURL.indexOf("&",start);
@@ -508,12 +508,12 @@ public class SearchPage extends Page{
 						for(int i=0;i<dataList.getLength();i++){
 							Node n=dataList.item(i);
 							String key=n.getAttributes().item(0).getTextContent();
-							StringBuffer value=new StringBuffer(((Element)n).getTextContent());
+							StringBuilder value=new StringBuilder(((Element)n).getTextContent());
 							data.put(key, value);
 						}
 						if(data.containsKey("authToken"))
 							data.put("authToken",client.getClientInfo().getAuthToken());
-						return search(new StringBuffer("1"),data,action);
+						return search(new StringBuilder("1"),data,action);
 					}
 					int newThinkTime=Integer.parseInt(action.getElementsByTagName("thinkTime").item(1).getTextContent());
 					if (RunSettings.isOutputThinkTimes()==true)
@@ -857,7 +857,7 @@ public class SearchPage extends Page{
 		client.setRestProb(actualProbSum-logOutProb);
 
 		for (Entry<String, Double> e:allOptions.entrySet()){
-			nextPageProbabilities.put(probSum, new StringBuffer(e.getKey()));
+			nextPageProbabilities.put(probSum, new StringBuilder(e.getKey()));
 			probSum-=(e.getValue()/actualProbSum);
 		}
 		if(verbose)System.out.println(nextPageProbabilities);
@@ -906,17 +906,17 @@ public class SearchPage extends Page{
 					child.setTextContent("GET"); 
 					request.appendChild(child);
 					child=xmlDocument.createElement("url");
-					child.setTextContent(new StringBuffer(client.getCMARTurl().getAppURL()).append(nextTab).toString());
+					child.setTextContent(new StringBuilder(client.getCMARTurl().getAppURL()).append(nextTab).toString());
 					request.appendChild(child);
-					OpenNewTab ont=new OpenNewTab(new StringBuffer(client.getCMARTurl().getAppURL()).append(nextTab));
+					OpenNewTab ont=new OpenNewTab(new StringBuilder(client.getCMARTurl().getAppURL()).append(nextTab));
 					threadExecutor.execute(ont);
 				}
 				else{
-					StringBuffer nextURL=new StringBuffer();
+					StringBuilder nextURL=new StringBuilder();
 					if(listedItems.get(itemID).getTs()>=(new Date().getTime()-300000))				
-						nextURL=new StringBuffer("ITEM").append(itemID);
+						nextURL=new StringBuilder("ITEM").append(itemID);
 					else
-						nextURL=new StringBuffer(client.getCMARTurl().getAppURL()).append("/viewitem?useHTML5=1&itemID=").append(itemID);	
+						nextURL=new StringBuilder(client.getCMARTurl().getAppURL()).append("/viewitem?useHTML5=1&itemID=").append(itemID);	
 					child=xmlDocument.createElement("type");
 					child.setTextContent("GET");
 					request.appendChild(child);
@@ -947,7 +947,7 @@ public class SearchPage extends Page{
 					catch(InterruptedException e){
 						e.printStackTrace();
 					}
-					StringBuffer nextURL=new StringBuffer(req.getElementsByTagName("url").item(0).getTextContent());
+					StringBuilder nextURL=new StringBuilder(req.getElementsByTagName("url").item(0).getTextContent());
 					if(nextURL.indexOf("authToken=")!=-1){
 						int start=nextURL.indexOf("&authToken=")+"&authToken=".length();
 						int end=nextURL.indexOf("&",start);
@@ -989,13 +989,13 @@ public class SearchPage extends Page{
 	 *
 	 */
 	private class OpenNewTab extends Thread{
-		StringBuffer itemUrl;		// url of the page to be opened
+		StringBuilder itemUrl;		// url of the page to be opened
 		/**
 		 * Openes a tab with a specified url
 		 * @param url - url of the page to be opened
 		 */
-		private OpenNewTab(StringBuffer itemUrl){
-			this.itemUrl=new StringBuffer(itemUrl);
+		private OpenNewTab(StringBuilder itemUrl){
+			this.itemUrl=new StringBuilder(itemUrl);
 		}
 		public void run(){
 			if(verbose)System.out.println("Tab to open: "+itemUrl);

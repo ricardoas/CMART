@@ -53,7 +53,7 @@ public class CollectStats extends TimerTask{
 	}
 
 	private void outputStats() throws IOException{
-		StringBuffer histStats=new StringBuffer("Hist ");
+		StringBuilder histStats=new StringBuilder("Hist ");
 		System.out.println("Number of Active Clients: "+cg.getActiveClients().size());
 		System.out.println("Number of Requests: "+oldHistogram.getNumEntries()+", 90% RT: "+oldHistogram.getPercentile(0.9));
 
@@ -72,8 +72,8 @@ public class CollectStats extends TimerTask{
 
 		this.outputRT(oldHistogram.getNumEntries(),RTDist);
 
-		StringBuffer regularSiteStats=openURL((new StringBuffer(cg.getCMARTurl().getFullURL()).append("/statistics")).toString());
-		ArrayList<StringBuffer>metrics=new ArrayList<StringBuffer>();
+		StringBuilder regularSiteStats=openURL((new StringBuilder(cg.getCMARTurl().getFullURL()).append("/statistics")).toString());
+		ArrayList<StringBuilder>metrics=new ArrayList<StringBuilder>();
 		int start=0;
 		int end=0;
 		for (int i=0;i<=18;i++){
@@ -99,7 +99,7 @@ public class CollectStats extends TimerTask{
 			case 18: start=regularSiteStats.indexOf("Total,<br>param,")+"Total,<br>param,".length(); break;
 			}
 			end=regularSiteStats.indexOf(",",start);
-			metrics.add(new StringBuffer(regularSiteStats.substring(start,end)));
+			metrics.add(new StringBuilder(regularSiteStats.substring(start,end)));
 		}
 
 		outputPageFreq(metrics);
@@ -110,16 +110,16 @@ public class CollectStats extends TimerTask{
 	 * Opens a url
 	 * @param urlString - url of page to be opened
 	 */
-	private StringBuffer openURL(String urlString){
-		StringBuffer newPage=new StringBuffer();
+	private StringBuilder openURL(String urlString){
+		StringBuilder newPage=new StringBuilder();
 		try{
 			URL url = new URL(urlString);
-			BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+			try(BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));){
 			String pageLine=null;
 			while ((pageLine = br.readLine()) != null) {
 				newPage.append(pageLine);
 			}
-			br.close();
+		}
 		}
 		catch(Exception e){
 			e.printStackTrace();
@@ -135,14 +135,10 @@ public class CollectStats extends TimerTask{
 	 * @throws IOException
 	 */
 	private void outputReqs(int activeClients, long numReqs) throws IOException{
-		FileWriter fstreamA = new FileWriter(outputFile.concat("numReqs.csv"),true);
-		BufferedWriter out = new BufferedWriter(fstreamA);
-
-		out = new BufferedWriter(fstreamA);
+		try(BufferedWriter out = new BufferedWriter(new FileWriter(outputFile.concat("numReqs.csv"),true))){
 		out.write(activeClients+","+numReqs);
 		out.newLine();
-		out.close();
-		fstreamA.close();
+		}
 
 		if(RunSettings.isOutputMatlab()){
 			File file=new File(outputFile.concat("numReqs.mat"));
@@ -173,7 +169,7 @@ public class CollectStats extends TimerTask{
 			}
 			ArrayList<MLArray> list=new ArrayList<MLArray>();
 			list.add(mldouble);
-			MatFileWriter mfw=new MatFileWriter(outputFile.concat("numReqs.mat"),list);
+			new MatFileWriter(outputFile.concat("numReqs.mat"),list);
 		}
 	}
 
@@ -183,19 +179,17 @@ public class CollectStats extends TimerTask{
 	 * @throws IOException
 	 */
 	private void outputRT(long numReqs, ArrayList<Long> RT) throws IOException{
-		FileWriter fstreamA = new FileWriter(outputFile.concat("responseTimes.csv"),true);
-		StringBuffer outputLine=new StringBuffer();
-		BufferedWriter out = new BufferedWriter(fstreamA);
 
-		out = new BufferedWriter(fstreamA);
+		try(BufferedWriter out = new BufferedWriter(new FileWriter(outputFile.concat("responseTimes.csv"),true))){
+
+			StringBuilder outputLine=new StringBuilder();
 		outputLine.append(numReqs);
 		for (long rt:RT){
 			outputLine.append(",").append(rt);
 		}
 		out.write(outputLine.toString());
 		out.newLine();
-		out.close();
-		fstreamA.close();
+		}
 
 		if(RunSettings.isOutputMatlab()){
 			File file=new File(outputFile.concat("responseTimes.mat"));
@@ -234,7 +228,7 @@ public class CollectStats extends TimerTask{
 			}
 			ArrayList<MLArray> list=new ArrayList<MLArray>();
 			list.add(mldouble);
-			MatFileWriter mfw=new MatFileWriter(outputFile.concat("responseTimes.mat"),list);
+			new MatFileWriter(outputFile.concat("responseTimes.mat"),list);
 		}
 	}
 
@@ -242,21 +236,19 @@ public class CollectStats extends TimerTask{
 	 * Outputs number of page accesses if each page type in each interval
 	 * @throws IOException
 	 */
-	private void outputPageFreq(ArrayList<StringBuffer> metrics) throws IOException{
-		FileWriter fstreamA = new FileWriter(outputFile.concat("pageFreq.csv"),true);
-		BufferedWriter out = new BufferedWriter(fstreamA);
-		StringBuffer outputLine=new StringBuffer();
+	private void outputPageFreq(ArrayList<StringBuilder> metrics) throws IOException{
+		try(BufferedWriter out = new BufferedWriter(new FileWriter(outputFile.concat("pageFreq.csv"),true))){
+			
+			StringBuilder outputLine=new StringBuilder();
 
-		for(StringBuffer m:metrics){
-			outputLine.append(m).append(",");
-		}
-		outputLine.deleteCharAt(outputLine.length()-1);
+			for(StringBuilder m:metrics){
+				outputLine.append(m).append(",");
+			}
+			outputLine.deleteCharAt(outputLine.length()-1);
 
-		out = new BufferedWriter(fstreamA);
-		out.write(outputLine.toString());
-		out.newLine();
-		out.close();
-		fstreamA.close();
+			out.write(outputLine.toString());
+			out.newLine();
+		};
 		
 		
 		if(RunSettings.isOutputMatlab()){
@@ -277,7 +269,7 @@ public class CollectStats extends TimerTask{
 					}
 				}
 				int i=0;
-				for(StringBuffer m:metrics){
+				for(StringBuilder m:metrics){
 					newdata[dataValue.getM()][i]=Double.parseDouble(m.toString());
 					i++;
 				}
@@ -286,7 +278,7 @@ public class CollectStats extends TimerTask{
 			else{
 				double[][] src=new double[1][metrics.size()];
 				int i=0;
-				for(StringBuffer m:metrics){
+				for(StringBuilder m:metrics){
 					src[0][i]=Double.parseDouble(m.toString());
 					i++;
 				}
@@ -294,7 +286,7 @@ public class CollectStats extends TimerTask{
 			}
 			ArrayList<MLArray> list=new ArrayList<MLArray>();
 			list.add(mldouble);
-			MatFileWriter mfw=new MatFileWriter(outputFile.concat("pageFreq.mat"),list);
+			new MatFileWriter(outputFile.concat("pageFreq.mat"),list);
 		}
 	}
 

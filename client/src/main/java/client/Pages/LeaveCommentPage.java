@@ -18,8 +18,8 @@ import client.clientMain.*;
  */
 
 public class LeaveCommentPage extends Page{
-	HashMap<String, StringBuffer> data = new HashMap<String, StringBuffer>();	// data to be sent to the login page
-	StringBuffer comment=new StringBuffer();
+	HashMap<String, StringBuilder> data = new HashMap<String, StringBuilder>();	// data to be sent to the login page
+	StringBuilder comment=new StringBuilder();
 	double pageRTFactor=1.0;
 
 	public LeaveCommentPage(Page page){
@@ -35,9 +35,9 @@ public class LeaveCommentPage extends Page{
 	 * @throws IOException 
 	 * @throws UnsupportedEncodingException 
 	 */
-	public StringBuffer makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
-		StringBuffer nextLink=new StringBuffer(client.getCMARTurl().getAppURL());	// link to send the login data to
-		StringBuffer nextURL=new StringBuffer();	// the response page returned after the login attempt
+	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
+		StringBuilder nextLink=new StringBuilder(client.getCMARTurl().getAppURL());	// link to send the login data to
+		StringBuilder nextURL=new StringBuilder();	// the response page returned after the login attempt
 
 		data=getFormData("commentitem");
 		
@@ -60,13 +60,13 @@ public class LeaveCommentPage extends Page{
 				numWordsInQuestion=(int)Math.round(rand.nextGaussian()*5+10);
 			}while(numWordsInQuestion<=0);
 			for (int i=0;i<numWordsInQuestion;i++){
-				comment.append(getRandomStringBufferFromDist(RunSettings.getTitleWords()));
+				comment.append(getRandomStringBuilderFromDist(RunSettings.getTitleWords()));
 				if (i!=numWordsInQuestion-1)
 					comment.append(" ");
 			}
 
 			data.put("comment", typingError(comment));
-			data.put("rating", new StringBuffer(Integer.toString(rand.nextInt(6))));
+			data.put("rating", new StringBuilder(Integer.toString(rand.nextInt(6))));
 
 
 			// Think Time
@@ -77,9 +77,9 @@ public class LeaveCommentPage extends Page{
 			}
 
 			Element child=xmlDocument.createElement("url");
-			child.setTextContent(new StringBuffer(nextLink).append("/commentitem").toString());
+			child.setTextContent(new StringBuilder(nextLink).append("/commentitem").toString());
 			request.appendChild(child);
-			for (Entry<String,StringBuffer> e:data.entrySet()){
+			for (Entry<String,StringBuilder> e:data.entrySet()){
 				child=xmlDocument.createElement("data");
 				child.setAttribute("name", e.getKey());
 				child.setTextContent(e.getValue().toString());
@@ -111,15 +111,15 @@ public class LeaveCommentPage extends Page{
 				client.setExitDueToRepeatChange(true);
 				return null;
 			}
-			nextLink=new StringBuffer(action.getElementsByTagName("nextPage").item(0).getTextContent());
+			nextLink=new StringBuilder(action.getElementsByTagName("nextPage").item(0).getTextContent());
 			request=(Element)((Element)action).getElementsByTagName("request").item(0);
-			nextURL=new StringBuffer(request.getElementsByTagName("url").item(0).getTextContent());
+			nextURL=new StringBuilder(request.getElementsByTagName("url").item(0).getTextContent());
 //			data.clear();
 //			NodeList dataList=request.getElementsByTagName("data");
 //			for(int i=0;i<dataList.getLength();i++){
 //				Node n=dataList.item(i);
 //				String key=n.getAttributes().item(0).getTextContent();
-//				StringBuffer value=new StringBuffer(((Element)n).getTextContent());
+//				StringBuilder value=new StringBuilder(((Element)n).getTextContent());
 //				data.put(key, value);
 //			}
 //			if(data.containsKey("authToken"))
@@ -132,7 +132,7 @@ public class LeaveCommentPage extends Page{
 				nextURL.replace(start, end, client.getClientInfo().getAuthToken().toString());
 			}
 //			if(data.containsKey("userID"))
-//				data.put("userID",new StringBuffer(Long.toString(client.getClientID())));
+//				data.put("userID",new StringBuilder(Long.toString(client.getClientID())));
 			if(nextURL.indexOf("userID=")!=-1){
 				int start=nextURL.indexOf("&userID=")+"&userID=".length();
 				int end=nextURL.indexOf("&",start);

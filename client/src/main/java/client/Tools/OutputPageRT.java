@@ -37,7 +37,7 @@ public class OutputPageRT {
 			BufferedWriter out = new BufferedWriter(fstreamA);
 
 			for (Histogram h:hists){
-				StringBuffer outputLine=new StringBuffer();
+				StringBuilder outputLine=new StringBuilder();
 				for (int i=0;i<h.getNumBins();i++){
 					outputLine.append(h.getHistElem(i)).append(",");
 				}

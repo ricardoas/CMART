@@ -24,7 +24,7 @@ import client.clientMain.*;
  */
 
 public class RegisterUserPage extends Page {
-	HashMap<String, StringBuffer> data=new HashMap<String, StringBuffer>();	// map of data to be posted to the register form
+	HashMap<String, StringBuilder> data=new HashMap<String, StringBuilder>();	// map of data to be posted to the register form
 	ArrayList<String>changedEntries =new ArrayList<String>();	// entries in the registeruser form that have changed since last entry (may be all)
 	double pageRTFactor=1.0;
 	int bonusCharacters=0;
@@ -43,9 +43,9 @@ public class RegisterUserPage extends Page {
 	 * @throws JsonParseException 
 	 * @throws InterruptedException 
 	 */
-	public StringBuffer makeDecision() throws JsonParseException, JsonMappingException, IOException, InterruptedException{
-		StringBuffer newPage=new StringBuffer();		// the page to be returned after the registration post
-		StringBuffer nextLink=new StringBuffer(client.getCMARTurl().getAppURL());	// the link to send the data to
+	public StringBuilder makeDecision() throws JsonParseException, JsonMappingException, IOException, InterruptedException{
+		StringBuilder newPage=new StringBuilder();		// the page to be returned after the registration post
+		StringBuilder nextLink=new StringBuilder(client.getCMARTurl().getAppURL());	// the link to send the data to
 		String threeDigits=Integer.toString(rand.nextInt(999));	// used if username or email is taken
 		boolean success=false;	// if the registration worked
 		JsonNode node = null;	// to read in the JSON data
@@ -78,12 +78,12 @@ public class RegisterUserPage extends Page {
 						if(success==false){
 							for(String s:client.getErrors()){
 								if (s.contains("The username is already taken")){
-									client.getClientInfo().setUsername(new StringBuffer(client.getClientInfo().getUsername()).append(new StringBuffer("_").append(threeDigits)));
+									client.getClientInfo().setUsername(new StringBuilder(client.getClientInfo().getUsername()).append(new StringBuilder("_").append(threeDigits)));
 									changeUserName=true;
 								}
 								if (s.contains("The email address is already taken")){
 									int atSign=client.getClientInfo().getEmail().indexOf("@");
-									client.getClientInfo().setEmail(client.getClientInfo().getEmail().insert(atSign,new StringBuffer("_").append(threeDigits)));
+									client.getClientInfo().setEmail(client.getClientInfo().getEmail().insert(atSign,new StringBuilder("_").append(threeDigits)));
 									changeEmail=true;
 								}
 								if (s.contains("The email addresses you entered are different Make sure both of the email addresses are the same")){
@@ -107,12 +107,12 @@ public class RegisterUserPage extends Page {
 				// error checking on the form entry
 				if (client.getLoginAttempts()>1){
 					if (html.indexOf("The username is already taken")!=-1){
-						client.getClientInfo().setUsername(new StringBuffer(client.getClientInfo().getUsername()).append(new StringBuffer("_").append(threeDigits)));
+						client.getClientInfo().setUsername(new StringBuilder(client.getClientInfo().getUsername()).append(new StringBuilder("_").append(threeDigits)));
 						changeUserName=true;
 					}
 					if (html.indexOf("The email address is already taken")!=-1){
 						int atSign=client.getClientInfo().getEmail().indexOf("@");
-						client.getClientInfo().setEmail(client.getClientInfo().getEmail().insert(atSign,new StringBuffer("_").append(threeDigits)));
+						client.getClientInfo().setEmail(client.getClientInfo().getEmail().insert(atSign,new StringBuilder("_").append(threeDigits)));
 						changeEmail=true;
 					}
 					if (html.indexOf("The email addresses you entered are different Make sure both of the email addresses are the same")!=-1){
@@ -220,7 +220,7 @@ public class RegisterUserPage extends Page {
 					}
 				}
 				if(!HTML4)
-					data.put("useHTML5",new StringBuffer("1"));
+					data.put("useHTML5",new StringBuilder("1"));
 
 
 				// Think Time
@@ -231,9 +231,9 @@ public class RegisterUserPage extends Page {
 				}
 				// submits the form and gets the response page
 				Element child=xmlDocument.createElement("url");
-				child.setTextContent(new StringBuffer(nextLink).append("/registeruser").toString());
+				child.setTextContent(new StringBuilder(nextLink).append("/registeruser").toString());
 				request.appendChild(child);
-				for (Entry<String,StringBuffer> e:data.entrySet()){
+				for (Entry<String,StringBuilder> e:data.entrySet()){
 					child=xmlDocument.createElement("data");
 					child.setAttribute("name", e.getKey());
 					child.setTextContent(e.getValue().toString());
@@ -276,15 +276,15 @@ public class RegisterUserPage extends Page {
 				client.setExitDueToRepeatChange(true);
 				return null;
 			}
-			nextLink=new StringBuffer(action.getElementsByTagName("nextPage").item(0).getTextContent());
+			nextLink=new StringBuilder(action.getElementsByTagName("nextPage").item(0).getTextContent());
 			request=(Element)((Element)action).getElementsByTagName("request").item(0);
-			StringBuffer nextURL=new StringBuffer(request.getElementsByTagName("url").item(0).getTextContent());
+			StringBuilder nextURL=new StringBuilder(request.getElementsByTagName("url").item(0).getTextContent());
 			data.clear();
 			NodeList dataList=request.getElementsByTagName("data");
 			for(int i=0;i<dataList.getLength();i++){
 				Node n=dataList.item(i);
 				String key=n.getAttributes().item(0).getTextContent();
-				StringBuffer value=new StringBuffer(((Element)n).getTextContent());
+				StringBuilder value=new StringBuilder(((Element)n).getTextContent());
 				data.put(key, value);
 			}
 			if(nextURL.indexOf("authToken=")!=-1){

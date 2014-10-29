@@ -2,24 +2,24 @@ package client.clientMain;
 
 public class CMARTurl {
 
-	private StringBuffer fullURL;			// full URL of the website
-	private StringBuffer hostURL;			// URL of the host
-	private StringBuffer ipURL;				// IP address of the website
-	private StringBuffer appURL;			// application name
+	private StringBuilder fullURL;			// full URL of the website
+	private StringBuilder hostURL;			// URL of the host
+	private StringBuilder ipURL;				// IP address of the website
+	private StringBuilder appURL;			// application name
 	private int appPort;					// port the website is running on
 
-	public CMARTurl(StringBuffer fullURL){
+	public CMARTurl(StringBuilder fullURL){
 		try{
-			this.fullURL=new StringBuffer(fullURL);
-			ipURL=new StringBuffer(fullURL.subSequence(fullURL.indexOf("http://")+"http://".length(),fullURL.lastIndexOf(":")));
+			this.fullURL=new StringBuilder(fullURL);
+			ipURL=new StringBuilder(fullURL.subSequence(fullURL.indexOf("http://")+"http://".length(),fullURL.lastIndexOf(":")));
 			int start=fullURL.lastIndexOf(":")+1;
 			int end=fullURL.indexOf("/",start);
 			if(start!=0 && end!=-1 && end>start)
 				appPort=Integer.parseInt(fullURL.substring(start,end));
 			else
 				appPort = 80;
-			appURL=new StringBuffer(fullURL.substring(end));
-			hostURL=new StringBuffer(fullURL).delete(fullURL.lastIndexOf(":"),fullURL.length());
+			appURL=new StringBuilder(fullURL.substring(end));
+			hostURL=new StringBuilder(fullURL).delete(fullURL.lastIndexOf(":"),fullURL.length());
 		}
 		catch(Exception e){
 			System.err.println("Make sure you always include the port number with the site URL");
@@ -32,28 +32,28 @@ public class CMARTurl {
 	 * Returns the full url of the website
 	 * @return
 	 */
-	public StringBuffer getFullURL(){
+	public StringBuilder getFullURL(){
 		return fullURL;
 	}
 	/**
 	 * Returns the host URl of the website
 	 * @return
 	 */
-	public StringBuffer getHostURL(){
+	public StringBuilder getHostURL(){
 		return hostURL;
 	}
 	/**
 	 * Returns the IP address of the website
 	 * @return
 	 */
-	public StringBuffer getIpURL(){
+	public StringBuilder getIpURL(){
 		return ipURL;
 	}
 	/**
 	 * Returns the name of the application
 	 * @return
 	 */
-	public StringBuffer getAppURL(){
+	public StringBuilder getAppURL(){
 		return appURL;
 	}
 	/**

@@ -22,7 +22,7 @@ import client.clientMain.*;
  */
 
 public class UploadImagesPage extends Page {
-	HashMap<String, StringBuffer> data=new HashMap<String, StringBuffer>();	// form data, not including images
+	HashMap<String, StringBuilder> data=new HashMap<String, StringBuilder>();	// form data, not including images
 	ArrayList<File> pics=new ArrayList<File>();	// pictures to be uploaded in multipart form
 	ArrayList<Integer> picNums=new ArrayList<Integer>();
 	int numPicsToSend=0;	// number of pictures to upload
@@ -43,16 +43,16 @@ public class UploadImagesPage extends Page {
 	 * @throws IOException 
 	 * @throws ParseException 
 	 */
-	public StringBuffer makeDecision() throws ParseException, IOException, InterruptedException{
-		StringBuffer nextPage;		// the response after the HTTP request
+	public StringBuilder makeDecision() throws ParseException, IOException, InterruptedException{
+		StringBuilder nextPage;		// the response after the HTTP request
 
 		if(HTML4)
 			data=getFormData("sellitemimages");		// brings in any form data
 		else{
-			data.put("userID",new StringBuffer(client.getClientInfo().getHTML5Cache().get("userID")));
-			data.put("authToken",new StringBuffer(client.getClientInfo().getHTML5Cache().get("authToken")));
-			data.put("itemID",new StringBuffer(Long.toString(client.getLastItemID())));
-			data.put("useHTML5",new StringBuffer("1"));
+			data.put("userID",new StringBuilder(client.getClientInfo().getHTML5Cache().get("userID")));
+			data.put("authToken",new StringBuilder(client.getClientInfo().getHTML5Cache().get("authToken")));
+			data.put("itemID",new StringBuilder(Long.toString(client.getLastItemID())));
+			data.put("useHTML5",new StringBuilder("1"));
 		}
 		
 		if(RunSettings.isRepeatedRun()==false){
@@ -88,9 +88,9 @@ public class UploadImagesPage extends Page {
 			// submits the form and receives the response
 
 			Element child=xmlDocument.createElement("url");
-			child.setTextContent((new StringBuffer(client.getCMARTurl().getAppURL()).append("/sellitemimages")).toString());
+			child.setTextContent((new StringBuilder(client.getCMARTurl().getAppURL()).append("/sellitemimages")).toString());
 			request.appendChild(child);
-			for (Entry<String,StringBuffer> e:data.entrySet()){
+			for (Entry<String,StringBuilder> e:data.entrySet()){
 				child=xmlDocument.createElement("data");
 				child.setAttribute("name", e.getKey());
 				child.setTextContent(e.getValue().toString());
@@ -105,12 +105,12 @@ public class UploadImagesPage extends Page {
 			child.setTextContent("POST");
 			request.appendChild(child);
 
-			nextPage=doSubmitPic((new StringBuffer(client.getCMARTurl().getAppURL()).append("/sellitemimages")).toString(),data,pics);
+			nextPage=doSubmitPic((new StringBuilder(client.getCMARTurl().getAppURL()).append("/sellitemimages")).toString(),data,pics);
 
 
 			if(nextPage.indexOf("Sell Item Confirmed")==-1){
 				System.err.println("Problem after image upload");
-				System.err.println(new StringBuffer(client.getCMARTurl().getAppURL()).append("/sellitemimages").toString());
+				System.err.println(new StringBuilder(client.getCMARTurl().getAppURL()).append("/sellitemimages").toString());
 				System.err.println(data);
 				System.err.println(pics);
 				System.err.println(nextPage);
@@ -128,16 +128,16 @@ public class UploadImagesPage extends Page {
 				client.setExitDueToRepeatChange(true);
 				return null;
 			}
-			//	StringBuffer nextLink=new StringBuffer(action.getElementsByTagName("nextPage").item(0).getTextContent());
+			//	StringBuilder nextLink=new StringBuilder(action.getElementsByTagName("nextPage").item(0).getTextContent());
 			request=(Element)((Element)action).getElementsByTagName("request").item(0);
-			StringBuffer nextURL=new StringBuffer(request.getElementsByTagName("url").item(0).getTextContent());
+			StringBuilder nextURL=new StringBuilder(request.getElementsByTagName("url").item(0).getTextContent());
 //			data.clear();
 			pics.clear();
 //			NodeList dataList=request.getElementsByTagName("data");
 //			for(int i=0;i<dataList.getLength();i++){
 //				Node n=dataList.item(i);
 //				String key=n.getAttributes().item(0).getTextContent();
-//				StringBuffer value=new StringBuffer(((Element)n).getTextContent());
+//				StringBuilder value=new StringBuilder(((Element)n).getTextContent());
 //				data.put(key, value);
 //			}
 //			if(data.containsKey("authToken"))

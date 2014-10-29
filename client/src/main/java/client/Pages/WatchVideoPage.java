@@ -19,7 +19,7 @@ import client.clientMain.*;
 
 
 public class WatchVideoPage extends Page {
-	TreeMap<Double,StringBuffer> nextPageProbabilities=new TreeMap<Double,StringBuffer>();	// map of probabilities of what the next page will be
+	TreeMap<Double,StringBuilder> nextPageProbabilities=new TreeMap<Double,StringBuilder>();	// map of probabilities of what the next page will be
 	double pageRTFactor=1.5;
 
 	public WatchVideoPage(Page page){
@@ -37,10 +37,10 @@ public class WatchVideoPage extends Page {
 	 * @throws IOException 
 	 * @throws UnsupportedEncodingException 
 	 */
-	public StringBuffer makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
-		StringBuffer nextURL=new StringBuffer(client.getCMARTurl().getAppURL());	// the URL of the next link to be opened
+	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
+		StringBuilder nextURL=new StringBuilder(client.getCMARTurl().getAppURL());	// the URL of the next link to be opened
 
-		StringBuffer nextLink=getRandomStringBufferFromDist(nextPageProbabilities);		// randomly chooses the next link
+		StringBuilder nextLink=getRandomStringBuilderFromDist(nextPageProbabilities);		// randomly chooses the next link
 
 		
 		
@@ -126,7 +126,7 @@ public class WatchVideoPage extends Page {
 		client.setRestProb(actualProbSum-logoutProb);
 
 		for (Entry<String, Double> e:allOptions.entrySet()){
-			nextPageProbabilities.put(probSum, new StringBuffer(e.getKey()));
+			nextPageProbabilities.put(probSum, new StringBuilder(e.getKey()));
 			probSum-=(e.getValue()/actualProbSum);
 		}
 

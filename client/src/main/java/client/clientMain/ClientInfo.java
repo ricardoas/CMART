@@ -19,33 +19,33 @@ import client.Items.SellerCG;
 public class ClientInfo {
 	private Random rand=new Random();
 
-	private StringBuffer username;						// username of client
-	private StringBuffer firstName;						// first name of client
-	private StringBuffer lastName;						// last name of client
-	private StringBuffer address=new StringBuffer();	// address of client
-	private StringBuffer city;							// city of client
-	private StringBuffer zipcode=new StringBuffer();	// zipcode of client
-	private StringBuffer USState;						// USState of client
-	private StringBuffer USStateCode;					// USState code of client
-	private StringBuffer email;							// email of client
-	private StringBuffer password;						// password of client
-	private StringBuffer creditCardNumber;				// credit card number of client
-	private StringBuffer cvv2;							// cvv2 of client's credit card
-	private StringBuffer creditCardExpiry;				// expiry date of client's credit card
+	private StringBuilder username;						// username of client
+	private StringBuilder firstName;						// first name of client
+	private StringBuilder lastName;						// last name of client
+	private StringBuilder address=new StringBuilder();	// address of client
+	private StringBuilder city;							// city of client
+	private StringBuilder zipcode=new StringBuilder();	// zipcode of client
+	private StringBuilder USState;						// USState of client
+	private StringBuilder USStateCode;					// USState code of client
+	private StringBuilder email;							// email of client
+	private StringBuilder password;						// password of client
+	private StringBuilder creditCardNumber;				// credit card number of client
+	private StringBuilder cvv2;							// cvv2 of client's credit card
+	private StringBuilder creditCardExpiry;				// expiry date of client's credit card
 	private boolean registered=false;					// if the client is already a registered user of cmart
-	private StringBuffer userID=new StringBuffer();		// userID number of client in cmart database (for HTML5)
+	private StringBuilder userID=new StringBuilder();		// userID number of client in cmart database (for HTML5)
 	private long clientIndex;							// index for the client generator indicating order clients were created
-	private StringBuffer authToken;						// client's authToken for C-MART
+	private StringBuilder authToken;						// client's authToken for C-MART
 
 	private TreeMap<String,Image>imageCache=new TreeMap<String,Image>();					// cache of images viewed by the client
-	private TreeMap<String,StringBuffer>jscssCache=new TreeMap<String,StringBuffer>();		// cache of the javascript files already opened by the client
-	private TreeMap<String,StringBuffer>HTML5Cache=new TreeMap<String,StringBuffer>();		// cache of HTML5 data
+	private TreeMap<String,StringBuilder>jscssCache=new TreeMap<String,StringBuilder>();		// cache of the javascript files already opened by the client
+	private TreeMap<String,StringBuilder>HTML5Cache=new TreeMap<String,StringBuilder>();		// cache of HTML5 data
 	private TreeMap<Long,ItemCG>HTML5ItemCache=new TreeMap<Long,ItemCG>();					// cache of the Item data for HTML5
 	private TreeMap<Long,SellerCG>HTML5SellerCache=new TreeMap<Long,SellerCG>();			// cache of the Seller data for HTML5
 	private TreeMap<Long,QuestionCG>HTML5QuestionCache=new TreeMap<Long,QuestionCG>();		// cache of the Question data for HTML5
 	
 	private TreeMap<String,Image>preImageCache=new TreeMap<String,Image>();					// cache of images viewed by the client
-	private TreeMap<String,StringBuffer>preJscssCache=new TreeMap<String,StringBuffer>();	// cache of the javascript files already opened by the client
+	private TreeMap<String,StringBuilder>preJscssCache=new TreeMap<String,StringBuilder>();	// cache of the javascript files already opened by the client
 
 	private  TreeMap<Long,ItemCG> itemsOfInterest=new TreeMap<Long,ItemCG>();			// tracks items the user has shown interest in, from viewing the item, to seeing it on a browse/search page
 	private  TreeMap<Long,Double> itemsOfInterestRatings=new TreeMap<Long,Double>();	// tracks the item ratings of the items of interest
@@ -56,7 +56,7 @@ public class ClientInfo {
 	 * @param username
 	 * @param password
 	 */
-	public ClientInfo(StringBuffer username,StringBuffer password){
+	public ClientInfo(StringBuilder username,StringBuilder password){
 		this.username=username;
 		this.password=password;
 		createNewCreditCard();
@@ -80,16 +80,16 @@ public class ClientInfo {
 	 * @param state
 	 */
 	public ClientInfo(String userID,String firstName,String lastName,String username,String password,String email,String address,String city,String zip,String state){
-		this.userID=new StringBuffer(userID);
-		this.firstName=new StringBuffer(firstName);
-		this.lastName=new StringBuffer(lastName);
-		this.username=new StringBuffer(username);
-		this.password=new StringBuffer(password);
-		this.email=new StringBuffer(email);
-		this.address=new StringBuffer(address);
-		this.city=new StringBuffer(city);
-		this.zipcode=new StringBuffer(zip);
-		this.USStateCode=new StringBuffer(state);
+		this.userID=new StringBuilder(userID);
+		this.firstName=new StringBuilder(firstName);
+		this.lastName=new StringBuilder(lastName);
+		this.username=new StringBuilder(username);
+		this.password=new StringBuilder(password);
+		this.email=new StringBuilder(email);
+		this.address=new StringBuilder(address);
+		this.city=new StringBuilder(city);
+		this.zipcode=new StringBuilder(zip);
+		this.USStateCode=new StringBuilder(state);
 
 		this.registered=true;
 		createNewCreditCard();
@@ -114,8 +114,8 @@ public class ClientInfo {
 	 * Creates client username from distribution and accompanying password
 	 */
 	private void createUserNameAndPassword(){
-		this.username=new StringBuffer(this.firstName).append(this.lastName).append(randomDigits(4));
-		StringBuffer pwd=new StringBuffer();
+		this.username=new StringBuilder(this.firstName).append(this.lastName).append(randomDigits(4));
+		StringBuilder pwd=new StringBuilder();
 		int pwdLength=5+rand.nextInt(8);
 		for (int i=0;i<pwdLength;i++){
 			pwd=pwd.append((char)(rand.nextInt(78)+48));
@@ -161,12 +161,12 @@ public class ClientInfo {
 		int lastDigit=luhnSum%10;
 		if (lastDigit==0)
 			lastDigit=10;
-		this.creditCardNumber=new StringBuffer(cardNum.concat(Integer.toString(10-lastDigit)));
-		this.cvv2=new StringBuffer(Long.toString(randomDigits(3)));
+		this.creditCardNumber=new StringBuilder(cardNum.concat(Integer.toString(10-lastDigit)));
+		this.cvv2=new StringBuilder(Long.toString(randomDigits(3)));
 
-		StringBuffer month=new StringBuffer(Integer.toString(rand.nextInt(12)));
+		StringBuilder month=new StringBuilder(Integer.toString(rand.nextInt(12)));
 		if (month.length()==1)
-			month=new StringBuffer("0").append(month);
+			month=new StringBuilder("0").append(month);
 		String year=Long.toString(rand.nextInt(3)+Calendar.getInstance().get(Calendar.YEAR)+1);
 		this.creditCardExpiry=month.append(year);
 
@@ -216,7 +216,7 @@ public class ClientInfo {
 		double index=binarySearch((Double[])RunSettings.getLastNames().keySet().toArray(new Double[RunSettings.getLastNames().size()]),rand.nextDouble(),0,RunSettings.getLastNames().size()-1);
 		this.lastName=RunSettings.getLastNames().get(index);
 
-		this.email=(new StringBuffer(this.firstName).append(".").append(this.lastName).append(randomDigits(4)).append("@").append("fakeMail.com"));
+		this.email=(new StringBuilder(this.firstName).append(".").append(this.lastName).append(randomDigits(4)).append("@").append("fakeMail.com"));
 	}
 
 	/**
@@ -243,8 +243,8 @@ public class ClientInfo {
 
 
 		this.city=RunSettings.getCities().get(index);
-		this.USState=new StringBuffer((RunSettings.getCityStates().get(this.city.toString())).toString().toUpperCase());
-		this.USStateCode=new StringBuffer(Integer.toString(determineUSStateCode()));
+		this.USState=new StringBuilder((RunSettings.getCityStates().get(this.city.toString())).toString().toUpperCase());
+		this.USStateCode=new StringBuilder(Integer.toString(determineUSStateCode()));
 
 
 		this.zipcode.append(rand.nextInt(100000));
@@ -366,91 +366,91 @@ public class ClientInfo {
 	 * Returns the client username
 	 * @return
 	 */
-	public StringBuffer getUsername(){
+	public StringBuilder getUsername(){
 		return this.username;
 	}
 	/**
 	 * Returns the client first name
 	 * @return
 	 */
-	public StringBuffer getFirstName(){
+	public StringBuilder getFirstName(){
 		return this.firstName;
 	}
 	/**
 	 * Returns the client last name
 	 * @return
 	 */
-	public StringBuffer getLastName(){
+	public StringBuilder getLastName(){
 		return this.lastName;
 	}
 	/**
 	 * Returns the client's address
 	 * @return
 	 */
-	public StringBuffer getAddress(){
+	public StringBuilder getAddress(){
 		return this.address;
 	}
 	/**
 	 * Returns the client's city
 	 * @return
 	 */
-	public StringBuffer getCity(){
+	public StringBuilder getCity(){
 		return this.city;
 	}
 	/**
 	 * Returns the clients zipcode
 	 * @return
 	 */
-	public StringBuffer getZipcode(){
+	public StringBuilder getZipcode(){
 		return this.zipcode;
 	}
 	/**
 	 * Returns the client's US State
 	 * @return
 	 */
-	public StringBuffer getUSState(){
+	public StringBuilder getUSState(){
 		return this.USState;
 	}
 	/**
-	 * Returns the numerical code as a StringBuffer for the client's US state
+	 * Returns the numerical code as a StringBuilder for the client's US state
 	 * @return
 	 */
-	public StringBuffer getUSStateCode(){
+	public StringBuilder getUSStateCode(){
 		return this.USStateCode;
 	}
 	/**
 	 * Returns the client's email
 	 * @return
 	 */
-	public StringBuffer getEmail(){
+	public StringBuilder getEmail(){
 		return this.email;
 	}
 	/**
 	 * Returns the client's password
 	 * @return
 	 */
-	public StringBuffer getPassword(){
+	public StringBuilder getPassword(){
 		return this.password;
 	}
 	/**
 	 * Returns the client's credit card number
 	 * @return
 	 */
-	public StringBuffer getCreditCardNum(){
+	public StringBuilder getCreditCardNum(){
 		return this.creditCardNumber;
 	}
 	/**
 	 * Returns the client's cvv2 credit card code
 	 * @return
 	 */
-	public StringBuffer getCvv2(){
+	public StringBuilder getCvv2(){
 		return this.cvv2;
 	}
 	/**
 	 * Returns the expiry date of the client's credit card
 	 * @return
 	 */
-	public StringBuffer getCreditCardExpiry(){
+	public StringBuilder getCreditCardExpiry(){
 		return this.creditCardExpiry;
 	}
 	/**
@@ -464,7 +464,7 @@ public class ClientInfo {
 	 * Returns the client's userID in the database
 	 * @return
 	 */
-	public StringBuffer getUserID(){
+	public StringBuilder getUserID(){
 		return this.userID;
 	}
 	/**
@@ -478,24 +478,24 @@ public class ClientInfo {
 	 * Sets the client's username
 	 * @param name
 	 */
-	public void setUsername(StringBuffer name){
+	public void setUsername(StringBuilder name){
 		this.username=name;
 	}
-	public void setUserID(StringBuffer userID){
+	public void setUserID(StringBuilder userID){
 		this.userID=userID;
 	}
 	/**
 	 * Sets the client's email
 	 * @param email
 	 */
-	public void setEmail(StringBuffer email){
+	public void setEmail(StringBuilder email){
 		this.email=email;
 	}
 	/**
 	 * Sets the client's password
 	 * @param password
 	 */
-	public void setPassword(StringBuffer password){
+	public void setPassword(StringBuilder password){
 		this.password=password;
 	}
 
@@ -516,14 +516,14 @@ public class ClientInfo {
 	/**
 	 * @return the authToken
 	 */
-	public StringBuffer getAuthToken() {
-		return new StringBuffer(authToken);
+	public StringBuilder getAuthToken() {
+		return new StringBuilder(authToken);
 	}
 
 	/**
 	 * @param authToken the authToken to set
 	 */
-	public void setAuthToken(StringBuffer authToken) {
+	public void setAuthToken(StringBuilder authToken) {
 		this.authToken = authToken;
 	}
 
@@ -551,7 +551,7 @@ public class ClientInfo {
 		return this.imageCache;
 	}
 
-	public TreeMap<String,StringBuffer>getJscssCache(){
+	public TreeMap<String,StringBuilder>getJscssCache(){
 		return this.jscssCache;
 	}
 
@@ -571,7 +571,7 @@ public class ClientInfo {
 	 * @param url - url of the js file
 	 * @param js - the javascript file
 	 */
-	public synchronized void addJSCSSCache(String url,StringBuffer js){
+	public synchronized void addJSCSSCache(String url,StringBuilder js){
 		this.jscssCache.put(url,js);
 	}
 
@@ -580,7 +580,7 @@ public class ClientInfo {
 	 * @param key
 	 * @param val
 	 */
-	public void addHTML5Cache(String key,StringBuffer val){
+	public void addHTML5Cache(String key,StringBuilder val){
 		this.HTML5Cache.put(key,val);
 	}
 	/**
@@ -598,7 +598,7 @@ public class ClientInfo {
 	 * Gets the HTML5 Cache
 	 * @return
 	 */
-	public TreeMap<String,StringBuffer> getHTML5Cache(){
+	public TreeMap<String,StringBuilder> getHTML5Cache(){
 		return this.HTML5Cache;
 	}
 

@@ -21,7 +21,7 @@ import client.clientMain.*;
  */
 
 public class ConfirmCommentPage extends Page {
-	TreeMap<Double,StringBuffer> nextPageProbabilities=new TreeMap<Double,StringBuffer>();
+	TreeMap<Double,StringBuilder> nextPageProbabilities=new TreeMap<Double,StringBuilder>();
 	double pageRTFactor=1.5;
 
 	public ConfirmCommentPage(Page page){
@@ -39,9 +39,9 @@ public class ConfirmCommentPage extends Page {
 	 * @throws IOException 
 	 * @throws UnsupportedEncodingException 
 	 */
-	public StringBuffer makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
-		StringBuffer nextURL=new StringBuffer(client.getCMARTurl().getAppURL());	// the URL of the next link to be opened
-		StringBuffer nextLink=getRandomStringBufferFromDist(nextPageProbabilities);
+	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
+		StringBuilder nextURL=new StringBuilder(client.getCMARTurl().getAppURL());	// the URL of the next link to be opened
+		StringBuilder nextLink=getRandomStringBuilderFromDist(nextPageProbabilities);
 		
 		if(RunSettings.isRepeatedRun()==false){
 		action=xmlDocument.createElement("action");
@@ -68,7 +68,7 @@ public class ConfirmCommentPage extends Page {
 		else{
 			String nextLinkS=nextLink.toString();
 			if(nextLinkS.equals(MY_ACCOUNT_TEXT)){
-				nextURL.append("/myaccount?useHTML5=1&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&ts=").append(new StringBuffer(Long.toString(new Date().getTime())));
+				nextURL.append("/myaccount?useHTML5=1&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&ts=").append(new StringBuilder(Long.toString(new Date().getTime())));
 			}
 			else if(nextLinkS.equals(BROWSE_TEXT)){
 				nextURL.append("/browsecategory?useHTML5=1&categoryID=0&pageNo=0&itemsPP=25&userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&catTs=").append(new Date().getTime()).append("&hasItems=").append(getHasItems());
@@ -83,11 +83,11 @@ public class ConfirmCommentPage extends Page {
 				nextURL.append("/index.html");
 			}
 			else if(nextLinkS.equals(SEARCH_TEXT)){
-				searchData.put("userID", new StringBuffer(client.getClientInfo().getHTML5Cache().get("userID")));
-				searchData.put("authToken", new StringBuffer(client.getClientInfo().getHTML5Cache().get("authToken")));
-				searchData.put("useHTML5", new StringBuffer("1"));
-				searchData.put("pageNo", new StringBuffer("0"));
-				searchData.put("itemsPP",new StringBuffer("25"));
+				searchData.put("userID", new StringBuilder(client.getClientInfo().getHTML5Cache().get("userID")));
+				searchData.put("authToken", new StringBuilder(client.getClientInfo().getHTML5Cache().get("authToken")));
+				searchData.put("useHTML5", new StringBuilder("1"));
+				searchData.put("pageNo", new StringBuilder("0"));
+				searchData.put("itemsPP",new StringBuilder("25"));
 				searchData.put("hasItems", getHasItems());
 				return search(searchData,action);
 			}
@@ -99,9 +99,9 @@ public class ConfirmCommentPage extends Page {
 				client.setExitDueToRepeatChange(true);
 				return null;
 			}
-			nextLink=new StringBuffer(action.getElementsByTagName("nextPage").item(0).getTextContent());
+			nextLink=new StringBuilder(action.getElementsByTagName("nextPage").item(0).getTextContent());
 			request=(Element)((Element)action).getElementsByTagName("request").item(0);
-			nextURL=new StringBuffer(request.getElementsByTagName("url").item(0).getTextContent());
+			nextURL=new StringBuilder(request.getElementsByTagName("url").item(0).getTextContent());
 			if(nextURL.indexOf("authToken=")!=-1){
 				int start=nextURL.indexOf("&authToken=")+"&authToken=".length();
 				int end=nextURL.indexOf("&",start);
@@ -110,18 +110,18 @@ public class ConfirmCommentPage extends Page {
 				nextURL.replace(start, end, client.getClientInfo().getAuthToken().toString());
 			}
 
-				HashMap<String, StringBuffer> data=new HashMap<String,StringBuffer>();
+				HashMap<String, StringBuilder> data=new HashMap<String,StringBuilder>();
 				NodeList dataList=request.getElementsByTagName("data");
 				for(int i=0;i<dataList.getLength();i++){
 					Node n=dataList.item(i);
 					String key=n.getAttributes().item(0).getTextContent();
-					StringBuffer value=new StringBuffer(((Element)n).getTextContent());
+					StringBuilder value=new StringBuilder(((Element)n).getTextContent());
 					data.put(key, value);
 				}
 				if(data.containsKey("authToken"))
 					data.put("authToken",client.getClientInfo().getAuthToken());
 				if(data.containsKey("userID"))
-					data.put("userID",new StringBuffer(Long.toString(client.getClientID())));
+					data.put("userID",new StringBuilder(Long.toString(client.getClientID())));
 				if(nextURL.indexOf("userID=")!=-1){
 					int start=nextURL.indexOf("&userID=")+"&userID=".length();
 					int end=nextURL.indexOf("&",start);
@@ -225,7 +225,7 @@ public class ConfirmCommentPage extends Page {
 		client.setRestProb(actualProbSum-logOutProb);
 
 		for (Entry<String, Double> e:allOptions.entrySet()){
-			nextPageProbabilities.put(probSum, new StringBuffer(e.getKey()));
+			nextPageProbabilities.put(probSum, new StringBuilder(e.getKey()));
 			probSum-=(e.getValue()/actualProbSum);
 		}
 
