@@ -1,60 +1,37 @@
 package client.Items;
 
+import org.codehaus.jackson.JsonNode;
+
 public class SellerCG {
 	private long id;
 	private String name;
 	private long rating;
 
-	public SellerCG(){
-	}
-	
-	public SellerCG(long id, String name, long rating){
-		this.id=id;
-		this.name=name;
-		this.rating=rating;
+	public SellerCG(JsonNode node) {
+		this.id = node.get("seller").get("id").getLongValue();
+		this.name = node.get("seller").get("name").getTextValue();
+		this.rating = node.get("seller").get("rating").getLongValue();
 	}
 
 	/**
 	 * @return the id
 	 */
 	public long getId() {
-		return id;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(long id) {
-		this.id = id;
+		return this.id;
 	}
 
 	/**
 	 * @return the name
 	 */
 	public String getName() {
-		return name;
-	}
-
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
+		return this.name;
 	}
 
 	/**
 	 * @return the rating
 	 */
 	public long getRating() {
-		return rating;
+		return this.rating;
 	}
-
-	/**
-	 * @param rating the rating to set
-	 */
-	public void setRating(long rating) {
-		this.rating = rating;
-	}
-
 
 }

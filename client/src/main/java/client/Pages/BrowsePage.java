@@ -22,6 +22,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import client.Items.*;
+import client.Tools.DateParser;
 import client.clientMain.*;
 
 
@@ -668,7 +669,7 @@ public class BrowsePage extends Page{
 				item.setCurrentBid(Double.parseDouble(html.substring(start,end).replace(",", "")));
 				start=html.indexOf("<label for=\"itemEndDate"+itemID+"\">",end)+("<label for=\"itemEndDate"+itemID+"\">").length();
 				end=html.indexOf("</label>",start);
-				item.setEndDate(stringToDate(html.substring(start,end)));
+				item.setEndDate(DateParser.stringToDate(html.substring(start,end)));
 				item.setListRank(i);
 				item.calcItemRating();
 				listedItems.put(itemID,item);
@@ -694,7 +695,7 @@ public class BrowsePage extends Page{
 				else
 					item.incCategoryDepth();
 				item.setName(node.get("items").get(i).get("name").getTextValue());
-				item.setEndDate(stringToDate(node.get("items").get(i).get("endDate").getTextValue()));
+				item.setEndDate(DateParser.stringToDate(node.get("items").get(i).get("endDate").getTextValue()));
 				item.setCurrentBid(node.get("items").get(i).get("currentBid").getDoubleValue());
 				String thumbImage=node.get("items").get(i).get("thumbnail").getTextValue();
 				if (thumbImage.equals("blank.jpg"))
@@ -714,7 +715,7 @@ public class BrowsePage extends Page{
 					if(item.getBuyNowPrice()==0)
 						item.setForBuyNow(false);
 					item.setNoOfBids(node.get("items").get(i).get("noOfBids").getLongValue());
-					item.setStartDate(stringToDate(node.get("items").get(i).get("startDate").getTextValue()));
+					item.setStartDate(DateParser.stringToDate(node.get("items").get(i).get("startDate").getTextValue()));
 					item.setNumPics(node.get("items").get(i).get("images").size());
 					for(int k=0;k<item.getNumPics();k++){
 						item.addImage(node.get("items").get(i).get("images").get(k).get("url").getTextValue());
@@ -736,10 +737,7 @@ public class BrowsePage extends Page{
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode node = mapper.readValue(html.toString(), JsonNode.class);
 		for (int i=0;i<node.get("sellers").size();i++){
-			SellerCG seller=new SellerCG();
-			seller.setId(node.get("sellers").get(i).get("id").getLongValue());
-			seller.setName(node.get("sellers").get(i).get("name").getTextValue());
-			seller.setRating(node.get("sellers").get(i).get("rating").getLongValue());
+			SellerCG seller=new SellerCG(node.get("sellers").get(i));
 			client.getClientInfo().addHTML5SellerCache(seller);
 		}
 	}
@@ -748,15 +746,7 @@ public class BrowsePage extends Page{
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode node = mapper.readValue(html.toString(), JsonNode.class);
 		for (int i=0;i<node.get("questions").size();i++){
-			QuestionCG question=new QuestionCG();
-			question.setId(node.get("questions").get(i).get("id").getLongValue());
-			question.setFromUserID(node.get("questions").get(i).get("fromUserID").getLongValue());
-			question.setToUserID(node.get("questions").get(i).get("toUserID").getLongValue());
-			question.setItemID(node.get("questions").get(i).get("itemID").getLongValue());
-			question.setQuestion(node.get("questions").get(i).get("isQuestion").getBooleanValue());
-			question.setPostDate(stringToDate(node.get("questions").get(i).get("postDate").getTextValue()));
-			question.setResponseTo(node.get("questions").get(i).get("responseTo").getLongValue());
-			question.setContent(node.get("questions").get(i).get("content").getTextValue());
+			QuestionCG question=new QuestionCG(node.get("questions").get(i));
 			client.getClientInfo().addHTML5QuestionCache(question);
 		}
 	}

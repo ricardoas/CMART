@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.io.*;
 import java.net.*;
+
 import javax.imageio.ImageIO;
 
 import org.apache.http.*;
@@ -784,15 +785,7 @@ public class Page {
 			else if(urlString.indexOf("/askquestion")!=-1||urlString.indexOf("/answerquestion")!=-1){
 				boolean success=node.get("success").getBooleanValue();
 				if(success==true){
-					QuestionCG question=new QuestionCG();
-					question.setId(node.get("question").get("id").getLongValue());
-					question.setFromUserID(node.get("question").get("fromUserID").getLongValue());
-					question.setToUserID(node.get("question").get("toUserID").getLongValue());
-					question.setItemID(node.get("question").get("itemID").getLongValue());
-					question.setQuestion(node.get("question").get("isQuestion").getBooleanValue());
-					question.setPostDate(stringToDate(node.get("question").get("postDate").getTextValue()));
-					question.setResponseTo(node.get("question").get("responseTo").getLongValue());
-					question.setContent(node.get("question").get("content").getTextValue());
+					QuestionCG question=new QuestionCG(node.get("question"));
 					client.getClientInfo().addHTML5QuestionCache(question);
 					StringBuilder redirectURL=new StringBuilder(client.getCMARTurl().getAppURL());
 					redirectURL.append("/viewitem.html").append(client.getLastItemID());
@@ -1067,33 +1060,6 @@ public class Page {
 			}
 		}
 		return str;
-	}
-
-	/**
-	 * Converts a string of specified formatting to a date
-	 * @param s - String
-	 * @return date- string converted to a date
-	 * @throws ParseException 
-	 */
-	protected Date stringToDate(String s) throws ParseException{
-		Date date=null;
-		DateFormat df =new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
-		date=df.parse(s);
-
-		return date;
-	}
-
-	/**
-	 * Converts a date to a specified formatting for a string
-	 * Used for If-Modified-Since in HTTP request header
-	 * @param d - date to be converted
-	 * @return date formatted string
-	 * @throws ParseException 
-	 */
-	protected String dateToString(Date d) throws ParseException{
-		DateFormat df =new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
-		return df.format(d);
-
 	}
 
 	/**
@@ -1591,7 +1557,7 @@ public class Page {
 					HttpEntity entity = response.getEntity();
 
 					if(inCache==true)
-						httpget.addHeader("If-Modified-Since", dateToString(new Date()));
+						httpget.addHeader("If-Modified-Since", DateParser.dateToString(new Date()));
 
 					if(RunSettings.isNetworkDelay()){
 						try{Thread.sleep(client.getNetworkDelay());}
@@ -1655,9 +1621,6 @@ public class Page {
 					e.printStackTrace();
 				} catch (URISyntaxException e) {
 					e.printStackTrace();
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 			}
 		}
@@ -1695,7 +1658,7 @@ public class Page {
 					HttpGet httpget = new HttpGet(uri);
 
 					if(inCache=true)
-						httpget.addHeader("If-Modified-Since", dateToString(new Date()));
+						httpget.addHeader("If-Modified-Since", DateParser.dateToString(new Date()));
 
 					HttpResponse response = httpclient.execute(httpget);
 
@@ -1750,8 +1713,6 @@ public class Page {
 				} catch (UnknownHostException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
-					e.printStackTrace();
-				} catch (ParseException e) {
 					e.printStackTrace();
 				}
 			}

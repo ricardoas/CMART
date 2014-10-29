@@ -1,6 +1,11 @@
 package client.Items;
 
+import java.text.ParseException;
 import java.util.Date;
+
+import org.codehaus.jackson.JsonNode;
+
+import client.Tools.DateParser;
 
 public class QuestionCG {
 	private long id;
@@ -11,90 +16,49 @@ public class QuestionCG {
 	private Date postDate;
 	private long responseTo;
 	private String content;
-	
-	public QuestionCG(){
-	}
-	
-	public QuestionCG(long id, long fromUserID, long toUserID, long itemID, boolean isQuestion, Date postDate, long responseTo, String content){
-		this.id=id;
-		this.fromUserID=fromUserID;
-		this.toUserID=toUserID;
-		this.itemID=itemID;
-		this.isQuestion=isQuestion;
-		this.postDate=postDate;
-		this.setResponseTo(responseTo);
-		this.content=content;				
+
+	public QuestionCG(JsonNode node) throws ParseException {
+		this.id=node.get("id").getLongValue();
+		this.fromUserID = node.get("fromUserID").getLongValue();
+		this.toUserID = node.get("toUserID").getLongValue();
+		this.itemID=node.get("itemID").getLongValue();
+		this.isQuestion = node.get("isQuestion").getBooleanValue();
+		this.postDate =DateParser.stringToDate(node.get("postDate").getTextValue());
+		this.responseTo=node.get("responseTo").getLongValue();
+		this.content=node.get("content").getTextValue();
+
 	}
 
 	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
+		return this.id;
 	}
 
 	public long getFromUserID() {
-		return fromUserID;
-	}
-
-	public void setFromUserID(long fromUserID) {
-		this.fromUserID = fromUserID;
+		return this.fromUserID;
 	}
 
 	public long getToUserID() {
-		return toUserID;
-	}
-
-	public void setToUserID(long toUserID) {
-		this.toUserID = toUserID;
+		return this.toUserID;
 	}
 
 	public long getItemID() {
-		return itemID;
-	}
-
-	public void setItemID(long itemID) {
-		this.itemID = itemID;
+		return this.itemID;
 	}
 
 	public boolean isQuestion() {
-		return isQuestion;
-	}
-
-	public void setQuestion(boolean isQuestion) {
-		this.isQuestion = isQuestion;
+		return this.isQuestion;
 	}
 
 	public Date getPostDate() {
-		return postDate;
-	}
-
-	public void setPostDate(Date postDate) {
-		this.postDate = postDate;
+		return this.postDate;
 	}
 
 	public String getContent() {
-		return content;
+		return this.content;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
-	}
-
-	/**
-	 * @return the responseTo
-	 */
 	public long getResponseTo() {
-		return responseTo;
+		return this.responseTo;
 	}
 
-	/**
-	 * @param responseTo the responseTo to set
-	 */
-	public void setResponseTo(long responseTo) {
-		this.responseTo = responseTo;
-	}
-	
-	
 }

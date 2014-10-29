@@ -19,6 +19,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import client.Items.*;
+import client.Tools.DateParser;
 import client.clientMain.*;
 
 /**
@@ -128,7 +129,7 @@ public class ItemPage extends Page{
 				start=html.indexOf("Bidding Ends",end)+("Bidding Ends").length();
 				start=html.indexOf("<td>",start)+4;
 				end=html.indexOf("</label>",start);
-				item.setEndDate(stringToDate(html.substring(start,end)));
+				item.setEndDate(DateParser.stringToDate(html.substring(start,end)));
 				if (start!=13)
 					item.setForAuction(true);
 				start=html.indexOf("Bidding History",start);
@@ -208,7 +209,7 @@ public class ItemPage extends Page{
 						item.setId(itemID);
 
 						item.setName(node.get("item").get("name").getTextValue());
-						item.setEndDate(stringToDate(node.get("item").get("endDate").getTextValue()));
+						item.setEndDate(DateParser.stringToDate(node.get("item").get("endDate").getTextValue()));
 						item.setCurrentBid(node.get("item").get("currentBid").getDoubleValue());
 						origBidPrice=item.getCurrentBid();
 						item.setSellerID(node.get("item").get("sellerID").getLongValue());
@@ -219,29 +220,18 @@ public class ItemPage extends Page{
 						if(item.getBuyNowPrice()==0)
 							item.setForBuyNow(false);
 						item.setNoOfBids(node.get("item").get("noOfBids").getLongValue());
-						item.setStartDate(stringToDate(node.get("item").get("startDate").getTextValue()));
+						item.setStartDate(DateParser.stringToDate(node.get("item").get("startDate").getTextValue()));
 						item.setNumPics(node.get("item").get("images").size());
 						for(int k=0;k<item.getNumPics();k++){
 							item.addImage(node.get("item").get("images").get(k).get("url").getTextValue());
 						}
 
-						SellerCG seller=new SellerCG();
-						seller.setId(node.get("seller").get("id").getLongValue());
-						seller.setName(node.get("seller").get("name").getTextValue());
-						seller.setRating(node.get("seller").get("rating").getLongValue());
+						SellerCG seller = new SellerCG(node.get("seller"));
 						client.getClientInfo().addHTML5SellerCache(seller);
 
 						item.resetNumQuestions();
 						for (int i=0;i<node.get("questions").size();i++){
-							QuestionCG question=new QuestionCG();
-							question.setId(node.get("questions").get(i).get("id").getLongValue());
-							question.setFromUserID(node.get("questions").get(i).get("fromUserID").getLongValue());
-							question.setToUserID(node.get("questions").get(i).get("toUserID").getLongValue());
-							question.setItemID(node.get("questions").get(i).get("itemID").getLongValue());
-							question.setQuestion(node.get("questions").get(i).get("isQuestion").getBooleanValue());
-							question.setPostDate(stringToDate(node.get("questions").get(i).get("postDate").getTextValue()));
-							question.setResponseTo(node.get("questions").get(i).get("responseTo").getLongValue());
-							question.setContent(node.get("questions").get(i).get("content").getTextValue());
+							QuestionCG question=new QuestionCG(node.get("questions").get(i));
 							client.getClientInfo().addHTML5QuestionCache(question);
 							if(question.isQuestion())
 								item.incQuestionNum();

@@ -17,6 +17,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import client.Items.*;
+import client.Tools.DateParser;
 import client.clientMain.*;
 
 
@@ -322,7 +323,7 @@ public class MyAccountPage extends Page{
 						start=html.indexOf("<label for=\"endDate",end);
 						end=html.indexOf("</label>",start);
 						start=html.lastIndexOf("\">",end)+2;
-						item.setEndDate(stringToDate(html.substring(start,end)));
+						item.setEndDate(DateParser.stringToDate(html.substring(start,end)));
 					}
 
 					item.calcItemRating();
@@ -390,7 +391,7 @@ public class MyAccountPage extends Page{
 						item.setOwner(true);
 					if(j<=2){
 						item.setName(node.get(itemHeading).get(i).get(bidItemHeading).get("name").getTextValue());
-						item.setEndDate(stringToDate(node.get(itemHeading).get(i).get(bidItemHeading).get("endDate").getTextValue()));
+						item.setEndDate(DateParser.stringToDate(node.get(itemHeading).get(i).get(bidItemHeading).get("endDate").getTextValue()));
 						item.setCurrentBid(node.get(itemHeading).get(i).get(bidItemHeading).get("currentBid").getDoubleValue());
 						if(i!=2)
 							item.setMaxBid(node.get(itemHeading).get(i).get("maxBid").getDoubleValue());
@@ -413,14 +414,14 @@ public class MyAccountPage extends Page{
 
 
 						item.setQuantity(node.get(itemHeading).get(i).get("quantity").getLongValue());
-						item.setBidDate(stringToDate(node.get(itemHeading).get(i).get("bidDate").getTextValue()));
+						item.setBidDate(DateParser.stringToDate(node.get(itemHeading).get(i).get("bidDate").getTextValue()));
 						item.setDescription(node.get(itemHeading).get(i).get(bidItemHeading).get("description").getTextValue());
 						item.setStartPrice(node.get(itemHeading).get(i).get(bidItemHeading).get("startPrice").getDoubleValue());
 						item.setBuyNowPrice(node.get(itemHeading).get(i).get(bidItemHeading).get("buyNowPrice").getDoubleValue());
 						if(item.getBuyNowPrice()==0)
 							item.setForBuyNow(false);
 						item.setNoOfBids(node.get(itemHeading).get(i).get(bidItemHeading).get("noOfBids").getLongValue());
-						item.setStartDate(stringToDate(node.get(itemHeading).get(i).get(bidItemHeading).get("startDate").getTextValue()));
+						item.setStartDate(DateParser.stringToDate(node.get(itemHeading).get(i).get(bidItemHeading).get("startDate").getTextValue()));
 						item.setSellerID(node.get(itemHeading).get(i).get(bidItemHeading).get("sellerID").getLongValue());
 
 						if(j==2){
@@ -438,7 +439,7 @@ public class MyAccountPage extends Page{
 					}
 					else{
 						item.setName(node.get(itemHeading).get(i).get("name").getTextValue());
-						item.setEndDate(stringToDate(node.get(itemHeading).get(i).get("endDate").getTextValue()));
+						item.setEndDate(DateParser.stringToDate(node.get(itemHeading).get(i).get("endDate").getTextValue()));
 						item.setCurrentBid(node.get(itemHeading).get(i).get("currentBid").getDoubleValue());
 						if(node.get(itemHeading).get(i).get("thumbnail").getTextValue().contains("blank"))
 							item.setNumPics(0);
@@ -463,7 +464,7 @@ public class MyAccountPage extends Page{
 						if(item.getBuyNowPrice()==0)
 							item.setForBuyNow(false);
 						item.setNoOfBids(node.get(itemHeading).get(i).get("noOfBids").getLongValue());
-						item.setStartDate(stringToDate(node.get(itemHeading).get(i).get("startDate").getTextValue()));
+						item.setStartDate(DateParser.stringToDate(node.get(itemHeading).get(i).get("startDate").getTextValue()));
 						item.setSellerID(node.get(itemHeading).get(i).get("sellerID").getLongValue());
 
 					}
@@ -483,10 +484,7 @@ public class MyAccountPage extends Page{
 		JsonNode node = mapper.readValue(html.toString(), JsonNode.class);
 		if(html.indexOf("\"sellers\"")!=-1){
 			for (int i=0;i<node.get("sellers").size();i++){
-				SellerCG seller=new SellerCG();
-				seller.setId(node.get("sellers").get(i).get("id").getLongValue());
-				seller.setName(node.get("sellers").get(i).get("name").getTextValue());
-				seller.setRating(node.get("sellers").get(i).get("rating").getLongValue());
+				SellerCG seller=new SellerCG(node.get("sellers").get(i));
 				client.getClientInfo().addHTML5SellerCache(seller);
 			}
 		}
@@ -496,15 +494,7 @@ public class MyAccountPage extends Page{
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode node = mapper.readValue(html.toString(), JsonNode.class);
 		for (int i=0;i<node.get("questions").size();i++){
-			QuestionCG question=new QuestionCG();
-			question.setId(node.get("questions").get(i).get("id").getLongValue());
-			question.setFromUserID(node.get("questions").get(i).get("fromUserID").getLongValue());
-			question.setToUserID(node.get("questions").get(i).get("toUserID").getLongValue());
-			question.setItemID(node.get("questions").get(i).get("itemID").getLongValue());
-			question.setQuestion(node.get("questions").get(i).get("isQuestion").getBooleanValue());
-			question.setPostDate(stringToDate(node.get("questions").get(i).get("postDate").getTextValue()));
-			question.setResponseTo(node.get("questions").get(i).get("responseTo").getLongValue());
-			question.setContent(node.get("questions").get(i).get("content").getTextValue());
+			QuestionCG question=new QuestionCG(node.get("question").get(i));
 			client.getClientInfo().addHTML5QuestionCache(question);
 		}
 	}
