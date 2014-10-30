@@ -1,8 +1,18 @@
 package client.Test;
 
 import java.util.ArrayList;
-import client.Tools.*;
+
 import org.junit.Test;
+
+import client.Tools.ClientSessionStats;
+import client.Tools.CollectStats;
+import client.Tools.Histogram;
+import client.Tools.OutputPageRT;
+import client.Tools.OutputThinkTime;
+import client.Tools.PageTimePair;
+import client.Tools.SiteData;
+import client.Tools.Stats;
+import client.Tools.Stopwatch;
 
 public class TestToolsPackageT2 {
 	public static void main(String[] args) {

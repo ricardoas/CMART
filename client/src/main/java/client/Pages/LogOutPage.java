@@ -4,7 +4,7 @@ import java.util.Date;
 
 import org.w3c.dom.Element;
 
-import client.clientMain.*;
+import client.clientMain.RunSettings;
 
 
 /**
@@ -17,7 +17,7 @@ public class LogOutPage extends Page{
 	double pageRTFactor=1.;
 
 	public LogOutPage(Page page){
-		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL,page.cg);
+		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL);
 		client.pageSpecificRT(pageRTFactor);	// change RT threshold depending on page type
 		searchData=getFormData("search");
 	}
@@ -84,7 +84,7 @@ public class LogOutPage extends Page{
 		}
 		if (verbose)System.out.println("User: "+client.getClientInfo().getUsername()+" - Think Time: "+thinkTime+" ms");
 		if (RunSettings.isOutputThinkTimes()==true)
-			cg.getThinkTimeHist().add(thinkTime);
+			client.getCg().getThinkTimeHist().add(thinkTime);
 		pageThinkTime=thinkTime;
 		return Math.max((int) ((thinkTime-(new Date().getTime()-pageOpenTime))/RunSettings.getThinkTimeSpeedUpFactor()),0);
 	}

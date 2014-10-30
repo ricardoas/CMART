@@ -1,7 +1,6 @@
 package client.Pages;
 
 import java.io.IOException;
-import java.lang.Math;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,7 +14,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import client.clientMain.*;
+import client.clientMain.RunSettings;
 
 
 
@@ -35,7 +34,7 @@ public class UpdateUserPage extends Page{
 	int bonusCharacters=0;
 
 	public UpdateUserPage(Page page){
-		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL,page.cg);
+		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL);
 		client.pageSpecificRT(pageRTFactor);	// change RT threshold depending on page type
 		if(HTML4)
 			searchData=getFormData("search");
@@ -371,7 +370,7 @@ public class UpdateUserPage extends Page{
 		}
 		if (verbose)System.out.println("User: "+client.getClientInfo().getUsername()+" - Think Time: "+thinkTime+" ms");
 		if (RunSettings.isOutputThinkTimes()==true)
-			cg.getThinkTimeHist().add(thinkTime);
+			client.getCg().getThinkTimeHist().add(thinkTime);
 		pageThinkTime=thinkTime;
 		return Math.max((int) ((thinkTime-(new Date().getTime()-pageOpenTime))/RunSettings.getThinkTimeSpeedUpFactor()),0);
 	}

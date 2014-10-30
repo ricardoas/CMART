@@ -1,5 +1,15 @@
 package client.clientMain;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.apache.http.client.utils.URIBuilder;
+
 public class CMARTurl {
 
 	private StringBuilder fullURL;			// full URL of the website
@@ -71,5 +81,21 @@ public class CMARTurl {
 	public int getAppPort(){
 		return appPort;
 	}
+	
+	public URI build(String page, Map<String, String> data) throws URISyntaxException, UnsupportedEncodingException{
+		URIBuilder builder = new URIBuilder();
+		builder.setScheme("http");
+		builder.setHost(ipURL.toString());
+		builder.setPort(appPort);
+		builder.setPath(appURL.toString() + page);
+		for (Entry<String, String> entry : data.entrySet()) {
+			builder.addParameter(entry.getKey(), URLEncoder.encode(entry.getValue(), "UTF-8"));
+		}
+		return builder.build();
+	}
 
+	public URI build(String page) throws UnsupportedEncodingException, URISyntaxException {
+		return build(page, new HashMap<String, String>());
+	}
+	
 }

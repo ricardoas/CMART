@@ -8,7 +8,7 @@ import java.util.TreeMap;
 
 import org.w3c.dom.Element;
 
-import client.clientMain.*;
+import client.clientMain.RunSettings;
 
 
 /**
@@ -23,7 +23,7 @@ public class WatchVideoPage extends Page {
 	double pageRTFactor=1.5;
 
 	public WatchVideoPage(Page page){
-		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL,page.cg);
+		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL);
 		client.pageSpecificRT(pageRTFactor);	// change RT threshold depending on page type
 
 		updateProbabilities();					// update the next move probabilities
@@ -74,7 +74,7 @@ public class WatchVideoPage extends Page {
 		double searchProb=0.;
 		double watchVideoProb=1.;
 
-		if(RunSettings.getWorkloadType()==1){
+		if(RunSettings.getWorkloadTypeCode()==1){
 			homeProb=0.;
 			browseProb=0.;
 			sellProb=0.;
@@ -83,7 +83,7 @@ public class WatchVideoPage extends Page {
 			searchProb=0.;
 			watchVideoProb=1.;
 		}
-		else if(RunSettings.getWorkloadType()==3){
+		else if(RunSettings.getWorkloadTypeCode()==3){
 			homeProb=0.;
 			browseProb=0.;
 			sellProb=0.;
@@ -145,7 +145,7 @@ public class WatchVideoPage extends Page {
 		}
 		if (verbose)System.out.println("User: "+client.getClientInfo().getUsername()+" - Think Time: "+thinkTime+" ms");
 		if (RunSettings.isOutputThinkTimes()==true)
-			cg.getThinkTimeHist().add(thinkTime);
+			client.getCg().getThinkTimeHist().add(thinkTime);
 		pageThinkTime=thinkTime;
 		return Math.max((int) ((thinkTime-(new Date().getTime()-pageOpenTime))/RunSettings.getThinkTimeSpeedUpFactor()),0);
 	}

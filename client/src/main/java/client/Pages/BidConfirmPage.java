@@ -12,7 +12,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import client.clientMain.*;
+import client.clientMain.RunSettings;
 
 
 /**
@@ -27,7 +27,7 @@ public class BidConfirmPage extends Page {
 	double pageRTFactor=1.5;
 
 	public BidConfirmPage(Page page){
-		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL,page.cg);
+		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL);
 		client.pageSpecificRT(pageRTFactor);	// change RT threshold depending on page type
 		client.incItemsBid();					// indicate that an item has been bid on
 		searchData=getFormData("search");		// get the search form data
@@ -176,14 +176,14 @@ public class BidConfirmPage extends Page {
 		double logoutProb=RunSettings.getTransitionProb(pageType,4);
 		double searchProb=RunSettings.getTransitionProb(pageType,5);
 
-		if(RunSettings.getWorkloadType()==1){
+		if(RunSettings.getWorkloadTypeCode()==1){
 			homeProb*=0.8;
 			browseProb*=1.2;
 			sellProb*=0.5;
 			myAccountProb*=0.88;
 			searchProb*=1.17;
 		}
-		else if(RunSettings.getWorkloadType()==3){
+		else if(RunSettings.getWorkloadTypeCode()==3){
 			homeProb*=1.2;
 			browseProb*=0.8;
 			sellProb*=1.5;
@@ -249,7 +249,7 @@ public class BidConfirmPage extends Page {
 		}
 		if (verbose)System.out.println("User: "+client.getClientInfo().getUsername()+" - Think Time: "+thinkTime+" ms");
 		if (RunSettings.isOutputThinkTimes()==true)
-			cg.getThinkTimeHist().add(thinkTime);
+			client.getCg().getThinkTimeHist().add(thinkTime);
 		pageThinkTime=thinkTime;
 		return Math.max((int) ((thinkTime-(new Date().getTime()-pageOpenTime))/RunSettings.getThinkTimeSpeedUpFactor()),0);
 	}

@@ -6,8 +6,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -29,7 +29,7 @@ public class BuyItemPage extends Page{
 	double pageRTFactor=1.2;
 
 	public BuyItemPage(Page page){
-		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL,page.cg);
+		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL);
 		client.pageSpecificRT(pageRTFactor);	// change RT threshold depending on page type
 		if(HTML4)
 			searchData=getFormData("search");
@@ -305,14 +305,14 @@ public class BuyItemPage extends Page{
 		double searchProb=RunSettings.getTransitionProb(pageType,5);
 		double buyItemProb=RunSettings.getTransitionProb(pageType,6);
 
-		if(RunSettings.getWorkloadType()==1){
+		if(RunSettings.getWorkloadTypeCode()==1){
 			homeProb*=0.85;
 			browseProb*=1.2;
 			sellProb*=0.5;
 			myAccountProb*=0.88;
 			searchProb*=1.17;
 		}
-		else if(RunSettings.getWorkloadType()==3){
+		else if(RunSettings.getWorkloadTypeCode()==3){
 			homeProb*=1.15;
 			browseProb*=0.8;
 			sellProb*=2;
@@ -399,7 +399,7 @@ public class BuyItemPage extends Page{
 
 		if (verbose)System.out.println("User: "+client.getClientInfo().getUsername()+" - Think Time: "+thinkTime+" ms");
 		if (RunSettings.isOutputThinkTimes()==true)
-			cg.getThinkTimeHist().add(thinkTime);
+			client.getCg().getThinkTimeHist().add(thinkTime);
 		pageThinkTime=thinkTime;
 		return Math.max((int) ((thinkTime-(new Date().getTime()-pageOpenTime))/RunSettings.getThinkTimeSpeedUpFactor()),0);
 	}

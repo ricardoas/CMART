@@ -5,13 +5,15 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import client.Items.ItemCG;
-import client.clientMain.*;
+import client.clientMain.RunSettings;
 
 
 /**
@@ -29,7 +31,7 @@ public class HomePage extends Page {
 	private static final String HREF_TEXT="href=\".";
 
 	public HomePage(Page page){
-		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL,page.cg);
+		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL);
 		client.pageSpecificRT(pageRTFactor);	// change RT threshold depending on page type
 		searchData=getFormData("search");
 		if(client.isLoggedIn())
@@ -256,12 +258,12 @@ public class HomePage extends Page {
 		double logOutProb=RunSettings.getTransitionProb(pageType,6);
 		double recommendedItemsProb=RunSettings.getTransitionProb(pageType,7);
 
-		if(RunSettings.getWorkloadType()==1){
+		if(RunSettings.getWorkloadTypeCode()==1){
 			sellProb*=0.45;
 			browseProb*=1.2;	
 			searchProb*=1.2;
 		}
-		else if(RunSettings.getWorkloadType()==3){
+		else if(RunSettings.getWorkloadTypeCode()==3){
 			sellProb*=1.8;
 			browseProb*=0.8;
 			searchProb*=0.8;
@@ -378,7 +380,7 @@ public class HomePage extends Page {
 
 		if (verbose)System.out.println("User: "+client.getClientInfo().getUsername()+" - Think Time: "+thinkTime+" ms");
 		if (RunSettings.isOutputThinkTimes()==true)
-			cg.getThinkTimeHist().add(thinkTime);
+			client.getCg().getThinkTimeHist().add(thinkTime);
 		pageThinkTime=thinkTime;
 		return Math.max((int) ((thinkTime-(new Date().getTime()-pageOpenTime))/RunSettings.getThinkTimeSpeedUpFactor()),0);
 	}

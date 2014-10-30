@@ -6,9 +6,12 @@ import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
-import org.w3c.dom.*;
 
-import client.clientMain.*;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import client.clientMain.RunSettings;
 
 
 /**
@@ -23,7 +26,7 @@ public class AskQuestionPage extends Page{
 	double pageRTFactor=1.;
 
 	public AskQuestionPage(Page page){
-		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL,page.cg);
+		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL);
 		client.pageSpecificRT(pageRTFactor);	// change RT threshold depending on page type
 	}
 
@@ -204,7 +207,7 @@ public class AskQuestionPage extends Page{
 		}
 		if (verbose)System.out.println("User: "+client.getClientInfo().getUsername()+" - Think Time: "+thinkTime+" ms");
 		if (RunSettings.isOutputThinkTimes()==true)
-			cg.getThinkTimeHist().add(thinkTime);
+			client.getCg().getThinkTimeHist().add(thinkTime);
 		pageThinkTime=thinkTime;
 		return Math.max((int) ((thinkTime-(new Date().getTime()-pageOpenTime))/RunSettings.getThinkTimeSpeedUpFactor()),0);
 	}

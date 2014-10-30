@@ -1,20 +1,50 @@
 package client.Pages;
 
+import static client.Pages.PageType.BROWSE_PAGE_NUM;
+import static client.Pages.PageType.BUYITEM_PAGE_NUM;
+import static client.Pages.PageType.HOME_PAGE_NUM;
+import static client.Pages.PageType.ITEM_PAGE_NUM;
+import static client.Pages.PageType.LOGIN_PAGE_NUM;
+import static client.Pages.PageType.LOGOUT_PAGE_NUM;
+import static client.Pages.PageType.MYACCOUNT_PAGE_NUM;
+import static client.Pages.PageType.REGISTER_PAGE_NUM;
+import static client.Pages.PageType.SEARCH_PAGE_NUM;
+import static client.Pages.PageType.SELLITEM_PAGE_NUM;
+import static client.Pages.PageType.UPDATEUSER_PAGE_NUM;
+
 import java.awt.Image;
-import java.text.DateFormat;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.ConnectException;
+import java.net.MalformedURLException;
+import java.net.SocketException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.Random;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.io.*;
-import java.net.*;
 
 import javax.imageio.ImageIO;
 
-import org.apache.http.*;
-import org.apache.http.client.*;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.NoHttpResponseException;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -28,12 +58,18 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import client.Items.ItemCG;
 import client.Items.QuestionCG;
-import client.Tools.*;
-import client.clientMain.*;
+import client.Tools.DateParser;
+import client.Tools.PageTimePair;
+import client.Tools.Stopwatch;
+import client.clientMain.Client;
+import client.clientMain.RunSettings;
 
 /**
  * Implements a General Page Type, specific pages are extended from this
@@ -42,7 +78,6 @@ import client.clientMain.*;
  */
 
 public class Page {
-	ClientGenerator cg;		// client generator that created the client on the page
 	StringBuilder url;		// URL of current page
 	StringBuilder html;		// HTML (or JSON) of current page
 	StringBuilder lastURL;	// url of previously accessed page
@@ -101,29 +136,6 @@ public class Page {
 	protected static final String LEAVE_COMMENT_TEXT="Leave Comment";
 	protected static final String ANSWER_QUESTION_TEXT="Answer Question";
 
-	// page numbers used to index pages
-	protected static final int LOGIN_PAGE_NUM=1;
-	protected static final int REGISTER_PAGE_NUM=2;
-	protected static final int ITEM_PAGE_NUM=3;
-	protected static final int MYACCOUNT_PAGE_NUM=4;
-	protected static final int UPDATEUSER_PAGE_NUM=5;
-	protected static final int SELLITEM_PAGE_NUM=6;
-	protected static final int BIDCONFIRM_PAGE_NUM=7;
-	protected static final int SELLITEMCONFIRM_PAGE_NUM=8;
-	protected static final int BROWSE_PAGE_NUM=9;
-	protected static final int BUYITEM_PAGE_NUM=10;
-	protected static final int UPLOADIMAGES_PAGE_NUM=11;
-	protected static final int VIEWUSER_PAGE_NUM=12;
-	protected static final int CONFIRMBUY_PAGE_NUM=13;
-	protected static final int LOGOUT_PAGE_NUM=14;
-	protected static final int HOME_PAGE_NUM=15;
-	protected static final int SEARCH_PAGE_NUM=16;
-	protected static final int BIDHISTORY_PAGE_NUM=17;
-	protected static final int ASKQUESTION_PAGE_NUM=18;
-	protected static final int LEAVECOMMENT_PAGE_NUM=19;
-	protected static final int CONFIRMCOMMENT_PAGE_NUM=20;
-	protected static final int ANSWERQUESTION_PAGE_NUM=21;
-
 
 	/**
 	 * Declares a new general page type and opens the page
@@ -132,62 +144,68 @@ public class Page {
 	 * @param lastURL - url of last page
 	 * @param client - client opening page
 	 */
-	public Page(StringBuilder url, int lastPageType, StringBuilder lastURL, Client client, ClientGenerator cg) throws UnknownHostException, IOException, InterruptedException, URISyntaxException{
-		this.url=url;
-		this.lastPageType=lastPageType;
-		this.lastURL=lastURL;
-		this.client=client;
-		this.cg=cg;
+	public Page(StringBuilder url, int lastPageType, StringBuilder lastURL, Client client) throws UnknownHostException, IOException, InterruptedException, URISyntaxException{
+		this.url = url;
+		this.lastPageType = lastPageType;
+		this.lastURL = lastURL;
+		this.client = client;
 
-		xmlDocument=client.getXMLDocument();
+		xmlDocument = client.getXMLDocument();
 
-		// opens the page only if the url represents a url
-		if (!url.toString().startsWith(HTML_TEXT)&&!url.toString().startsWith("NEXTLINK")&&!url.toString().startsWith("{\"")){
-			if(HTML4){
-				this.html=openURL(url);
-			}
-			else{
-				StringBuilder rootURL=new StringBuilder();
-				if(url.indexOf("/myaccount?")!=-1)
-					rootURL=new StringBuilder(client.getCMARTurl().getAppURL()).append("/myaccount.html");
-				else if(url.indexOf("/browsecategory?")!=-1)
-					rootURL=new StringBuilder(client.getCMARTurl().getAppURL()).append("/browse.html");
-				else if(url.indexOf("/search?")!=-1)
-					rootURL=new StringBuilder(client.getCMARTurl().getAppURL()).append("/search.html");
-				else if(url.indexOf("/updateuserdetails?")!=-1)
-					rootURL=new StringBuilder(client.getCMARTurl().getAppURL()).append("/updateuserdetails.html");
-				else if(url.indexOf("/viewitem?")!=-1||url.indexOf("ITEM")!=-1)
-					rootURL=new StringBuilder(client.getCMARTurl().getAppURL()).append("/viewitem.html");
-				else if(url.indexOf("/index.html")!=-1&&client.isLoggedIn()){
-					rootURL=url;
-					url=new StringBuilder(client.getCMARTurl().getAppURL()).append("/index?userID=").append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=").append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&getRecommendation=1&recommendationPageNo=0");
+		String urlString = url.toString();
+		if (isURI(urlString)) {
+			if (HTML4) {
+				this.html = openURL(url);
+			} else {
+				StringBuilder rootURL = new StringBuilder();
+				if (urlString.contains("/myaccount?")) {
+					rootURL = new StringBuilder(client.getCMARTurl().getAppURL()).append("/myaccount.html");
+				} else if (urlString.contains("/browsecategory?")) {
+					rootURL = new StringBuilder(client.getCMARTurl().getAppURL()).append("/browse.html");
+				} else if (urlString.contains("/search?")) {
+					rootURL = new StringBuilder(client.getCMARTurl().getAppURL()).append("/search.html");
+				} else if (urlString.contains("/updateuserdetails?")) {
+					rootURL = new StringBuilder(client.getCMARTurl().getAppURL()).append("/updateuserdetails.html");
+				} else if (urlString.contains("/viewitem?") || urlString.contains("ITEM")) {
+					rootURL = new StringBuilder(client.getCMARTurl().getAppURL()).append("/viewitem.html");
+				} else if (urlString.contains("/index.html") && client.isLoggedIn()) {
+					rootURL = url;
+					url = new StringBuilder(client.getCMARTurl().getAppURL()).append("/index?userID=")
+							.append(client.getClientInfo().getHTML5Cache().get("userID")).append("&authToken=")
+							.append(client.getClientInfo().getHTML5Cache().get("authToken")).append("&getRecommendation=1&recommendationPageNo=0");
+				} else {
+					rootURL = url;
+					url = null;
 				}
-				else{
-					rootURL=url;
-					url=null;
-				}
-
-
-				this.html=openHTML5Page(rootURL,url);
+				this.html = openHTML5Page(rootURL, url);
 			}
+		} else {
+			this.html = url;
 		}
-		else{
-			this.html=url;
+		
+		pageOpenTime = System.currentTimeMillis(); // time the page is opened
+		this.pageType = getPageType(); // gets the page type
+		if (verbose){
+			System.out.println("User: " + client.getClientInfo().getUsername() + " - Page Type: " + this.pageType);
 		}
-		pageOpenTime=new Date().getTime();	// time the page is opened
-		this.pageType=getPageType();		// gets the page type
-		if (verbose)System.out.println("User: "+client.getClientInfo().getUsername()+" - Page Type: "+this.pageType);
 
 		int start = html.indexOf("$(window).load(function(){preloadImages([");
-		if(start!=-1){
-			start+="$(window).load(function(){preloadImages([".length();
-			int end=html.indexOf("]",start);
-			if(end!=start+1){
-				GetPrefetchImage gpi = new GetPrefetchImage(html.substring(start,end));
-				gpi.start();
+		if (start != -1) {
+			start += "$(window).load(function(){preloadImages([".length();
+			int end = html.indexOf("]", start);
+			if (end != start + 1) {
+				new GetPrefetchImage(html.substring(start, end)).start();
 			}
 		}
+	}
 
+	/**
+	 * Check if a {@link String} is page content (HTML) or {@link URI} 
+	 * @param string {@link String} to check.
+	 * @return 
+	 */
+	private boolean isURI(String string) {
+		return !string.startsWith(HTML_TEXT) && !string.startsWith("NEXTLINK") && !string.startsWith("{\"");
 	}
 
 	/**
@@ -199,7 +217,7 @@ public class Page {
 	 * @param pageOpenTime - time that the page was opened
 	 * @param lastURL - url of previous page
 	 */
-	public Page(StringBuilder url,StringBuilder html,Client client, int pageType, long pageOpenTime,int lastPageType, StringBuilder lastURL,ClientGenerator cg){
+	public Page(StringBuilder url,StringBuilder html,Client client, int pageType, long pageOpenTime,int lastPageType, StringBuilder lastURL){
 		this.url=url;
 		this.html=html;
 		this.client=client;
@@ -207,7 +225,6 @@ public class Page {
 		this.pageOpenTime=pageOpenTime;
 		this.lastPageType=lastPageType;
 		this.lastURL=lastURL;
-		this.cg=cg;
 
 		allPagesImages.add("images/misc/button-gloss.png");
 		itemPageImages.add("js/themes/light/pointer.png");
@@ -223,158 +240,74 @@ public class Page {
 	 * @return pageType
 	 */
 	public int getPageType() throws JsonParseException, JsonMappingException, IOException{
-		return getPageType2(html);
+		return getPageType(html);
 	}
-	/**
-	 * Gets the page type number of a submitted pagepage
-	 * @param line - HTML of the page to find the pageType number on
-	 * @return
-	 */
-	public int getPageType(StringBuilder line) throws JsonParseException, JsonMappingException, IOException{
-		return getPageType2(line);
-	}
-
+	
 	/**
 	 * Determines what type of page the page is
 	 * Uses the page number index defined in Page.java
 	 * @return The page type index
 	 */
-	public int getPageType2(StringBuilder line) throws JsonParseException, JsonMappingException, IOException{
-		int pageType=0;
-		if(line.indexOf(HTTP_RESPONSE_ERROR)!=-1)
-			return pageType;
-		String title=null;	// the title of the page (HTML4)
-		boolean testTitle=true;	// if the page type should be determined from the title
-		// gets the title of the page from the html
-		int start=line.indexOf(TITLE_TEXT)+(TITLE_TEXT).length();
-		int end=line.indexOf("</TITLE>",start);
-		if(end!=-1)	// if the title markers exist
-			title=line.substring(start,end);
-		if (!HTML4){
-			String htmlS=line.toString();
-			if(htmlS.equals("PAGE CACHED")){
-				String testTitle2=this.url.toString();
+	public int getPageType(StringBuilder content) throws JsonParseException, JsonMappingException, IOException{
+		if(content.indexOf(HTTP_RESPONSE_ERROR)!=-1){
+			return PageType.NONE.getCode();
+		}
+		
+		int start=content.indexOf(TITLE_TEXT)+(TITLE_TEXT).length();
+		int end=content.indexOf("</TITLE>",start);
+		
+		// the title of the page (HTML4)
+		String title = (end != -1) ? content.substring(start, end) : null;
+		
+		if (!HTML4) {
+			String htmlS = content.toString();
+			if (htmlS.equals("PAGE CACHED")) {
+				String urlString = this.url.toString();
 
-				if(testTitle2.contains("/viewitem.html")){
-					pageType=ITEM_PAGE_NUM;
-					testTitle=false;
+				if (urlString.contains("/viewitem.html")) {
+					return ITEM_PAGE_NUM.getCode();
+				} else if (urlString.contains("/sell.html")) {
+					return SELLITEM_PAGE_NUM.getCode();
+				} else if (urlString.contains("/logout.html")) {
+					return LOGOUT_PAGE_NUM.getCode();
+				} else if (urlString.contains("/index.html")) {
+					return HOME_PAGE_NUM.getCode();
 				}
-				else if(testTitle2.contains("/sell.html")){
-					pageType=SELLITEM_PAGE_NUM;
-					testTitle=false;
-				}
-				else if(testTitle2.contains("/logout.html")){
-					pageType=LOGOUT_PAGE_NUM;
-					testTitle=false;
-				}
-				else if(testTitle2.contains("/index.html")){
-					pageType=HOME_PAGE_NUM;
-					testTitle=false;
-				}
-			}
-
-			if (htmlS.startsWith("NEXTLINK")){	// for the NEXTLINK commands, get out the page type
-				title=line.substring(html.indexOf("NEXTLINK")+8);
-			}
-			else if(htmlS.contains("<?xml version=\"1.0\"  encoding=\"UTF-8\" ?><recommendation>")){
-				pageType=HOME_PAGE_NUM;
-				testTitle=false;
-			}
-			else if(htmlS.startsWith("ITEM")){
-				pageType=ITEM_PAGE_NUM;
-				testTitle=false;
-			}
-			else if(htmlS.startsWith("{")){
+			} else if (htmlS.startsWith("NEXTLINK")) {
+				// for the NEXTLINK commands, get out the page type
+				title = content.substring(html.indexOf("NEXTLINK") + 8);
+				// Find out by title
+			} else if (htmlS.contains("<?xml version=\"1.0\"  encoding=\"UTF-8\" ?><recommendation>")) {
+				return HOME_PAGE_NUM.getCode();
+			} else if (htmlS.startsWith("ITEM")) {
+				return ITEM_PAGE_NUM.getCode();
+			} else if (htmlS.startsWith("{")) {
 				ObjectMapper mapper = new ObjectMapper();
 				JsonNode node = mapper.readValue(htmlS, JsonNode.class);
-				String pageTypeJSON=node.get("pageType").getTextValue();
-				if(pageTypeJSON.equals("login")){
-					pageType=LOGIN_PAGE_NUM;
-					testTitle=false;
-				}
-				else if (pageTypeJSON.equals("viewitem")){
-					pageType=ITEM_PAGE_NUM;
-					testTitle=false;
-				}
-				else if (pageTypeJSON.equals("register")){
-					pageType=REGISTER_PAGE_NUM;
-					testTitle=false;
-				}
-				else if (pageTypeJSON.equals("myaccount")){
-					pageType=MYACCOUNT_PAGE_NUM;
-					testTitle=false;
-				}
-				else if (pageTypeJSON.equals("sell")){
-					pageType=SELLITEM_PAGE_NUM;
-					testTitle=false;
-				}
-				else if (pageTypeJSON.equals("browse")){
-					pageType=BROWSE_PAGE_NUM;
-					testTitle=false;
-				}
-				else if (pageTypeJSON.equals("search")){
-					pageType=SEARCH_PAGE_NUM;
-					testTitle=false;
-				}
-				else if (pageTypeJSON.equals("updateuserdetails")){
-					pageType=UPDATEUSER_PAGE_NUM;
-					testTitle=false;
-				}
-				else if (pageTypeJSON.equals("buyitem")){
-					pageType=BUYITEM_PAGE_NUM;
-					testTitle=false;
+				String pageTypeJSON = node.get("pageType").getTextValue();
+				if (pageTypeJSON.equals("login")) {
+					return LOGIN_PAGE_NUM.getCode();
+				} else if (pageTypeJSON.equals("viewitem")) {
+					return ITEM_PAGE_NUM.getCode();
+				} else if (pageTypeJSON.equals("register")) {
+					return REGISTER_PAGE_NUM.getCode();
+				} else if (pageTypeJSON.equals("myaccount")) {
+					return MYACCOUNT_PAGE_NUM.getCode();
+				} else if (pageTypeJSON.equals("sell")) {
+					return SELLITEM_PAGE_NUM.getCode();
+				} else if (pageTypeJSON.equals("browse")) {
+					return BROWSE_PAGE_NUM.getCode();
+				} else if (pageTypeJSON.equals("search")) {
+					return SEARCH_PAGE_NUM.getCode();
+				} else if (pageTypeJSON.equals("updateuserdetails")) {
+					return UPDATEUSER_PAGE_NUM.getCode();
+				} else if (pageTypeJSON.equals("buyitem")) {
+					return BUYITEM_PAGE_NUM.getCode();
 				}
 			}
-
 		}
 
-		// determines the page type
-		if (testTitle){
-			if (title.equals("Login"))
-				pageType=LOGIN_PAGE_NUM;
-			else if(title.equals("Register User"))
-				pageType=REGISTER_PAGE_NUM;
-			else if(title.equals("View Item"))
-				pageType=ITEM_PAGE_NUM;
-			else if (title.equals("My Account"))
-				pageType=MYACCOUNT_PAGE_NUM;
-			else if(title.equals("Update User Details"))
-				pageType=UPDATEUSER_PAGE_NUM;
-			else if(title.equals("Sell Item"))
-				pageType=SELLITEM_PAGE_NUM;
-			else if(title.equals("Bid Confirmed"))
-				pageType=BIDCONFIRM_PAGE_NUM;
-			else if(title.equals("Sell Item Confirmed"))
-				pageType=SELLITEMCONFIRM_PAGE_NUM;
-			else if(title.equals("Browse Category"))
-				pageType=BROWSE_PAGE_NUM;
-			else if(title.equals("Buy Item"))
-				pageType=BUYITEM_PAGE_NUM;
-			else if(title.equals("Upload images"))
-				pageType=UPLOADIMAGES_PAGE_NUM;
-			else if(title.equals("View User"))
-				pageType=VIEWUSER_PAGE_NUM;
-			else if(title.equals("Buy Confirmed"))
-				pageType=CONFIRMBUY_PAGE_NUM;
-			else if(title.equals("Logout"))
-				pageType=LOGOUT_PAGE_NUM;
-			else if(title.equals("Welcome to CMART"))
-				pageType=HOME_PAGE_NUM;
-			else if(title.equals("Search"))
-				pageType=SEARCH_PAGE_NUM;
-			else if(title.equals("Bid History"))
-				pageType=BIDHISTORY_PAGE_NUM;
-			else if(title.equals("Ask Question"))
-				pageType=ASKQUESTION_PAGE_NUM;
-			else if(title.equals("Leave Comment"))
-				pageType=LEAVECOMMENT_PAGE_NUM;
-			else if(title.equals("Confirm Comment"))
-				pageType=CONFIRMCOMMENT_PAGE_NUM;
-			else if(title.equals(ANSWER_QUESTION_TEXT))
-				pageType=ANSWERQUESTION_PAGE_NUM;
-		}
-
-		return pageType;
+		return PageType.getBasedOnTitle(title).getCode();
 	}
 
 	/**
@@ -386,33 +319,7 @@ public class Page {
 	 * @throws JsonParseException 
 	 */
 	public Page toPageType() throws ParseException, JsonParseException, JsonMappingException, IOException{
-		Page pageToReturn=null;
-		switch(pageType){
-		case 0: pageToReturn=this;break;
-		case LOGIN_PAGE_NUM: pageToReturn= new LoginPage(this); break;
-		case REGISTER_PAGE_NUM: pageToReturn=new RegisterUserPage(this);break;
-		case ITEM_PAGE_NUM: pageToReturn=new ItemPage(this); break;
-		case MYACCOUNT_PAGE_NUM: pageToReturn=new MyAccountPage(this); break;
-		case UPDATEUSER_PAGE_NUM: pageToReturn=new UpdateUserPage(this); break;
-		case SELLITEM_PAGE_NUM: pageToReturn=new SellItemPage(this); break;
-		case BIDCONFIRM_PAGE_NUM: pageToReturn=new BidConfirmPage(this); break;
-		case SELLITEMCONFIRM_PAGE_NUM: pageToReturn=new SellItemConfirmPage(this); break;
-		case BROWSE_PAGE_NUM: pageToReturn=new BrowsePage(this); break;
-		case BUYITEM_PAGE_NUM: pageToReturn=new BuyItemPage(this); break;
-		case UPLOADIMAGES_PAGE_NUM: pageToReturn=new UploadImagesPage(this); break;
-		case VIEWUSER_PAGE_NUM: pageToReturn=new ViewUserPage(this); break;
-		case CONFIRMBUY_PAGE_NUM: pageToReturn=new ConfirmBuyPage(this); break;
-		case LOGOUT_PAGE_NUM: pageToReturn=new LogOutPage(this); break;
-		case HOME_PAGE_NUM: pageToReturn=new HomePage(this); break;
-		case SEARCH_PAGE_NUM: pageToReturn=new SearchPage(this); break;
-		case BIDHISTORY_PAGE_NUM: pageToReturn=new BidHistoryPage(this); break;
-		case ASKQUESTION_PAGE_NUM: pageToReturn=new AskQuestionPage(this); break;
-		case LEAVECOMMENT_PAGE_NUM: pageToReturn=new LeaveCommentPage(this); break;
-		case CONFIRMCOMMENT_PAGE_NUM: pageToReturn=new ConfirmCommentPage(this); break;
-		case ANSWERQUESTION_PAGE_NUM: pageToReturn=new AnswerQuestionPage(this); break;
-		}
-
-		return pageToReturn;
+		return pageType == 0? this: PageType.values()[pageType].buildPage(this);
 	}
 
 
@@ -429,9 +336,6 @@ public class Page {
 		if(verbose)System.out.println("URLSTRING "+urlString);
 		String inputLine;	// each line being read in
 
-		//		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-		//		cm.setMaxTotal(100);
-		//		HttpClient httpclient = new CloseableHttpClient(cm);
 		try{
 			URI uri=URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), urlString.toString().replace(" ", "%20"), null, null);
 			HttpGet httpget = new HttpGet(uri);
@@ -457,7 +361,7 @@ public class Page {
 			br.close();
 			if(response.getStatusLine().getStatusCode()>=400){
 				this.responseTime=sw.stop();	// stops the Stopwatch and determines the final response time
-				cg.getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
+				client.getCg().getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
 				client.addRT(responseTime);	// indexes the response time as the latest response time for the client
 				client.incRequestErrors();
 				client.incNumPagesOpened();
@@ -494,8 +398,8 @@ public class Page {
 				client.setMessage(openAJAXRequest(new StringBuilder(urlString).append("&getRecommendation=1&recommendationPageNo=0")).toString());
 
 			this.responseTime=sw.stop();	// stops the Stopwatch and determines the final response time
-			cg.getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
-			cg.addPageRT(getPageType(ret), responseTime);	// saves the response time for the specific page
+			client.getCg().getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
+			client.getCg().addPageRT(getPageType(ret), responseTime);	// saves the response time for the specific page
 			client.addRT(responseTime);	// indexes the response time as the latest reponse time for the client
 			client.incTotalRT(responseTime);
 			client.incNumPagesOpened();
@@ -586,8 +490,8 @@ public class Page {
 			this.responseTime=0;
 		else
 			this.responseTime=finalPagePair.getSw().stop();	// stops the Stopwatch and determines the final response time
-		cg.getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
-		cg.addPageRT(getPageType(finalPagePair.getPage()), responseTime);	// saves the response time for the specific page
+		client.getCg().getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
+		client.getCg().addPageRT(getPageType(finalPagePair.getPage()), responseTime);	// saves the response time for the specific page
 		client.addRT(responseTime);	// indexes the response time as the latest response time for the client
 		client.incTotalRT(responseTime);
 		client.incNumPagesOpened();
@@ -815,8 +719,8 @@ public class Page {
 				this.responseTime=0;
 			else
 				this.responseTime=finalPagePair.getSw().stop();	// stops the Stopwatch and determines the final response time
-			cg.getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
-			cg.addPageRT(getPageType(finalPagePair.getPage()), responseTime);	// saves the response time for the specific page
+			client.getCg().getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
+			client.getCg().addPageRT(getPageType(finalPagePair.getPage()), responseTime);	// saves the response time for the specific page
 			client.addRT(responseTime);	// indexes the response time as the latest response time for the client
 			client.incTotalRT(responseTime);
 			client.incNumPagesOpened();
@@ -884,7 +788,7 @@ public class Page {
 			br.close();
 			if(response.getStatusLine().getStatusCode()>=400){
 				this.responseTime=sw.stop();	// stops the Stopwatch and determines the final response time
-				cg.getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
+				client.getCg().getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
 				client.addRT(responseTime);	// indexes the response time as the latest response time for the client
 				client.incRequestErrors();
 				client.incNumPagesOpened();
@@ -1110,7 +1014,7 @@ public class Page {
 			br.close();
 			if(response.getStatusLine().getStatusCode()>=400){
 				this.responseTime=sw.stop();	// stops the Stopwatch and determines the final response time
-				cg.getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
+				client.getCg().getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
 				client.addRT(responseTime);	// indexes the response time as the latest reponse time for the client
 				client.incRequestErrors();
 				client.incNumPagesOpened();
@@ -1140,8 +1044,8 @@ public class Page {
 			this.responseTime=sw.stop();		// gets the final response time
 			threadExecutor.shutdown();
 			//	httpclient.getConnectionManager().shutdown();
-			cg.getStats().getActiveHistogram().add(responseTime);		// adds the response time to the stats
-			cg.addPageRT(getPageType(ret), responseTime);	// saves the response time for the specific page
+			client.getCg().getStats().getActiveHistogram().add(responseTime);		// adds the response time to the stats
+			client.getCg().addPageRT(getPageType(ret), responseTime);	// saves the response time for the specific page
 			client.addRT(responseTime);	// adds the response time to the clients most recent response time
 			client.incTotalRT(responseTime);
 			client.incNumPagesOpened();
@@ -1233,7 +1137,7 @@ public class Page {
 			br.close();
 			if(response.getStatusLine().getStatusCode()>=400){
 				this.responseTime=sw.stop();	// stops the Stopwatch and determines the final response time
-				cg.getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
+				client.getCg().getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
 				client.addRT(responseTime);	// indexes the response time as the latest reponse time for the client
 				client.incRequestErrors();
 				client.incNumPagesOpened();
@@ -1274,8 +1178,8 @@ public class Page {
 			this.responseTime=sw.stop();		// gets the final response time
 			threadExecutor.shutdown();
 			//httpclient.getConnectionManager().shutdown();
-			cg.getStats().getActiveHistogram().add(responseTime);		// adds the response time to the stats
-			cg.addPageRT(getPageType(ret), responseTime);	// saves the response time for the specific page
+			client.getCg().getStats().getActiveHistogram().add(responseTime);		// adds the response time to the stats
+			client.getCg().addPageRT(getPageType(ret), responseTime);	// saves the response time for the specific page
 			client.addRT(responseTime);	// adds the response time to the clients most recent response time
 			client.incTotalRT(responseTime);
 			client.incNumPagesOpened();
@@ -1474,7 +1378,7 @@ public class Page {
 	 */
 	protected double adjustLogOutProb(double prob){
 		long avg=client.getRTavg();
-		//long avg=cg.getStats().getActiveHistogram().getPercentile(0.5);
+		//long avg=client.getCg().getStats().getActiveHistogram().getPercentile(0.5);
 		long threshold=client.getRTThreshold();
 		if (avg>threshold){
 			prob*=(((((double)avg)/((double)threshold))-1.)/(Math.log(2.*(double)client.getNumPagesOpened()+1.)))+1.;
@@ -1902,7 +1806,7 @@ public class Page {
 						if (getConnectionCount()==0)
 							sw.pause();
 					}
-					if(getPageType(str)==ITEM_PAGE_NUM&&str.indexOf("_1.jpg")!=-1){
+					if(getPageType(str)==ITEM_PAGE_NUM.getCode()&&str.indexOf("_1.jpg")!=-1){
 						for (String s:itemPageImages){
 							if(isImageOnPage(s)==false){
 								inCache=false;
@@ -2240,7 +2144,7 @@ public class Page {
 		}
 		if (verbose)System.out.println("User: "+client.getClientInfo().getUsername()+" - Think Time: "+thinkTime+" ms");
 		if (RunSettings.isOutputThinkTimes()==true)
-			cg.getThinkTimeHist().add(thinkTime);
+			client.getCg().getThinkTimeHist().add(thinkTime);
 		pageThinkTime=thinkTime;
 		return Math.max((int) ((thinkTime-(new Date().getTime()-pageOpenTime))/RunSettings.getThinkTimeSpeedUpFactor()),0);
 	}

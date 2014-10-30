@@ -16,9 +16,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import client.Items.*;
+import client.Items.ItemCG;
+import client.Items.QuestionCG;
+import client.Items.SellerCG;
 import client.Tools.DateParser;
-import client.clientMain.*;
+import client.clientMain.RunSettings;
 
 
 /**
@@ -33,8 +35,8 @@ public class MyAccountPage extends Page{
 	double pageRTFactor=1.;
 
 	public MyAccountPage(Page page) throws JsonParseException, JsonMappingException, IOException, ParseException{
-		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL,page.cg);
-		if(lastPageType==LOGIN_PAGE_NUM || lastPageType==REGISTER_PAGE_NUM){
+		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL);
+		if(lastPageType==PageType.LOGIN_PAGE_NUM.getCode() || lastPageType==PageType.REGISTER_PAGE_NUM.getCode()){
 			pageRTFactor=1.5;
 			if(HTML4)
 				client.setClientID(Long.parseLong(url.substring(url.indexOf("userID=")+"userID=".length(),url.indexOf("&",url.indexOf("userID=")))));
@@ -517,7 +519,7 @@ public class MyAccountPage extends Page{
 		double checkCurrentSaleProb=RunSettings.getTransitionProb(pageType,9);
 		double checkPreviouslySoldProb=RunSettings.getTransitionProb(pageType,10);
 
-		if(RunSettings.getWorkloadType()==1){
+		if(RunSettings.getWorkloadTypeCode()==1){
 			searchProb*=1.2;
 			sellProb*=0.65;
 			browseProb*=1.15;
@@ -525,7 +527,7 @@ public class MyAccountPage extends Page{
 			updateProb*=0.83;
 			checkCurrentBidProb*=1.05;
 		}
-		else if(RunSettings.getWorkloadType()==3){
+		else if(RunSettings.getWorkloadTypeCode()==3){
 			searchProb*=0.8;
 			sellProb*=1.35;
 			browseProb*=0.85;
@@ -549,7 +551,7 @@ public class MyAccountPage extends Page{
 			checkCurrentSaleProb*=(1.+(rand.nextDouble()-0.5)*.3);
 			checkPreviouslySoldProb*=(1.+(rand.nextDouble()-0.5)*.3);
 
-			if(html.indexOf("Update details")==-1||lastPageType==UPDATEUSER_PAGE_NUM)
+			if(html.indexOf("Update details")==-1||lastPageType==PageType.UPDATEUSER_PAGE_NUM.getCode())
 				updateProb/=10;
 
 			for (Entry<Long,ItemCG> e:client.getCurrentBids().entrySet()){
@@ -576,7 +578,7 @@ public class MyAccountPage extends Page{
 				checkPreviouslySoldProb=0;
 			}
 
-			if ((lastPageType==LOGIN_PAGE_NUM||lastPageType==REGISTER_PAGE_NUM)){
+			if ((lastPageType==PageType.LOGIN_PAGE_NUM.getCode()||lastPageType==PageType.REGISTER_PAGE_NUM.getCode())){
 				logOutProb/=3;	
 			}
 
@@ -660,7 +662,7 @@ public class MyAccountPage extends Page{
 		}
 		if (verbose)System.out.println("User: "+client.getClientInfo().getUsername()+" - Think Time: "+thinkTime+" ms");
 		if (RunSettings.isOutputThinkTimes()==true)
-			cg.getThinkTimeHist().add(thinkTime);
+			client.getCg().getThinkTimeHist().add(thinkTime);
 		pageThinkTime=thinkTime;
 		return Math.max((int) ((thinkTime-(new Date().getTime()-pageOpenTime))/RunSettings.getThinkTimeSpeedUpFactor()),0);
 	}

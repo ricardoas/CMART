@@ -1,8 +1,11 @@
 package client.Test;
 
 import java.util.ArrayList;
-import client.Items.*;
+
 import org.junit.Test;
+
+import client.Items.ItemCG;
+import client.Items.SellerCG;
 
 public class TestItemsPackageT2 {
 	public static void main(String[] args) {

@@ -7,15 +7,15 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import client.clientMain.*;
+import client.clientMain.RunSettings;
 
 /**
  * Sell Item Page
@@ -35,7 +35,7 @@ public class SellItemPage extends Page {
 	HashMap<String,StringBuilder>data=new HashMap<String,StringBuilder>();
 
 	public SellItemPage(Page page){
-		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL,page.cg);
+		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL);
 		client.pageSpecificRT(pageRTFactor);	// change RT threshold depending on page type
 	}
 
@@ -310,14 +310,14 @@ public class SellItemPage extends Page {
 		double searchProb=RunSettings.getTransitionProb(pageType,5);
 
 
-		if(RunSettings.getWorkloadType()==1){
+		if(RunSettings.getWorkloadTypeCode()==1){
 			homeProb*=1.33;
 			searchProb*=1.67;
 			myAccountProb*=1.33;
 			sellProb*=0.87;
 			browseProb*=1.6;
 		}
-		else if(RunSettings.getWorkloadType()==3){
+		else if(RunSettings.getWorkloadTypeCode()==3){
 			homeProb*=0.67;
 			searchProb*=0.33;
 			myAccountProb*=0.67;
@@ -397,7 +397,7 @@ public class SellItemPage extends Page {
 		}
 		if (verbose)System.out.println("User: "+client.getClientInfo().getUsername()+" - Think Time: "+thinkTime+" ms");
 		if (RunSettings.isOutputThinkTimes()==true)
-			cg.getThinkTimeHist().add(thinkTime);
+			client.getCg().getThinkTimeHist().add(thinkTime);
 		pageThinkTime=thinkTime;
 		return Math.max((int) ((thinkTime-(new Date().getTime()-pageOpenTime))/RunSettings.getThinkTimeSpeedUpFactor()),0);
 	}

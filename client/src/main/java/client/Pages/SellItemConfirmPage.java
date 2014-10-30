@@ -4,14 +4,14 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import client.clientMain.*;
+import client.clientMain.RunSettings;
 
 
 /**
@@ -26,7 +26,7 @@ public class SellItemConfirmPage extends Page {
 	double pageRTFactor=2.5;
 
 	public SellItemConfirmPage(Page page){
-		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL,page.cg);
+		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL);
 		client.pageSpecificRT(pageRTFactor);	// change RT threshold depending on page type
 		client.incItemsSold();
 		searchData=getFormData("search");
@@ -177,13 +177,13 @@ public class SellItemConfirmPage extends Page {
 		double logOutProb=RunSettings.getTransitionProb(pageType,4);
 		double searchProb=RunSettings.getTransitionProb(pageType,5);
 
-		if(RunSettings.getWorkloadType()==1){
+		if(RunSettings.getWorkloadTypeCode()==1){
 			homeProb*=1.1;
 			browseProb*=1.3;
 			sellProb*=0.67;
 			searchProb*=1.25;
 		}
-		else if(RunSettings.getWorkloadType()==3){
+		else if(RunSettings.getWorkloadTypeCode()==3){
 			homeProb*=0.9;
 			browseProb*=0.7;
 			sellProb*=1.33;
@@ -246,7 +246,7 @@ public class SellItemConfirmPage extends Page {
 		}
 		if (verbose)System.out.println("User: "+client.getClientInfo().getUsername()+" - Think Time: "+thinkTime+" ms");
 		if (RunSettings.isOutputThinkTimes()==true)
-			cg.getThinkTimeHist().add(thinkTime);
+			client.getCg().getThinkTimeHist().add(thinkTime);
 		pageThinkTime=thinkTime;
 		return Math.max((int) ((thinkTime-(new Date().getTime()-pageOpenTime))/RunSettings.getThinkTimeSpeedUpFactor()),0);
 	}

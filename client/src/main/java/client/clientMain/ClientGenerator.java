@@ -1,16 +1,25 @@
 package client.clientMain;
 
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.*;
 import java.awt.Image;
-import java.io.*;
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.URLEncoder;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-
-import java.lang.StringBuilder;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Random;
+import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -20,10 +29,23 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.w3c.dom.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import client.Tools.*;
+import client.Tools.ClientSessionStats;
+import client.Tools.Histogram;
+import client.Tools.OutputPageRT;
+import client.Tools.OutputThinkTime;
+import client.Tools.SiteData;
+import client.Tools.Stats;
 
 /**
  * Generates clients
@@ -51,257 +73,157 @@ public class ClientGenerator extends Thread{
 	private ChangePopularity cp=new ChangePopularity(40,470000,300000);
 	private CMARTurl cmarturl;				// set of URLs for C-MART application
 	private int origClientNum=0;			// number of inactive clients initially loaded from C-MART
-	private Timer timer=new Timer();		// timer for creating clients
+	private ScheduledExecutorService timer;
 	private long startTime;					// time client generator started
 	private Document xmlDocument;			// xml document indicating which clients start and when
 	private Element root;					// the root node of xmlDocument
 	private long clientIndex=0;				// index for each created client - used for xmlDocument tracking
 	private Document readXmlDocument;		// xml document of all clients to be read in for repeated run
 
-	/**
-	 * Runs a client on the website
-	 * @author Andrew Fox
-	 *
-	 */
-	private class RunClient extends Thread{
-		ClientInfo clientToRun=null;		// information of the client to run
-		CMARTurl cmarturl=RunSettings.getCMARTurl();
-		StringBuilder startPage=new StringBuilder(cmarturl.getAppURL()).append("/index"); 	// page the client starts on (home page)
-		ClientGenerator cg;					// the client generator that created the client
+	public ClientGenerator(CMARTurl cmarturl) throws ClientGeneratorException {
+		this.cmarturl = cmarturl;
+		this.timer = Executors.newSingleThreadScheduledExecutor();
 
-		public void run(){
-			if(RunSettings.isRepeatedRun()){
-				addActiveClient(clientToRun);
-				addUser();
-			}
-			if(RunSettings.isHTML4()==false)	// if HTML5
-				startPage.append(".html");		// switch to HTML5 home page
-			if (clientToRun!=null){				// if the client info exists
-				Client p;						// create the client
-				try {
-					//start the client running in system
-					System.out.println("Starting Client: "+clientToRun.getUsername()+", Number of Active Clients = "+activeClients.size());
-					p = new Client(clientToRun,startPage,cmarturl,cg);
-					synchronized(aC){
-						aC.add(p);
-					}
-					threadExecutorC.execute(p);
-					//p.start();
-				} catch (UnknownHostException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+		try {
+			// prepare the xml document to record when clients are created
+			xmlDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+			root = xmlDocument.createElement("ClientGenerator");
+			xmlDocument.appendChild(root);
+			Element child = xmlDocument.createElement("HTML4");
+			child.setTextContent(Boolean.toString(RunSettings.isHTML4()));
+			root.appendChild(child);
 
+			// if the run is repeated and read from XML files
+			if (RunSettings.isRepeatedRun()) {
+				readXmlDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+						.parse(new File(new StringBuilder(RunSettings.getRepeatedXmlFolder()).append("clientGenerator.xml").toString()));
 			}
-		}
-		private RunClient(ClientGenerator cg){
-			this.cg=cg;							// client generator creating the client
-			// creates a client node in the xmlDocument for the client about to be run
-			Element client=xmlDocument.createElement("client");
-			Element child=xmlDocument.createElement("clientIndex");
-			long index=getClientIndex();
-			child.setTextContent(Long.toString(index));
-			client.appendChild(child);
-			child=xmlDocument.createElement("runTime");
-			child.setTextContent(Long.toString(new Date().getTime()-startTime));
-			client.appendChild(child);
-			Element cI=xmlDocument.createElement("clientInfo");
-			if(rand.nextDouble()>newClientProb){	// using a client whose info already exists
-				if (inactiveClients.isEmpty()==false){		// if there are existing clients available
-					// pick a random client from the inactive set
 
-					this.clientToRun=getInactiveClient();
-
-					if(this.clientToRun==null)
-						this.clientToRun=new ClientInfo();
-					clientToRun.setClientIndex(index);
-					addActiveClient(this.clientToRun);
-					//		inactiveToActive(this.clientToRun);		// remove the client as an inactive client and add it to the active set
-				}
-				else{									// if no existing clients are available, create a new one
-					this.clientToRun=new ClientInfo();
-					clientToRun.setClientIndex(index);
-					addActiveClient(this.clientToRun);
-				}
-			}
-			else{		// generating a new client
-				this.clientToRun=new ClientInfo();
-				clientToRun.setClientIndex(index);
-				addActiveClient(this.clientToRun);			// add the new client to the active set
-			}
-			/**
-			 * Puts client information into xmlDocument
-			 */
-			child=xmlDocument.createElement("userID");
-			child.setTextContent(clientToRun.getUserID().toString());
-			cI.appendChild(child);
-			child=xmlDocument.createElement("username");
-			child.setTextContent(clientToRun.getUsername().toString());
-			cI.appendChild(child);
-			child=xmlDocument.createElement("password");
-			child.setTextContent(clientToRun.getPassword().toString());
-			cI.appendChild(child);
-			child=xmlDocument.createElement("registered");
-			child.setTextContent(Boolean.toString(clientToRun.isRegistered()));
-			cI.appendChild(child);
-			Element cache=xmlDocument.createElement("imageCache");
-			for(Entry<String,Image> e: clientToRun.getImageCache().entrySet()){
-				child=xmlDocument.createElement("image");
-				child.setTextContent(e.getKey());
-				cache.appendChild(child);
-			}
-			cI.appendChild(cache);
-			cache=xmlDocument.createElement("jscssCache");
-			for(Entry<String,StringBuilder> e: clientToRun.getJscssCache().entrySet()){
-				child=xmlDocument.createElement("jscss");
-				child.setTextContent(e.getKey());
-				cache.appendChild(child);
-			}
-			cI.appendChild(cache);
-			cache=xmlDocument.createElement("HTML5Cache");
-			for(Entry<String,StringBuilder> e: clientToRun.getHTML5Cache().entrySet()){
-				child=xmlDocument.createElement("html5");
-				child.setTextContent(e.getKey());
-				cache.appendChild(child);
-			}
-			cI.appendChild(cache);
-
-			client.appendChild(cI);
-			root.appendChild(client);
+		} catch (IOException | SAXException | ParserConfigurationException e) {
+			throw new ClientGeneratorException("Problem creating/reading client xml files", e);
 		}
 
-		/**
-		 * RunClient for repeated runs
-		 * @param cg - Client generator
-		 * @param client - Node of the client from readXmlDocument that is to be run
-		 */
-		private RunClient(ClientGenerator cg, Node client){
-			this.cg=cg;
-			this.clientToRun=new ClientInfo();
-			// Sets the client info according to that in the readXmlDocument
-			clientToRun.setClientIndex(Long.parseLong(((Element)client).getElementsByTagName("clientIndex").item(0).getTextContent()));
-			Element clientInfo=(Element)((Element)client).getElementsByTagName("clientInfo").item(0);
-			clientToRun.setUserID(new StringBuilder(clientInfo.getElementsByTagName("userID").item(0).getTextContent()));
-			clientToRun.setUsername(new StringBuilder(clientInfo.getElementsByTagName("username").item(0).getTextContent()));
-			clientToRun.setPassword(new StringBuilder(clientInfo.getElementsByTagName("password").item(0).getTextContent()));
-			clientToRun.setRegistered(Boolean.parseBoolean(clientInfo.getElementsByTagName("registered").item(0).getTextContent()));
+		// more database writes = more new clients (unregistered)
+		newClientProb = RunSettings.getWorkloadType().getNewClientProb();
+
+		if (RunSettings.isOutputThinkTimes()) {
+			setThinkTimeHist(new Histogram(600000, 100)); 
+		}
+		for (int i = 0; i <= 20; i++) {
+			pageRTHistograms.add(new Histogram(20000, 2));
+		}
+		if (RunSettings.isOutputSiteData()) {
+			new SiteData(cmarturl).collectStats(); 
 		}
 
+		try {
+			populateUsers();
+		} catch (IOException | URISyntaxException e) {
+			throw new ClientGeneratorException("Problem populating users from database.", e);
+		}
+		origClientNum = inactiveClients.size();
 	}
 
 	public void run(){
-		stats.start();		// start collecting response time data
-		cp.start();			// schedules popularity of different items to change
-		csd=new ClientSessionStats();
+		stats.start(); // start collecting response time data
+		cp.start(); // schedules popularity of different items to change
+		csd = new ClientSessionStats();
 
-		startTime=new Date().getTime();		// sets the time the client generator was started
+		startTime = System.currentTimeMillis(); 
 
-		if(RunSettings.isRepeatedRun()==false){
+		if(!RunSettings.isRepeatedRun()){
 			// schedule changes in the rate of client generation and peak user load
-			for (Entry<Long,Integer> e:RunSettings.getChangeStableUsers().entrySet()){
-				ChangeStableUsers csu=new ChangeStableUsers(e.getValue());
-				timer.schedule(csu,new Date(startTime+e.getKey()*1000));
+			for (Entry<Long, Integer> e : RunSettings.getChangeStableUsers().entrySet()) {
+				ChangeStableUsers csu = new ChangeStableUsers(e.getValue());
+				timer.schedule(csu, startTime + e.getKey() * 1000, TimeUnit.MILLISECONDS);
 			}
-			for (Entry<Long, Double> e:RunSettings.getChangeMeanClientsPerMinute().entrySet()){
-				ChangeMeanClientsAdded cmca=new ChangeMeanClientsAdded(e.getValue());
-				timer.schedule(cmca,new Date(startTime+e.getKey()*1000));
+			for (Entry<Long, Double> e : RunSettings.getChangeMeanClientsPerMinute().entrySet()) {
+				ChangeMeanClientsAdded cmca = new ChangeMeanClientsAdded(e.getValue());
+				timer.schedule(cmca, startTime + e.getKey() * 1000, TimeUnit.MILLISECONDS);
 			}
 
 			//		ArrayList<Timer>peakusersTimer=new ArrayList<Timer>();
 			//		for(int i=0;i<RunSettings.getChangePeakUsersSlope().size();i++)
 			//			peakusersTimer.add(new Timer());
-			for(Long m:RunSettings.getChangePeakUsersSlope().keySet()){
-				long end=-1;
-				if(m!=RunSettings.getChangePeakUsersSlope().lastKey())
-					end=RunSettings.getChangePeakUsersSlope().higherKey(m)*1000+startTime;
-				ChangePeakUsersSlope cpus=new ChangePeakUsersSlope(RunSettings.getChangePeakUsersSlope().get(m),end,this);
-				timer.schedule(cpus,new Date(startTime+m*1000));
+			for (Long m : RunSettings.getChangePeakUsersSlope().keySet()) {
+				long end = -1;
+				if (m != RunSettings.getChangePeakUsersSlope().lastKey())
+					end = RunSettings.getChangePeakUsersSlope().higherKey(m) * 1000 + startTime;
+				ChangePeakUsersSlope cpus = new ChangePeakUsersSlope(RunSettings.getChangePeakUsersSlope().get(m), end, this);
+				timer.schedule(cpus, startTime + m * 1000, TimeUnit.MILLISECONDS);
 			}
 
-			/**
+			/*
 			 * Creates random bursts in client generation
 			 * Burst schedules on top of existing generation method
 			 * Defined by 3 time periods, generation increase, plateau, decrease to original level
 			 */
-			if(RunSettings.isAllowBursts()){
-				long endTime=RunSettings.getTimeToRun()*60000+startTime;
-				int numSpikes=getPoisson(((double)RunSettings.getTimeToRun())/15.);
+			if (RunSettings.isAllowBursts()) {
+				long endTime = RunSettings.getTimeToRun() * 60000 + startTime;
+				int numSpikes = getPoisson(((double) RunSettings.getTimeToRun()) / 15.);
 				double lambda;
-				double timeLeft=RunSettings.getTimeToRun()*60000;
-				double t0=startTime;
-				long currentTime=startTime;
-				for(int i=0;i<numSpikes;i++){
-					do{
-						lambda=-timeLeft/Math.log(0.01);
-						t0+=expDist(lambda);
-					}while((t0+currentTime)>endTime);
+				double timeLeft = RunSettings.getTimeToRun() * 60000;
+				double t0 = startTime;
+				long currentTime = startTime;
+				for (int i = 0; i < numSpikes; i++) {
+					do {
+						lambda = -timeLeft / Math.log(0.01);
+						t0 += expDist(lambda);
+					} while ((t0 + currentTime) > endTime);
 
-					timeLeft=endTime-t0;
-					double t3=expDist(2*60000)+t0;
-					double t1=rand.nextDouble()*(t3-t0)+t0;
-					double t2=rand.nextDouble()*(t3-t1)+t1;
+					timeLeft = endTime - t0;
+					double t3 = expDist(2 * 60000) + t0;
+					double t1 = rand.nextDouble() * (t3 - t0) + t0;
+					double t2 = rand.nextDouble() * (t3 - t1) + t1;
 
-					double M=getPareto(3.);
+					double M = getPareto(3.);
 
-					CreateSpike cs=new CreateSpike((long)t0,(long)t1,(long)t2,(long)t3,M,this,timer);
-					timer.schedule(cs,0);
+					timer.schedule(new CreateSpike((long) t0, (long) t1, (long) t2, (long) t3, M, this, timer), 0, TimeUnit.MILLISECONDS);
 				}
 			}
 
-			if(RunSettings.isStaticUserload()==false){
-				while(exit==false){
-					int delay=0;	// delay between generating clients
-
-					// delay is an exponential function dependent on the average number of clients to be generated per minute
-					if (RunSettings.getMeanClientsPerMinute()!=0)
-						delay=(int)getPareto(60000/RunSettings.getMeanClientsPerMinute());
-
-					try{Thread.sleep(delay);} 			// wait for the specified delay
-					catch(InterruptedException e){
+			if(!RunSettings.isStaticUserload()){
+				while(!exit){
+					try {
+						// delay is an exponential function dependent on the average number of clients to be generated per minute
+						int delay = RunSettings.getMeanClientsPerMinute()==0? 0:(int)getPareto(60000/RunSettings.getMeanClientsPerMinute());	// delay between generating clients
+						Thread.sleep(delay);
+					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					//				synchronized(this){
-					//					while(getUsers()>=RunSettings.getStableUsers()){		// if there are more users than the desired plateau
-					//						try {
-					//							wait();											// wait for a user to leave the system
-					//						} catch (InterruptedException e) {
-					//							e.printStackTrace();
-					//						}
-					//					}
-					if(exit==false){
-						RunClient rc=new RunClient(this);		// create a new run client
-						addUser();								// indicate that a user has been added to the system
+					
+					if(!exit){
+						RunClient rc = new RunClient(this);
+						addUser();
 						threadExecutorRC.execute(rc);
 					}
-					//				}
 				}
-			}
-			else{
+			} else{
 				double rampupTime=RunSettings.getRampupTime()*1000;
-				while(exit==false){
-					if(new Date().getTime()<(startTime+rampupTime)){
-						try{Thread.sleep((long)(rampupTime/RunSettings.getStableUsers()));} 			// wait for the specified delay
-						catch(InterruptedException e){
+				while(!exit){
+					if (System.currentTimeMillis() < (startTime + rampupTime)) {
+						try {
+							Thread.sleep((long) (rampupTime / RunSettings.getStableUsers()));
+						}catch (InterruptedException e) {
 							e.printStackTrace();
 						}
 					}
-					synchronized(this){
-						while(getUsers()>=RunSettings.getStableUsers()){		// if there are more users than the desired plateau
+					synchronized (this) {
+						while (getUsers() >= RunSettings.getStableUsers()) {
 							try {
-								wait();											// wait for a user to leave the system
+								wait();
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							}
 						}
 					}
-					if(exit==false){
-						RunClient rc=new RunClient(this);		// create a new run client
-						addUser();								// indicate that a user has been added to the system
+					if(!exit){
+						RunClient rc = new RunClient(this);
+						addUser();
 						threadExecutorRC.execute(rc);
-						if(new Date().getTime()<(startTime+rampupTime)){
-							while(getUsers()<RunSettings.getStableUsers()/rampupTime*(new Date().getTime()-startTime)){
-								RunClient nrc=new RunClient(this);	
+						if(System.currentTimeMillis() < (startTime+rampupTime)){
+							while(getUsers() < RunSettings.getStableUsers()/rampupTime*(System.currentTimeMillis()-startTime)){
+								RunClient nrc = new RunClient(this);	
 								addUser();	
 								threadExecutorRC.execute(nrc);
 							}
@@ -309,240 +231,103 @@ public class ClientGenerator extends Thread{
 						if((inactiveClients.size()-100)>origClientNum)
 							cutInactiveClients();
 					}
-
-
 				}
 			}
-		}else{	// repeated run
-			NodeList listOfClients=readXmlDocument.getElementsByTagName("client");
-			// Schedules all clients to run at the same time as in the previous run
-			for(int i=0;i<listOfClients.getLength();i++){
-				if(exit==true)
+		} else {
+			NodeList listOfClients = readXmlDocument.getElementsByTagName("client");
+			// Schedules all clients to run at the same time as in the previous
+			// run
+			for (int i = 0; i < listOfClients.getLength(); i++) {
+				if (exit){
 					break;
-				Node client=listOfClients.item(i);
-				long runTime=Long.parseLong(((Element)client).getElementsByTagName("runTime").item(0).getTextContent());
-				RunClient rc=new RunClient(this,client);		// create a new run client
-				threadExecutorRC.schedule(rc, runTime-(new Date().getTime()-startTime),TimeUnit.MILLISECONDS);
+				}
+				Node client = listOfClients.item(i);
+				long runTime = Long.parseLong(((Element) client).getElementsByTagName("runTime").item(0).getTextContent());
+				RunClient rc = new RunClient(this, client); 
+				threadExecutorRC.schedule(rc, runTime - (new Date().getTime() - startTime), TimeUnit.MILLISECONDS);
 			}
 		}
-		timer.cancel();			// cancel any schedule when the system is told to exit
-	}
-
-	public ClientGenerator(CMARTurl cmarturl){
-		this.cmarturl=cmarturl;
-
-		try {
-			// prepare the xml document to record when clients are created
-			xmlDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-			root = xmlDocument.createElement("ClientGenerator");
-			xmlDocument.appendChild(root);
-			Element child=xmlDocument.createElement("HTML4");
-			child.setTextContent(Boolean.toString(RunSettings.isHTML4()));
-			root.appendChild(child);
-
-			// if the run is repeated and read from XML files
-			if(RunSettings.isRepeatedRun()){
-				readXmlDocument=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(new StringBuilder(RunSettings.getRepeatedXmlFolder()).append("clientGenerator.xml").toString()));
-			}
-
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-
-		// more database writes = more new clients (unregistered)
-		if(RunSettings.getWorkloadType()==1)
-			newClientProb=0.05;
-		else if(RunSettings.getWorkloadType()==2)
-			newClientProb=0.1;
-		else if(RunSettings.getWorkloadType()==3)
-			newClientProb=0.15;
-
-		if (RunSettings.isOutputThinkTimes()==true)			// if think times should be output
-			setThinkTimeHist(new Histogram(600000,100));	// create a histogram to track think times
-		for (int i=0;i<=20;i++)
-			pageRTHistograms.add(new Histogram(20000,2));
-		if(RunSettings.isOutputSiteData()){
-			new SiteData(cmarturl).collectStats();				// clears the data from the statistics page
-		}
-
-		try {
-			populateUsers();
-			origClientNum=inactiveClients.size();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-
-
+		timer.shutdownNow();			
 	}
 
 	/**
 	 * Loads already registered users from C-MART
-	 * @throws UnsupportedEncodingException
+	 * @throws IOException 
+	 * @throws URISyntaxException 
 	 */
-	public void populateUsers() throws UnsupportedEncodingException{
-		StringBuilder ret;		// returned page from C-MART
-		int pageLimit=600;		// highest page number which can be loaded (25 users per page)
-		int comma;				// index of commas (returned page is in CSV form)
-		ArrayList<String> userInfo=new ArrayList<String>();		// user info of clients loaded
-		ArrayList<Long>chosenPages=new ArrayList<Long>();		// tracks loaded user pages so there are no duplicates
-		long pageNo;			// page number of page to be opened
-		HashMap<String,StringBuilder> data=new HashMap<String,StringBuilder>();		// data for the URL of the page to open
+	public void populateUsers() throws IOException, URISyntaxException{
+		ArrayList<Long> chosenPages = new ArrayList<Long>();
 
-		for(int k=0;k<31;k++){
-			do{
-				pageNo=rand.nextInt(pageLimit);
-			}while(chosenPages.contains(pageNo)==true);
+		HashMap<String, String> data = new HashMap<>();
+		data.put("totalUsers", Integer.toString(1));
+		
+		long numberOfUsers = Long.parseLong(openPopulateUser(cmarturl.build("/getusers", data)).toString());
+		int pageLimit = (int) (Math.floor((numberOfUsers - 1) / 25) - 1);
+		
+		for (int k = 0; k < 30; k++) {
+			long pageNo;
+			do {
+				pageNo = rand.nextInt(pageLimit);
+			} while (chosenPages.contains(pageNo));
 			chosenPages.add(pageNo);
-			data.clear();
-			data.put("pageNo",new StringBuilder(Long.toString(pageNo)));
-			data.put("itemsPP",new StringBuilder(Integer.toString(25)));
-			if(k==0){
-				data.put("totalUsers",new StringBuilder(Integer.toString(1)));
-			}
+			
+			data = new HashMap<>();
+			data.put("pageNo", Long.toString(pageNo));
+			data.put("itemsPP", Integer.toString(25));
 
-			try{Thread.sleep(100);}
-			catch(InterruptedException e){
-			}
+			StringBuilder ret = openPopulateUser(cmarturl.build("/getusers", data));
+			try (Scanner input = new Scanner(ret.toString());) {
 
-			ret=openPopulateUser(new StringBuilder(cmarturl.getAppURL()).append("/getusers?").append(createURL(data)));
-			if(k==0){
-				try{
-				pageLimit=(int)(Math.floor((Long.parseLong(ret.toString())-1)/25)-1);
-				}catch(Exception e){
-					System.err.println("Warning: Could not load any clients from database");
-					break;
-				}
-			}
-			else{
-				while(ret.indexOf(",")!=-1){
-					for(int i=0;i<15;i++){
-						comma=ret.indexOf(",");
-						userInfo.add(ret.substring(0,comma).trim());
-						ret.delete(0,comma+1);
-					}
-					ClientInfo clientInfo=new ClientInfo(userInfo.get(0),userInfo.get(1),userInfo.get(2),userInfo.get(3),userInfo.get(4),userInfo.get(5),userInfo.get(10),userInfo.get(11),userInfo.get(12),userInfo.get(13));
-					boolean alreadyAdded=false;
-					for(ClientInfo c:inactiveClients){
-						if(c.getUserID().toString().equals(userInfo.get(0))){
-							alreadyAdded=true;
+				while (input.hasNextLine()) {
+					String[] strings = input.nextLine().split(",");
+					ClientInfo clientInfo = new ClientInfo(strings[0], strings[1], strings[2], strings[3], strings[4], strings[5], strings[10],
+							strings[11], strings[12], strings[13]);
+					boolean alreadyAdded = false;
+					for (ClientInfo c : inactiveClients) {
+						if (c.getUserID().toString().equals(strings[0])) {
+							alreadyAdded = true;
 							break;
 						}
 					}
-					if(alreadyAdded==false)
+					if (!alreadyAdded) {
 						addInactiveClient(clientInfo);
-					userInfo.clear();
+					}
 				}
 			}
-
-
 		}
 	}
 
-	/**
-	 * Creates a URL query in UTF-8 format out of the information from a HashMap
-	 * @param data - map of the data needed to be turned into a query string
-	 * @return The query in UTF-8 form
-	 * @throws UnsupportedEncodingException
-	 */
-	private String createURL(HashMap<String, StringBuilder> data) throws UnsupportedEncodingException{
-		StringBuilder content = new StringBuilder();
-		int i=0;
-		for(Entry<String,StringBuilder> e:data.entrySet()){
-			if(i!=0)
-				content.append("&");
-			content.append(e.getKey()).append("=").append(URLEncoder.encode(e.getValue().toString(), "UTF-8"));
-			i++;
-		}
-		return content.toString();
-	}
 	/**
 	 * Opens a url and returns the String used to populate the inactive users
-	 * @param urlString - url to open
+	 * @param uri - url to open
 	 * @return CSV of the returned users
+	 * @throws IOException 
 	 */
-	private StringBuilder openPopulateUser(StringBuilder urlString){
-		StringBuilder ret = new StringBuilder();		// the source code of the page
-		String inputLine;	// each line being read in
-		String urlStringS=urlString.toString().replace(" ", "%20");
-		if(RunSettings.isVerbose())System.out.println("PopulateUser "+urlString);
-
-		Socket socket;
-		try {
-			socket = new Socket(cmarturl.getIpURL().toString(),cmarturl.getAppPort());
-
-
-			PrintStream out=new PrintStream(socket.getOutputStream());		// opens an output PrintStream to send the HTTP request
-			out.println(new StringBuilder("GET ").append(urlStringS).append(" HTTP/1.0\r\n"));
-			out.flush();
-
-			BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));	// opens a BufferedReader to read the response of the HTTP request
-
-			while((inputLine=br.readLine())!=null){
-				ret.append(inputLine);	// creates the response
-			}
-			// deletes the header information of the HTTP response
-			if(ret.indexOf("Connection: close")!=-1)
-				ret.delete(0, ret.indexOf("Connection: close")+"Connection: close".length());
-
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (SocketException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+	private StringBuilder openPopulateUser(URI uri) throws IOException{
+		
+		if(RunSettings.isVerbose()){
+			System.out.println("PopulateUser "+uri);
 		}
-
-		return ret;
-	}
-
-	/**
-	 * Randomly assigns itemIDs to be artificially popular.
-	 * Rolling list of popular items.
-	 * @author Andrew Fox
-	 *
-	 */
-	private class ChangePopularity extends Thread{
-		long maxItemId;
-		long minItemId;
-
-		public ChangePopularity(int numItems, long maxItemId,long minItemId){
-			this.maxItemId=maxItemId;
-			this.minItemId=minItemId;
-
-			long itemId;
-			for (int i=0;i<numItems;i++){
-				do{
-					itemId=(long)rand.nextInt((int)(maxItemId-minItemId))+minItemId;
-				}while(hotItems.contains(itemId));
-				hotItems.add(itemId);
+		
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(new BasicHttpClientConnectionManager());
+		try(CloseableHttpClient client = builder.build();
+				CloseableHttpResponse response = client.execute(new HttpGet(uri));
+				InputStream inputStream = response.getEntity().getContent();
+				Scanner scanner = new Scanner(inputStream);
+			){
+			StringBuilder content = new StringBuilder();
+			while(scanner.hasNextLine()){
+				content.append(scanner.nextLine());
 			}
-		}
-
-		public void run(){
-			long itemId;
-			do{
-				try{Thread.sleep((long) expDist(120000));}
-				catch(InterruptedException e){
-					break;
-				}
-				do{
-					itemId=(long)(rand.nextInt((int)(maxItemId-minItemId))+minItemId);
-				}while(hotItems.contains(itemId));
-				hotItems.remove(0);
-				hotItems.add(itemId);
-			}while(exit==false);
+			return content;
 		}
 	}
 
 	/**
 	 * Indicates a connection has been added
 	 */
-	private void addUser(){
+	private synchronized void addUser(){
 		activeUsers+=1;
 	}
 
@@ -584,7 +369,7 @@ public class ClientGenerator extends Thread{
 	public ClientInfo getInactiveClient(){
 		ClientInfo clientInfo=null;
 		synchronized (inactiveClients){
-			if(inactiveClients.size()>0){
+			if(!inactiveClients.isEmpty()){
 				int client=rand.nextInt(inactiveClients.size());
 				clientInfo=inactiveClients.remove(client);
 			}
@@ -748,8 +533,9 @@ public class ClientGenerator extends Thread{
 	 */
 	public void exitAllClients(){
 		System.out.println("EXITING SYSTEM");
-		if(RunSettings.isOutputThinkTimes())
-			new OutputThinkTime(thinkTimeHist,RunSettings.getOutputSiteDataFile());
+		if(RunSettings.isOutputThinkTimes()){
+			new OutputThinkTime(thinkTimeHist,RunSettings.getOutputSiteDataFile()).outputThinkTimes();
+		}
 		cp.interrupt();
 		this.exit=true;
 		threadExecutorC.shutdown();				// shuts down the client generation process
@@ -761,16 +547,18 @@ public class ClientGenerator extends Thread{
 			for (int m=0;m<aC.size();m++){			// tells all clients to exit after next request
 				aC.get(m).setExit(true);
 				aC.get(m).interrupt();				// if the client is thinking
-				try{Thread.sleep(25);} 				// wait for the specified delay
-				catch(InterruptedException e){
+				try {
+					Thread.sleep(25);
+				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
 
 			//stops taking stats once there are no more clients in the system
 
-			try{Thread.sleep(3500);} 			// wait for the specified delay
-			catch(InterruptedException e){
+			try {
+				Thread.sleep(3500);
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			threadExecutorC.shutdown();			// reattempt to shutdown client threads
@@ -783,162 +571,15 @@ public class ClientGenerator extends Thread{
 		threadExecutorRC.shutdownNow();
 		System.out.println("ALL CLIENTS SHUTDOWN");
 		if(RunSettings.isOutputSiteData()){
-			new SiteData(cmarturl).collectStats();		// output data from Statistics page to csv
+			new SiteData(RunSettings.getOutputSiteDataFile(),true, cmarturl).collectStats();		// output data from Statistics page to csv
 		}
-		new OutputPageRT(pageRTHistograms,RunSettings.getOutputSiteDataFile());
+		new OutputPageRT(pageRTHistograms,RunSettings.getOutputSiteDataFile()).outputData();;
 		stats.exitStats();		// exit stats - no more collecting response times
 		csd.output(RunSettings.getOutputSiteDataFile().toString());
 
 		outputClientGeneratorXML();
 
-		timer.cancel();
-	}
-
-	/**
-	 * Schedules a change in the value of the stable users
-	 * @author Andrew Fox
-	 *
-	 */
-	private static class ChangeStableUsers extends TimerTask{
-		int stableUsers;		// new number of stable users
-		private ChangeStableUsers(int stableUsers){
-			this.stableUsers=stableUsers;
-		}
-		public void run(){
-			System.out.println("Changing stableUsers to "+stableUsers);
-			RunSettings.setStableUsers(stableUsers);
-		}
-
-	}
-
-	/**
-	 * Schedules a change in the value of the mean clients added per minute
-	 * @author Andrew Fox
-	 *
-	 */
-	private static class ChangeMeanClientsAdded extends TimerTask{
-		double meanClients;		// new value of mean clients per minute to add
-		private ChangeMeanClientsAdded(double meanClients){
-			this.meanClients=meanClients;
-		}
-		public void run(){
-			System.out.println("Changing meanClientsPerMinute to "+meanClients);
-			RunSettings.setMeanClientsPerMinute(meanClients);
-		}
-
-	}
-
-	/**
-	 * Changes the of the peak users in the system
-	 * @author Andrew Fox
-	 *
-	 */
-	private static class ChangePeakUsersSlope extends TimerTask{
-		double newSlope;		// in clients added per ms
-		long endTime;
-		ClientGenerator cg;
-		private ChangePeakUsersSlope(double newSlope, long endTime,ClientGenerator cg){
-			this.newSlope=newSlope/60000;
-			this.endTime=endTime;
-			this.cg=cg;
-		}
-		public void run(){
-			System.out.println("Increasing the Peak User value by "+newSlope*60000+" clients per minute");
-			long startTime=new Date().getTime();
-			int startValue=RunSettings.getStableUsers();
-			if(endTime!=-1){
-				while(new Date().getTime()<endTime){
-					RunSettings.setStableUsers(startValue+(int)(((double)(new Date().getTime()-startTime))*newSlope));
-					try{Thread.sleep(2000);} 	
-					catch(InterruptedException e){
-						e.printStackTrace();
-					}
-				}
-			}
-			else{
-				while(cg.exit==false){
-					RunSettings.setStableUsers(startValue+(int)(((double)(new Date().getTime()-startTime))*newSlope));
-					try{Thread.sleep(2000);} 	
-					catch(InterruptedException e){
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Creates a spike in the number of clients
-	 * @author Andrew Fox
-	 *
-	 */
-	private static class CreateSpike extends TimerTask{
-		long t0;
-		long t1;
-		long t2;
-		long t3;
-		double M;
-		ClientGenerator cg;
-		Timer timer;
-
-		/**
-		 * Creates a burst in clients for the closed loop client
-		 * @param t0 - time spike starts
-		 * @param t1 - time spike peaks
-		 * @param t2 - time of the end of the peak
-		 * @param t3 - time of end of spike
-		 * @param M - relative increase in workload volume
-		 */
-		public CreateSpike(long t0,long t1,long t2,long t3,double M,ClientGenerator cg,Timer timer){
-			this.t0=t0;
-			this.t1=t1;
-			this.t2=t2;
-			this.t3=t3;
-			this.M=M;
-			this.cg=cg;
-			this.timer=timer;
-		}
-
-		public void run(){
-			System.out.println("Creating a volume spike");
-
-			if(RunSettings.isStaticUserload()==true){
-				double origUsers=(double)RunSettings.getStableUsers();
-				double increaseSlope=(origUsers*(M-1.))/(((double)(t1-t0))/60000);
-				ChangePeakUsersSlope cpus=new ChangePeakUsersSlope(increaseSlope,t1,cg);
-				timer.schedule(cpus,t0);
-				cpus=new ChangePeakUsersSlope(0,t2,cg);
-				timer.schedule(cpus,t1);
-				double decreaseSlope=(origUsers*(1.-M))/(((double)(t3-t2))/60000);
-				cpus=new ChangePeakUsersSlope(decreaseSlope,t3,cg);
-				timer.schedule(cpus,t2);
-			}
-			else{
-				double origStableUsers=(double)RunSettings.getStableUsers();
-				double origUsers=(double)cg.aC.size();
-				double origClientsAdded=(double)RunSettings.getMeanClientsPerMinute();
-
-
-				ChangeStableUsers csu=new ChangeStableUsers((int)(M*origStableUsers));
-				double increaseRate=(M-1.)*(origUsers)/((double)(t1-t0))+origClientsAdded;
-				ChangeMeanClientsAdded cmca=new ChangeMeanClientsAdded((int)increaseRate);
-				timer.schedule(csu,t0);
-				timer.schedule(cmca,t0);
-
-				cmca=new ChangeMeanClientsAdded((int)(origClientsAdded));
-				timer.schedule(cmca,t1);
-
-				double decreaseRate=(1.-M)*(origUsers)/((double)(t3-t2))+origClientsAdded;
-				cmca=new ChangeMeanClientsAdded((int)decreaseRate);
-				timer.schedule(cmca,t2);
-
-				csu=new ChangeStableUsers((int)(origStableUsers));
-				cmca=new ChangeMeanClientsAdded((int)(origClientsAdded));
-				timer.schedule(csu,t3);
-				timer.schedule(cmca,t3);
-
-			}
-		}
+		timer.shutdownNow();
 	}
 
 	/**
@@ -979,27 +620,341 @@ public class ClientGenerator extends Thread{
 	 * Outputs the Client Generator XML when the client generator is exiting
 	 */
 	private void outputClientGeneratorXML(){
-		if(RunSettings.isRepeatedRun()==false){
-			try{
-				FileWriter fstreamA = new FileWriter(new StringBuilder(RunSettings.getRepeatedXmlFolder()).append("clientGenerator.xml").toString(),true);
-				BufferedWriter out = new BufferedWriter(fstreamA);
-
+		if(!RunSettings.isRepeatedRun()){
+			String fileName = new StringBuilder(RunSettings.getRepeatedXmlFolder()).append("clientGenerator.xml").toString();
+			try(BufferedWriter out = new BufferedWriter(new FileWriter(fileName,true));){
+	
 				Transformer transformer = TransformerFactory.newInstance().newTransformer();
 				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-
+	
 				//initialize StreamResult with File object to save to file
 				StreamResult result = new StreamResult(new StringWriter());
 				DOMSource source = new DOMSource(xmlDocument);
 				transformer.transform(source, result);
-
+	
 				String xmlString = result.getWriter().toString();
 				out.write(xmlString);
-
-				out.close();
 			}catch(Exception e){
 				e.printStackTrace();
 				System.err.println("Could not output page response time data");
 			}
+		}
+	}
+
+	/**
+	 * Schedules a change in the value of the stable users
+	 * @author Andrew Fox
+	 *
+	 */
+	private static class ChangeStableUsers extends Thread{
+		int stableUsers;		// new number of stable users
+		private ChangeStableUsers(int stableUsers){
+			this.stableUsers=stableUsers;
+		}
+		public void run(){
+			System.out.println("Changing stableUsers to "+stableUsers);
+			RunSettings.setStableUsers(stableUsers);
+		}
+
+	}
+
+	/**
+	 * Schedules a change in the value of the mean clients added per minute
+	 * @author Andrew Fox
+	 *
+	 */
+	private static class ChangeMeanClientsAdded extends Thread{
+		double meanClients;		// new value of mean clients per minute to add
+		private ChangeMeanClientsAdded(double meanClients){
+			this.meanClients=meanClients;
+		}
+		public void run(){
+			System.out.println("Changing meanClientsPerMinute to "+meanClients);
+			RunSettings.setMeanClientsPerMinute(meanClients);
+		}
+
+	}
+
+	/**
+	 * Changes the of the peak users in the system
+	 * @author Andrew Fox
+	 *
+	 */
+	private static class ChangePeakUsersSlope extends Thread{
+		double newSlope;		// in clients added per ms
+		long endTime;
+		ClientGenerator cg;
+		private ChangePeakUsersSlope(double newSlope, long endTime,ClientGenerator cg){
+			this.newSlope=newSlope/60000;
+			this.endTime=endTime;
+			this.cg=cg;
+		}
+		public void run(){
+			System.out.println("Increasing the Peak User value by "+newSlope*60000+" clients per minute");
+			long startTime=System.currentTimeMillis();
+			int startValue=RunSettings.getStableUsers();
+			if(endTime!=-1){
+				while(System.currentTimeMillis()<endTime){
+					RunSettings.setStableUsers(startValue+(int)(((double)(System.currentTimeMillis()-startTime))*newSlope));
+					try{Thread.sleep(2000);} 	
+					catch(InterruptedException e){
+						e.printStackTrace();
+					}
+				}
+			}
+			else{
+				while(!cg.exit){
+					RunSettings.setStableUsers(startValue+(int)(((double)(System.currentTimeMillis()-startTime))*newSlope));
+					try{Thread.sleep(2000);} 	
+					catch(InterruptedException e){
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Creates a spike in the number of clients
+	 * @author Andrew Fox
+	 *
+	 */
+	private static class CreateSpike extends Thread{
+		long t0;
+		long t1;
+		long t2;
+		long t3;
+		double M;
+		ClientGenerator cg;
+		ScheduledExecutorService timer;
+
+		/**
+		 * Creates a burst in clients for the closed loop client
+		 * @param t0 - time spike starts
+		 * @param t1 - time spike peaks
+		 * @param t2 - time of the end of the peak
+		 * @param t3 - time of end of spike
+		 * @param M - relative increase in workload volume
+		 */
+		public CreateSpike(long t0,long t1,long t2,long t3,double M,ClientGenerator cg,ScheduledExecutorService timer){
+			this.t0=t0;
+			this.t1=t1;
+			this.t2=t2;
+			this.t3=t3;
+			this.M=M;
+			this.cg=cg;
+			this.timer=timer;
+		}
+
+		public void run(){
+			System.out.println("Creating a volume spike");
+
+			if(RunSettings.isStaticUserload()){
+				double origUsers=(double)RunSettings.getStableUsers();
+				double increaseSlope=(origUsers*(M-1.))/(((double)(t1-t0))/60000);
+				ChangePeakUsersSlope cpus=new ChangePeakUsersSlope(increaseSlope,t1,cg);
+				timer.schedule(cpus,t0, TimeUnit.MILLISECONDS);
+				cpus=new ChangePeakUsersSlope(0,t2,cg);
+				timer.schedule(cpus,t1, TimeUnit.MILLISECONDS);
+				double decreaseSlope=(origUsers*(1.-M))/(((double)(t3-t2))/60000);
+				cpus=new ChangePeakUsersSlope(decreaseSlope,t3,cg);
+				timer.schedule(cpus,t2, TimeUnit.MILLISECONDS);
+			} else{
+				double origStableUsers=(double)RunSettings.getStableUsers();
+				double origUsers=(double)cg.aC.size();
+				double origClientsAdded=(double)RunSettings.getMeanClientsPerMinute();
+
+
+				ChangeStableUsers csu=new ChangeStableUsers((int)(M*origStableUsers));
+				double increaseRate=(M-1.)*(origUsers)/((double)(t1-t0))+origClientsAdded;
+				ChangeMeanClientsAdded cmca=new ChangeMeanClientsAdded((int)increaseRate);
+				timer.schedule(csu,t0, TimeUnit.MILLISECONDS);
+				timer.schedule(cmca,t0, TimeUnit.MILLISECONDS);
+
+				cmca=new ChangeMeanClientsAdded((int)(origClientsAdded));
+				timer.schedule(cmca,t1, TimeUnit.MILLISECONDS);
+
+				double decreaseRate=(1.-M)*(origUsers)/((double)(t3-t2))+origClientsAdded;
+				cmca=new ChangeMeanClientsAdded((int)decreaseRate);
+				timer.schedule(cmca,t2, TimeUnit.MILLISECONDS);
+
+				csu=new ChangeStableUsers((int)(origStableUsers));
+				cmca=new ChangeMeanClientsAdded((int)(origClientsAdded));
+				timer.schedule(csu,t3, TimeUnit.MILLISECONDS);
+				timer.schedule(cmca,t3, TimeUnit.MILLISECONDS);
+
+			}
+		}
+	}
+
+	/**
+	 * Runs a client on the website
+	 * @author Andrew Fox
+	 *
+	 */
+	private class RunClient extends Thread{
+		ClientInfo clientToRun=null;		// information of the client to run
+		CMARTurl cmarturl=RunSettings.getCMARTurl();
+		StringBuilder startPage=new StringBuilder(cmarturl.getAppURL()).append("/index"); 	// page the client starts on (home page)
+		ClientGenerator cg;					// the client generator that created the client
+	
+		public void run(){
+			if(RunSettings.isRepeatedRun()){
+				addActiveClient(clientToRun);
+				addUser();
+			}
+			if(!RunSettings.isHTML4())	// if HTML5
+				startPage.append(".html");		// switch to HTML5 home page
+			if (clientToRun!=null){				// if the client info exists
+				Client p;						// create the client
+				try {
+					//start the client running in system
+					System.out.println("Starting Client: "+clientToRun.getUsername()+", Number of Active Clients = "+activeClients.size());
+					p = new Client(clientToRun,startPage,cmarturl,cg);
+					synchronized(aC){
+						aC.add(p);
+					}
+					threadExecutorC.execute(p);
+					//p.start();
+				} catch (UnknownHostException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+	
+			}
+		}
+		private RunClient(ClientGenerator cg){
+			this.cg=cg;							// client generator creating the client
+			// creates a client node in the xmlDocument for the client about to be run
+			Element client=xmlDocument.createElement("client");
+			Element child=xmlDocument.createElement("clientIndex");
+			long index=getClientIndex();
+			child.setTextContent(Long.toString(index));
+			client.appendChild(child);
+			child=xmlDocument.createElement("runTime");
+			child.setTextContent(Long.toString(new Date().getTime()-startTime));
+			client.appendChild(child);
+			Element cI=xmlDocument.createElement("clientInfo");
+			if(rand.nextDouble()>newClientProb){	// using a client whose info already exists
+				if (!inactiveClients.isEmpty()){		// if there are existing clients available
+					// pick a random client from the inactive set
+	
+					this.clientToRun=getInactiveClient();
+	
+					if(this.clientToRun==null)
+						this.clientToRun=new ClientInfo();
+					clientToRun.setClientIndex(index);
+					addActiveClient(this.clientToRun);
+					//		inactiveToActive(this.clientToRun);		// remove the client as an inactive client and add it to the active set
+				}
+				else{									// if no existing clients are available, create a new one
+					this.clientToRun=new ClientInfo();
+					clientToRun.setClientIndex(index);
+					addActiveClient(this.clientToRun);
+				}
+			}
+			else{		// generating a new client
+				this.clientToRun=new ClientInfo();
+				clientToRun.setClientIndex(index);
+				addActiveClient(this.clientToRun);			// add the new client to the active set
+			}
+			/**
+			 * Puts client information into xmlDocument
+			 */
+			child=xmlDocument.createElement("userID");
+			child.setTextContent(clientToRun.getUserID().toString());
+			cI.appendChild(child);
+			child=xmlDocument.createElement("username");
+			child.setTextContent(clientToRun.getUsername().toString());
+			cI.appendChild(child);
+			child=xmlDocument.createElement("password");
+			child.setTextContent(clientToRun.getPassword().toString());
+			cI.appendChild(child);
+			child=xmlDocument.createElement("registered");
+			child.setTextContent(Boolean.toString(clientToRun.isRegistered()));
+			cI.appendChild(child);
+			Element cache=xmlDocument.createElement("imageCache");
+			for(Entry<String,Image> e: clientToRun.getImageCache().entrySet()){
+				child=xmlDocument.createElement("image");
+				child.setTextContent(e.getKey());
+				cache.appendChild(child);
+			}
+			cI.appendChild(cache);
+			cache=xmlDocument.createElement("jscssCache");
+			for(Entry<String,StringBuilder> e: clientToRun.getJscssCache().entrySet()){
+				child=xmlDocument.createElement("jscss");
+				child.setTextContent(e.getKey());
+				cache.appendChild(child);
+			}
+			cI.appendChild(cache);
+			cache=xmlDocument.createElement("HTML5Cache");
+			for(Entry<String,StringBuilder> e: clientToRun.getHTML5Cache().entrySet()){
+				child=xmlDocument.createElement("html5");
+				child.setTextContent(e.getKey());
+				cache.appendChild(child);
+			}
+			cI.appendChild(cache);
+	
+			client.appendChild(cI);
+			root.appendChild(client);
+		}
+	
+		/**
+		 * RunClient for repeated runs
+		 * @param cg - Client generator
+		 * @param client - Node of the client from readXmlDocument that is to be run
+		 */
+		private RunClient(ClientGenerator cg, Node client){
+			this.cg=cg;
+			this.clientToRun=new ClientInfo();
+			// Sets the client info according to that in the readXmlDocument
+			clientToRun.setClientIndex(Long.parseLong(((Element)client).getElementsByTagName("clientIndex").item(0).getTextContent()));
+			Element clientInfo=(Element)((Element)client).getElementsByTagName("clientInfo").item(0);
+			clientToRun.setUserID(new StringBuilder(clientInfo.getElementsByTagName("userID").item(0).getTextContent()));
+			clientToRun.setUsername(new StringBuilder(clientInfo.getElementsByTagName("username").item(0).getTextContent()));
+			clientToRun.setPassword(new StringBuilder(clientInfo.getElementsByTagName("password").item(0).getTextContent()));
+			clientToRun.setRegistered(Boolean.parseBoolean(clientInfo.getElementsByTagName("registered").item(0).getTextContent()));
+		}
+	
+	}
+
+	/**
+	 * Randomly assigns itemIDs to be artificially popular.
+	 * Rolling list of popular items.
+	 * @author Andrew Fox
+	 *
+	 */
+	private class ChangePopularity extends Thread{
+		long maxItemId;
+		long minItemId;
+	
+		public ChangePopularity(int numItems, long maxItemId,long minItemId){
+			this.maxItemId=maxItemId;
+			this.minItemId=minItemId;
+	
+			long itemId;
+			for (int i=0;i<numItems;i++){
+				do{
+					itemId=(long)rand.nextInt((int)(maxItemId-minItemId))+minItemId;
+				}while(hotItems.contains(itemId));
+				hotItems.add(itemId);
+			}
+		}
+	
+		public void run(){
+			long itemId;
+			do{
+				try{Thread.sleep((long) expDist(120000));}
+				catch(InterruptedException e){
+					break;
+				}
+				do{
+					itemId=(long)(rand.nextInt((int)(maxItemId-minItemId))+minItemId);
+				}while(hotItems.contains(itemId));
+				hotItems.remove(0);
+				hotItems.add(itemId);
+			}while(!exit);
 		}
 	}
 

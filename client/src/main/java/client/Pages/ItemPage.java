@@ -5,10 +5,10 @@ import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
@@ -18,9 +18,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import client.Items.*;
+import client.Items.ItemCG;
+import client.Items.QuestionCG;
+import client.Items.SellerCG;
 import client.Tools.DateParser;
-import client.clientMain.*;
+import client.clientMain.RunSettings;
 
 /**
  * Item Page
@@ -43,7 +45,7 @@ public class ItemPage extends Page{
 	long ajaxRequestPeriod=5000;					// time period of the AJAX requests to update the bid price
 
 	public ItemPage(Page page) throws ParseException, JsonParseException, JsonMappingException, IOException{
-		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL,page.cg);
+		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL);
 		//TODO: What is this?
 		if(lastURL.indexOf("/askquestion?")!=-1){
 			this.url=new StringBuilder(client.getCMARTurl().getAppURL()).append("/viewitem").append(lastURL.substring(lastURL.indexOf("?")));
@@ -633,7 +635,7 @@ public class ItemPage extends Page{
 		double askQuestionProb=RunSettings.getTransitionProb(pageType,10);
 		double leaveCommentProb=RunSettings.getTransitionProb(pageType,11);
 
-		if(RunSettings.getWorkloadType()==1){
+		if(RunSettings.getWorkloadTypeCode()==1){
 			bidProb*=0.6;
 			buyNowProb*=0.6;
 			browseProb*=1.35;
@@ -642,7 +644,7 @@ public class ItemPage extends Page{
 			myAccountProb*=1.15;
 			askQuestionProb*=0.65;
 		}
-		else if(RunSettings.getWorkloadType()==3){
+		else if(RunSettings.getWorkloadTypeCode()==3){
 			bidProb*=1.4;
 			buyNowProb*=1.4;
 			browseProb*=0.65;
@@ -712,7 +714,7 @@ public class ItemPage extends Page{
 			askQuestionProb*=item.getItemRating()/item.getWantRating();
 			if(item.getNumQuestions()>1)
 				askQuestionProb/=item.getNumQuestions();
-			if(lastPageType==ASKQUESTION_PAGE_NUM){
+			if(lastPageType==PageType.ASKQUESTION_PAGE_NUM.getCode()){
 				askQuestionProb/=4;
 				bidProb/=5;
 				buyNowProb/=5;
@@ -883,7 +885,7 @@ public class ItemPage extends Page{
 
 		if (verbose)System.out.println("User: "+client.getClientInfo().getUsername()+" - Think Time: "+thinkTime+" ms");
 		if (RunSettings.isOutputThinkTimes()==true)
-			cg.getThinkTimeHist().add(thinkTime);
+			client.getCg().getThinkTimeHist().add(thinkTime);
 		pageThinkTime=thinkTime;
 		return Math.max((int) ((thinkTime-(new Date().getTime()-pageOpenTime))/RunSettings.getThinkTimeSpeedUpFactor()),0);
 	}

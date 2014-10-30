@@ -1,8 +1,13 @@
 package client.Test;
 
 import java.util.ArrayList;
-import client.clientMain.*;
+
 import org.junit.Test;
+
+import client.clientMain.CMARTurl;
+import client.clientMain.ClientGenerator;
+import client.clientMain.ClientInfo;
+import client.clientMain.RunSettings;
 
 public class TestClientManiPackageT2 {
 	public static void main(String[] args) {

@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.TreeMap;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
@@ -21,9 +21,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import client.Items.*;
+import client.Items.ItemCG;
+import client.Items.QuestionCG;
+import client.Items.SellerCG;
 import client.Tools.DateParser;
-import client.clientMain.*;
+import client.clientMain.RunSettings;
 
 
 
@@ -50,7 +52,7 @@ public class BrowsePage extends Page{
 
 	public BrowsePage(Page page) throws ParseException, JsonParseException, JsonMappingException, IOException{
 
-		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL,page.cg);
+		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL);
 		client.pageSpecificRT(pageRTFactor);	// change RT threshold depending on page type
 		if(HTML4)
 			searchData=getFormData("search");
@@ -148,7 +150,7 @@ public class BrowsePage extends Page{
 						e.printStackTrace();
 					}
 					if (RunSettings.isOutputThinkTimes()==true)
-						cg.getThinkTimeHist().add(thinkTime);
+						client.getCg().getThinkTimeHist().add(thinkTime);
 					Element child=xmlDocument.createElement("thinkTime");
 					child.setTextContent(Long.toString(thinkTime));
 					action.appendChild(child);
@@ -206,7 +208,7 @@ public class BrowsePage extends Page{
 							}
 							else{
 								repeat=true;
-								ItemPage page=(ItemPage)new Page(nextURL,pageType,nextURL,client,cg).toPageType();
+								ItemPage page=(ItemPage)new Page(nextURL,pageType,nextURL,client).toPageType();
 								page.setTabbed(true);
 								client.getOpenTabs().get(0).cancelTimer();
 								client.getOpenTabs().remove(0);
@@ -545,7 +547,7 @@ public class BrowsePage extends Page{
 							}
 							else{
 								repeat=true;
-								ItemPage page=(ItemPage)new Page(nextURL,pageType,nextURL,client,cg).toPageType();
+								ItemPage page=(ItemPage)new Page(nextURL,pageType,nextURL,client).toPageType();
 								page.setTabbed(true);
 								client.getOpenTabs().get(0).cancelTimer();
 								client.getOpenTabs().remove(0);
@@ -578,7 +580,7 @@ public class BrowsePage extends Page{
 					}
 					int newThinkTime=Integer.parseInt(action.getElementsByTagName("thinkTime").item(1).getTextContent());
 					if (RunSettings.isOutputThinkTimes()==true)
-						cg.getThinkTimeHist().add(newThinkTime);
+						client.getCg().getThinkTimeHist().add(newThinkTime);
 					try{Thread.sleep((long) Math.max(newThinkTime/RunSettings.getThinkTimeSpeedUpFactor(),0));}
 					catch(InterruptedException e){
 						for(int i=0;i<client.getOpenTabs().size();i++)
@@ -774,7 +776,7 @@ public class BrowsePage extends Page{
 		double sortDateProb=RunSettings.getTransitionProb(pageType,10);
 		double sortPriceProb=RunSettings.getTransitionProb(pageType,11);
 
-		if(RunSettings.getWorkloadType()==1){
+		if(RunSettings.getWorkloadTypeCode()==1){
 			sellProb*=0.46;
 			nextPageProb*=1.2;
 			tabbedBrowsingProb*=0.85;
@@ -782,7 +784,7 @@ public class BrowsePage extends Page{
 			sortDateProb*=1.2;
 			sortPriceProb*=1.2;
 		}
-		else if(RunSettings.getWorkloadType()==3){
+		else if(RunSettings.getWorkloadTypeCode()==3){
 			sellProb*=1.54;
 			nextPageProb*=0.8;
 			tabbedBrowsingProb*=1.15;
@@ -948,7 +950,7 @@ public class BrowsePage extends Page{
 				e.printStackTrace();
 			}
 			if (RunSettings.isOutputThinkTimes()==true)
-				cg.getThinkTimeHist().add(thinkTime);
+				client.getCg().getThinkTimeHist().add(thinkTime);
 			Element child=xmlDocument.createElement("thinkTime");
 			child.setTextContent(Long.toString(thinkTime));
 			action.appendChild(child);
@@ -1071,7 +1073,7 @@ public class BrowsePage extends Page{
 			if(verbose)System.out.println("Tab to open: "+itemUrl);
 			try {
 				//	client.addOpenTab(openURL(url,client));		// adds the tab to the client list of open tabs
-				ItemPage page=(ItemPage)new Page(itemUrl,pageType,url,client,cg).toPageType();
+				ItemPage page=(ItemPage)new Page(itemUrl,pageType,url,client).toPageType();
 				page.setTabbed(true);
 				client.addOpenTab(page);
 				addFinishedTab();
@@ -1140,7 +1142,7 @@ public class BrowsePage extends Page{
 		}
 		if (verbose)System.out.println("User: "+client.getClientInfo().getUsername()+" - Think Time: "+thinkTime+" ms");
 		if (RunSettings.isOutputThinkTimes()==true)
-			cg.getThinkTimeHist().add(thinkTime);
+			client.getCg().getThinkTimeHist().add(thinkTime);
 		pageThinkTime=thinkTime;
 		return Math.max((int) ((thinkTime-(new Date().getTime()-pageOpenTime))/RunSettings.getThinkTimeSpeedUpFactor()),0);
 	}

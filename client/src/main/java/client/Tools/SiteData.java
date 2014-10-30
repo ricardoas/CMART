@@ -1,13 +1,18 @@
 package client.Tools;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.net.Socket;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.util.Scanner;
+
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
+import org.apache.http.util.EntityUtils;
 
 import client.clientMain.CMARTurl;
 
@@ -23,9 +28,8 @@ import client.clientMain.CMARTurl;
  */
 public class SiteData {
 
-	private final String outputFileLocation; // the location to output the csv
-	// file
-	private final boolean toOutput; // if the csv file is to be output
+	private final String outputFileLocation;
+	private final boolean printOutput;
 	private final CMARTurl cmarturl;
 
 	/**
@@ -45,7 +49,7 @@ public class SiteData {
 	 */
 	public SiteData(String outputFileLocation, boolean toOutput, CMARTurl cmarturl) {
 		this.outputFileLocation = outputFileLocation.concat("siteData.csv");
-		this.toOutput = true;
+		this.printOutput = true;
 		this.cmarturl = cmarturl;
 	}
 
@@ -60,29 +64,27 @@ public class SiteData {
 
 		// form new socket to access stats page
 		while (attempts++ < 3) {
-			try (Socket socket = new Socket(this.cmarturl.getIpURLString(), this.cmarturl.getAppPort());
-					PrintStream out = new PrintStream(socket.getOutputStream());
-					BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));) {
-
-				out.println(new StringBuilder("GET ").append(this.cmarturl.getAppURL()).append("/statistics HTTP/1.0\r\n"));
-				out.flush();
-
-				StringBuilder ret = new StringBuilder(); // the html returned
-				// from the
-				// statistics page
-
-				String inputLine;
-				while ((inputLine = br.readLine()) != null) {
-					ret.append(inputLine); // creates the response
-				}
-
-				ret.delete(0, ret.indexOf("Browse Category"));
-				ret.delete(ret.indexOf("</div>"), ret.length());
-				if (this.toOutput) {
-					outputStats(ret);
+			
+			HttpClientBuilder builder = HttpClientBuilder.create();
+			builder.setConnectionManager(new BasicHttpClientConnectionManager());
+			try(CloseableHttpClient client = builder.build();
+					CloseableHttpResponse response = client.execute(new HttpGet(cmarturl.build("/statistics")));
+				){
+				if (printOutput) {
+					StringBuilder content = new StringBuilder();
+					try(Scanner scanner = new Scanner(response.getEntity().getContent());){
+						while(scanner.hasNextLine()){
+							content.append(scanner.nextLine());
+						}
+						content.delete(0, content.indexOf("Browse Category"));
+						content.delete(content.indexOf("</div>"), content.length());
+						outputStats(content);
+					}
+				}else{
+					EntityUtils.consume(response.getEntity());
 				}
 				return;
-			} catch (IOException e) {
+			} catch (IOException | URISyntaxException e) {
 				System.err.println("Problem collecting SiteData. Attempt:" + attempts);
 				e.printStackTrace();
 			}

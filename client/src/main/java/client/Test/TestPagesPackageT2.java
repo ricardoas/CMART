@@ -1,8 +1,32 @@
 package client.Test;
 
 import java.util.ArrayList;
-import client.Pages.*;
+
 import org.junit.Test;
+
+import client.Pages.AskQuestionPage;
+import client.Pages.BidConfirmPage;
+import client.Pages.BidHistoryPage;
+import client.Pages.BrowsePage;
+import client.Pages.BuyItemPage;
+import client.Pages.ConfirmBuyPage;
+import client.Pages.ConfirmCommentPage;
+import client.Pages.HomePage;
+import client.Pages.ItemPage;
+import client.Pages.LeaveCommentPage;
+import client.Pages.LogOutPage;
+import client.Pages.LoginPage;
+import client.Pages.MyAccountPage;
+import client.Pages.Page;
+import client.Pages.ParsePage;
+import client.Pages.RegisterUserPage;
+import client.Pages.SearchPage;
+import client.Pages.SellItemConfirmPage;
+import client.Pages.SellItemPage;
+import client.Pages.UpdateUserPage;
+import client.Pages.UploadImagesPage;
+import client.Pages.ViewUserPage;
+import client.Pages.WatchVideoPage;
 
 public class TestPagesPackageT2 {
 	public static void main(String[] args) {

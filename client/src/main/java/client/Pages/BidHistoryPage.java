@@ -4,9 +4,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.TreeMap;
 
-import org.w3c.dom.*;
+import org.w3c.dom.Element;
 
-import client.clientMain.*;
+import client.clientMain.RunSettings;
 
 
 /**
@@ -24,7 +24,7 @@ public class BidHistoryPage extends Page {
 
 
 	public BidHistoryPage(Page page){
-		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL,page.cg);
+		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL);
 		searchData=getFormData("search");
 		getItemData();
 		updateProbabilities();
@@ -79,7 +79,7 @@ public class BidHistoryPage extends Page {
 
 		if (verbose)System.out.println("User: "+client.getClientInfo().getUsername()+" - Think Time: "+thinkTime+" ms");
 		if (RunSettings.isOutputThinkTimes()==true)
-			cg.getThinkTimeHist().add(thinkTime);
+			client.getCg().getThinkTimeHist().add(thinkTime);
 		pageThinkTime=thinkTime;
 		return Math.max((int) ((thinkTime-(new Date().getTime()-pageOpenTime))/RunSettings.getThinkTimeSpeedUpFactor()),0);
 	}

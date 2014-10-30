@@ -1,8 +1,16 @@
 package client.clientMain;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 /**
  * Initial Settings for client generator
@@ -76,34 +84,38 @@ public class RunSettings {
 	private static TreeMap<Long,ArrayList<Long>> categoriesParentsStorage=new TreeMap<Long,ArrayList<Long>>();	// mapping of category parentIDs to their child categories
 	private static TreeMap<Integer,ArrayList<Double>> transitionProbabilities=new TreeMap<Integer,ArrayList<Double>>();
 
-	public static void main(String[] args){
-		
+	public static void main(String[] args) throws ClientGeneratorException{
+
 		// FIX PROBLEM WHEN RUNNING CLIENT ON NON-ENGLISH LOCALE
 		Locale.setDefault(Locale.ENGLISH);
+		
 		System.out.println("START= " + System.currentTimeMillis());
-
 		System.out.println("Initializing Distributions");
-		String configFileName="CGconfig.txt";
-		for(int aloop=0; aloop<args.length; aloop++){
-			if(args[aloop].toLowerCase().equals("config") || args[aloop].toLowerCase().equals("-config")){
-				if(aloop+1 <= args.length)
-					configFileName = args[aloop+1];
+		
+		String configFileName = "CGconfig.txt";
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].toLowerCase().equals("config") || args[i].toLowerCase().equals("-config")) {
+				if (i + 1 <= args.length)
+					configFileName = args[i + 1];
 			}
 		}
-		initializeRunSettings(configFileName);		// initializes the run settings
-		if(ableToRun){
+		
+		initializeRunSettings(configFileName); 
+		
+		if (ableToRun) {
 			try {
-				initializeDistributions();		// adds all the distributions into the TreeMaps
+				initializeDistributions();
 			} catch (IOException e) {
 				e.printStackTrace();
-			}					
+			}
+			
 			System.out.println("Starting Client Generator");
-			//	Timer t1=new Timer();
-			ClientGenerator cg=new ClientGenerator(getCMARTurl());		// starts the client generator
+			ClientGenerator cg = new ClientGenerator(getCMARTurl());
 			cg.start();
 
-			try{Thread.sleep(60000*timeToRun);} 			// wait for the specified delay
-			catch(InterruptedException e){
+			try {
+				Thread.sleep(60000 * timeToRun);
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			exitSystem(cg);
@@ -1219,8 +1231,16 @@ public class RunSettings {
 	 * Gets the workload type for the run (read/normal/write heavy)
 	 * @return
 	 */
-	public static int getWorkloadType(){
+	public static int getWorkloadTypeCode(){
 		return workloadType;
+	}
+
+	/**
+	 * Gets the workload type for the run (read/normal/write heavy)
+	 * @return
+	 */
+	public static WorkloadType getWorkloadType(){
+		return WorkloadType.values()[getWorkloadTypeCode()-1];
 	}
 
 	/**

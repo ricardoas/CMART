@@ -298,7 +298,7 @@ public class Client extends Thread{
 				if(verbose)System.out.println("Page Number: "+i);
 				if(verbose)System.out.println(currentURL);
 
-				Page activePage=new Page(currentURL,currentPageType,lastURL,this,cg).toPageType();	// declares a general page from the URL and returns a page of the specific type
+				Page activePage=new Page(currentURL,currentPageType,lastURL,this).toPageType();	// declares a general page from the URL and returns a page of the specific type
 				lastURL=currentURL;
 				lastPageType=currentPageType;
 				currentPageType=activePage.getPageType();		// gets the page type of the current page
@@ -1049,7 +1049,7 @@ public class Client extends Thread{
 	 * Outputs the Client XML document of all the client's actions upon the client exiting the system
 	 */
 	private void outputClientXML(){
-		if(RunSettings.isRepeatedRun()==false){
+		if(!RunSettings.isRepeatedRun()){
 			try{
 				FileWriter fstreamA = new FileWriter(new StringBuilder(RunSettings.getRepeatedXmlFolder()).append("client").append(clientInfo.getClientIndex()).append(".xml").toString(),true);
 				BufferedWriter out = new BufferedWriter(fstreamA);
