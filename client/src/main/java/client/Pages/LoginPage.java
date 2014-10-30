@@ -36,11 +36,11 @@ public class LoginPage extends Page{
 	 * @throws IOException 
 	 * @throws UnsupportedEncodingException 
 	 */
-	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
+	@Override public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
 		StringBuilder nextLink=new StringBuilder(client.getCMARTurl().getAppURL());	// link to send the login data to
 		StringBuilder nextURL=new StringBuilder();	// the response page returned after the login attempt
 
-		if(RunSettings.isRepeatedRun()==false){
+		if(!RunSettings.isRepeatedRun()){
 			searchData=getFormData("search");
 			data=getFormData("login");
 

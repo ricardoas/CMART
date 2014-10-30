@@ -41,7 +41,7 @@ public class SellItemConfirmPage extends Page {
 	 * @throws IOException 
 	 * @throws UnsupportedEncodingException 
 	 */
-	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
+	@Override public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
 		StringBuilder nextURL=new StringBuilder(client.getCMARTurl().getAppURL());		// the next URL to submit a request to
 
 		if(HTML4)

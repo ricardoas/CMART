@@ -261,7 +261,7 @@ public class ClientGenerator extends Thread{
 		HashMap<String, String> data = new HashMap<>();
 		data.put("totalUsers", Integer.toString(1));
 		
-		long numberOfUsers = Long.parseLong(openPopulateUser(cmarturl.build("/getusers", data)).toString());
+		long numberOfUsers = Long.parseLong(openPopulateUser(cmarturl.build(cmarturl.getAppURL().append("/getusers?").toString(), data)).toString());
 		int pageLimit = (int) (Math.floor((numberOfUsers - 1) / 25) - 1);
 		
 		for (int k = 0; k < 30; k++) {
@@ -275,7 +275,7 @@ public class ClientGenerator extends Thread{
 			data.put("pageNo", Long.toString(pageNo));
 			data.put("itemsPP", Integer.toString(25));
 
-			StringBuilder ret = openPopulateUser(cmarturl.build("/getusers", data));
+			StringBuilder ret = openPopulateUser(cmarturl.build(cmarturl.getAppURL().append("/getusers?").toString(), data));
 			try (Scanner input = new Scanner(ret.toString());) {
 
 				while (input.hasNextLine()) {
@@ -571,7 +571,7 @@ public class ClientGenerator extends Thread{
 		threadExecutorRC.shutdownNow();
 		System.out.println("ALL CLIENTS SHUTDOWN");
 		if(RunSettings.isOutputSiteData()){
-			new SiteData(RunSettings.getOutputSiteDataFile(),true, cmarturl).collectStats();		// output data from Statistics page to csv
+			new SiteData(RunSettings.getOutputSiteDataFile(), true, cmarturl).collectStats();		// output data from Statistics page to csv
 		}
 		new OutputPageRT(pageRTHistograms,RunSettings.getOutputSiteDataFile()).outputData();;
 		stats.exitStats();		// exit stats - no more collecting response times

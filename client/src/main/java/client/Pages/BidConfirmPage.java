@@ -43,7 +43,7 @@ public class BidConfirmPage extends Page {
 	 * @throws UnsupportedEncodingException 
 	 * @throws URISyntaxException 
 	 */
-	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException, URISyntaxException{
+	@Override public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException, URISyntaxException{
 		StringBuilder nextURL=new StringBuilder(client.getCMARTurl().getAppURL());	// the URL of the next link to be opened
 
 		StringBuilder nextLink=getRandomStringBuilderFromDist(nextPageProbabilities);		// randomly chooses the next link

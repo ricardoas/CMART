@@ -284,7 +284,7 @@ public class ItemPage extends Page{
 	 * @throws UnsupportedEncodingException 
 	 * @throws ParseException 
 	 */
-	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException, ParseException{
+	@Override public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException, ParseException{
 
 		client.setLastItemID(itemID);
 		StringBuilder nextPage=new StringBuilder(client.getCMARTurl().getAppURL());

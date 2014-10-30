@@ -42,10 +42,12 @@ import javax.imageio.ImageIO;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIUtils;
@@ -327,39 +329,41 @@ public class Page {
 	 * Opens a C-MART page for HTML4
 	 * @param urlString - URL of page to be opened
 	 * @return HTML of the response from C-MART
+	 * @throws UnsupportedEncodingException 
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
-	protected StringBuilder openURL(StringBuilder urlString) throws ClientProtocolException, IOException, URISyntaxException{
-		StringBuilder ret = new StringBuilder();		// the source code of the page
-		if(verbose)System.out.println("URLSTRING "+urlString);
-		String inputLine;	// each line being read in
+	protected StringBuilder openURL(StringBuilder urlString) throws UnsupportedEncodingException, URISyntaxException {
+		StringBuilder ret = new StringBuilder(); // the source code of the page
+		if (verbose){
+			System.out.println("URLSTRING " + urlString);
+		}
 
-		try{
-			URI uri=URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), urlString.toString().replace(" ", "%20"), null, null);
-			HttpGet httpget = new HttpGet(uri);
-			Stopwatch sw=new Stopwatch();
-			HttpResponse response = client.getHttpClient().execute(httpget);
+		URI uri = client.getCMARTurl().build(urlString.toString());
+		HttpGet httpget = new HttpGet(uri);
+		Stopwatch sw = new Stopwatch();
 
-			HttpEntity entity = response.getEntity();
-			BufferedReader br = new BufferedReader(new InputStreamReader(entity.getContent()));	// opens a BufferedReader to read the response of the HTTP request
-
-			while((inputLine=br.readLine())!=null){
-				//	System.out.println(inputLine);
-				ret.append(inputLine);	// creates the response
+		try(CloseableHttpResponse response = client.getHttpClient().execute(httpget);
+				BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));	// opens a BufferedReader to read the response of the HTTP request
+				){
+			
+			String inputLine; // each line being read in
+			while ((inputLine = br.readLine()) != null) {
+				ret.append(inputLine);
 			}
+			
 			if(RunSettings.isNetworkDelay()){
-				try{Thread.sleep(client.getNetworkDelay());}
-				catch(InterruptedException e){
-					br.close();
-					return null;
+				try {
+					Thread.sleep(client.getNetworkDelay());
+				} catch (InterruptedException e) {
+					//					return null;
 				}
 			}
 
 			sw.pause();
-			br.close();
-			if(response.getStatusLine().getStatusCode()>=400){
+			
+			if (response.getStatusLine().getStatusCode() >= HttpStatus.SC_BAD_REQUEST) {
 				this.responseTime=sw.stop();	// stops the Stopwatch and determines the final response time
 				client.getCg().getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
 				client.addRT(responseTime);	// indexes the response time as the latest response time for the client
@@ -369,33 +373,32 @@ public class Page {
 
 				if (httpRequestAttempts<3){
 					httpRequestAttempts++;
-					try{Thread.sleep((long) (expDist(1500)/RunSettings.getThinkTimeSpeedUpFactor()));}
-					catch(InterruptedException e){
+					try {
+						Thread.sleep((long) (expDist(1500) / RunSettings.getThinkTimeSpeedUpFactor()));
+					} catch (InterruptedException e) {
 					}
-					ret=openURL(urlString);
-					if (httpRequestAttempts<3)
-						return ret;
+					return openURL(urlString);
 				}
 				threadExecutor.shutdown();
-				//		httpclient.getConnectionManager().shutdown();
-				System.err.println("HTTP request error: "+urlString);
+				
+				System.err.println("Error (Status=" + response.getStatusLine().getStatusCode() + ") connecting (HTTP4) to: " + uri);
 				client.setExit(true);
 				client.setExitDueToError(true);
 				return new StringBuilder(HTTP_RESPONSE_ERROR);
-
 			}
 
 			if(RunSettings.isGetExtras()){
 				try {
 					sw=getJsCssNew(ret,sw);
-					sw=getImagesNew(ret,sw);	// Downloads any jpg on the page that is not already in the image cache
+					sw=getImagesNew(ret,sw);
 				} catch (InterruptedException e) {
-				}		// Downloads the JS of any js files not already cached
+				}
 			}
 
 			sw.start();
-			if(urlString.indexOf("index?")!=-1&&client.isLoggedIn())
+			if(urlString.indexOf("index?")!=-1&&client.isLoggedIn()){
 				client.setMessage(openAJAXRequest(new StringBuilder(urlString).append("&getRecommendation=1&recommendationPageNo=0")).toString());
+			}
 
 			this.responseTime=sw.stop();	// stops the Stopwatch and determines the final response time
 			client.getCg().getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
@@ -405,29 +408,19 @@ public class Page {
 			client.incNumPagesOpened();
 
 			threadExecutor.shutdown();
-			if(verbose)System.out.println("RET "+ret);
+			if(verbose){
+				System.out.println("RET "+ret);
+			}
 
 			return ret;
-		}catch(SocketException e){
-			System.err.println("Could not create connection");
-			System.err.println(urlString);
+		} catch (IOException e) {
+			System.err.println("Could not connect (HTTP4) to " + uri);
+			e.printStackTrace();
 			client.incRequestErrors();
 			httpRequestAttempts++;
-			ret=openURL(urlString);
-			if (httpRequestAttempts<3)
-				return ret;
-			threadExecutor.shutdown();
-			client.setExit(true);
-			client.setExitDueToError(true);
-			return new StringBuilder(HTTP_RESPONSE_ERROR);
-		}catch(NoHttpResponseException e){
-			System.err.println("Could not create connection");
-			System.err.println(urlString);
-			client.incRequestErrors();
-			httpRequestAttempts++;
-			ret=openURL(urlString);
-			if (httpRequestAttempts<3)
-				return ret;
+			if (httpRequestAttempts < 3){
+				return openURL(urlString);
+			}
 			threadExecutor.shutdown();
 			client.setExit(true);
 			client.setExitDueToError(true);
@@ -2233,6 +2226,11 @@ public class Page {
 				break;
 			}
 		}
+	}
+
+	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException, URISyntaxException, ParseException{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

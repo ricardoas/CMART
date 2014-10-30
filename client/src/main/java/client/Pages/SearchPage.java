@@ -73,7 +73,7 @@ public class SearchPage extends Page{
 	 * @throws InterruptedException 
 	 * @throws URISyntaxException 
 	 */
-	public StringBuilder makeDecision() throws JsonParseException, JsonMappingException, IOException, ParseException, InterruptedException, URISyntaxException{
+	@Override public StringBuilder makeDecision() throws JsonParseException, JsonMappingException, IOException, ParseException, InterruptedException, URISyntaxException{
 		StringBuilder nextURL=new StringBuilder(client.getCMARTurl().getAppURL());
 		StringBuilder nextLink=new StringBuilder(getRandomStringBuilderFromDist(nextPageProbabilities));
 		String nextLinkS=nextLink.toString();

@@ -43,7 +43,7 @@ public class UploadImagesPage extends Page {
 	 * @throws IOException 
 	 * @throws ParseException 
 	 */
-	public StringBuilder makeDecision() throws ParseException, IOException, InterruptedException{
+	@Override public StringBuilder makeDecision() throws ParseException, IOException, InterruptedException{
 		StringBuilder nextPage;		// the response after the HTTP request
 
 		if(HTML4)

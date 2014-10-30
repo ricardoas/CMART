@@ -33,7 +33,7 @@ public class ViewUserPage extends Page {
 	 * @return the URL or HTML of the next link, depending on whether
 	 * 		   the previous entry contained a form or not
 	 */
-	public StringBuilder makeDecision(){
+	@Override public StringBuilder makeDecision(){
 		StringBuilder nextLink=getRandomStringBuilderFromDist(nextPageProbabilities);
 
 		if (HTML4==true){

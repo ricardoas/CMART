@@ -64,7 +64,7 @@ public class MyAccountPage extends Page{
 	 * @return the URL or HTML of the next link, depending on whether
 	 * 		   the previous entry contained a form or not
 	 */
-	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
+	@Override public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
 		StringBuilder nextURL=new StringBuilder(client.getCMARTurl().getAppURL());
 		StringBuilder nextLink=getRandomStringBuilderFromDist(nextPageProbabilities);
 

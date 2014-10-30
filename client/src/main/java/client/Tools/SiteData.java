@@ -44,12 +44,12 @@ public class SiteData {
 	 *
 	 * @param outputFileLocation
 	 *            - location that the csv file is to be saved to
-	 * @param toOutput
+	 * @param printOutput
 	 *            TODO
 	 */
-	public SiteData(String outputFileLocation, boolean toOutput, CMARTurl cmarturl) {
+	public SiteData(String outputFileLocation, boolean printOutput, CMARTurl cmarturl) {
 		this.outputFileLocation = outputFileLocation.concat("siteData.csv");
-		this.printOutput = true;
+		this.printOutput = printOutput;
 		this.cmarturl = cmarturl;
 	}
 
@@ -68,7 +68,7 @@ public class SiteData {
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(new BasicHttpClientConnectionManager());
 			try(CloseableHttpClient client = builder.build();
-					CloseableHttpResponse response = client.execute(new HttpGet(cmarturl.build("/statistics")));
+					CloseableHttpResponse response = client.execute(new HttpGet(cmarturl.build(cmarturl.getAppURL().append("/statistics").toString())));
 				){
 				if (printOutput) {
 					StringBuilder content = new StringBuilder();

@@ -45,7 +45,7 @@ public class BuyItemPage extends Page{
 	 * @throws UnsupportedEncodingException 
 	 * @throws URISyntaxException 
 	 */
-	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException, URISyntaxException{
+	@Override public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException, URISyntaxException{
 		StringBuilder nextPage=new StringBuilder(client.getCMARTurl().getAppURL());
 		String nextLinkS=getRandomStringBuilderFromDist(nextPageProbabilities).toString();		// randomly chooses the next link
 

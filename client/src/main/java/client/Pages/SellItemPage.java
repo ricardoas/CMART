@@ -47,7 +47,7 @@ public class SellItemPage extends Page {
 	 * @throws IOException 
 	 * @throws UnsupportedEncodingException 
 	 */
-	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
+	@Override public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException{
 		StringBuilder nextPage=new StringBuilder(client.getCMARTurl().getAppURL());
 
 

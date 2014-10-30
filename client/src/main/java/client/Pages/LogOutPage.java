@@ -27,7 +27,7 @@ public class LogOutPage extends Page{
 	 * @return the URL or HTML of the next link, depending on whether
 	 * 		   the previous entry contained a form or not
 	 */
-	public StringBuilder makeDecision(){
+	@Override public StringBuilder makeDecision(){
 		client.setExit(true);		// client exits the website
 		client.setLoggedIn(false);
 

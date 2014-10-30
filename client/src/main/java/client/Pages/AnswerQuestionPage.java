@@ -39,7 +39,7 @@ public class AnswerQuestionPage extends Page{
 	 * @throws UnsupportedEncodingException 
 	 * @throws URISyntaxException 
 	 */
-	public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException, URISyntaxException{
+	@Override public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException, URISyntaxException{
 		StringBuilder nextLink=new StringBuilder(client.getCMARTurl().getAppURL());	// link to send the login data to
 		StringBuilder nextURL=new StringBuilder();	// the response page returned after the login attempt
 

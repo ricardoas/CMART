@@ -69,12 +69,12 @@ public class BrowsePage extends Page{
 	 * @return the URL or HTML of the next link, depending on whether
 	 * 		   the previous entry contained a form or not
 	 * @throws IOException 
-	 * @throws ParseException 
 	 * @throws InterruptedException 
 	 * @throws UnsupportedEncodingException 
 	 * @throws URISyntaxException 
+	 * @throws ParseException 
 	 */
-	public StringBuilder makeDecision() throws InterruptedException, UnsupportedEncodingException, IOException, ParseException, URISyntaxException{
+	@Override public StringBuilder makeDecision() throws InterruptedException, UnsupportedEncodingException, IOException, URISyntaxException, ParseException{
 		StringBuilder nextURL=new StringBuilder(client.getCMARTurl().getAppURL());
 		StringBuilder nextLink=new StringBuilder(getRandomStringBuilderFromDist(nextPageProbabilities));
 		String nextLinkS=nextLink.toString();
@@ -82,7 +82,7 @@ public class BrowsePage extends Page{
 
 		if(verbose)System.out.println("Next Link: "+nextLink);
 
-		if(RunSettings.isRepeatedRun()==false){
+		if(!RunSettings.isRepeatedRun()){
 			action=xmlDocument.createElement("action");
 			action.setAttribute("id",client.getActionNum());
 			Element currentPage=xmlDocument.createElement("currentPage");
@@ -199,7 +199,7 @@ public class BrowsePage extends Page{
 								client.getOpenTabs().get(0).cancelTimer();
 								client.getOpenTabs().remove(0);
 							}
-							else if(nextURL.equals(client.getOpenTabs().get(0).getURL())==false){
+							else if(!nextURL.equals(client.getOpenTabs().get(0).getURL())){
 								for(int i=0;i<client.getOpenTabs().size();i++)
 									client.getOpenTabs().get(i).cancelTimer();
 								client.getOpenTabs().clear();

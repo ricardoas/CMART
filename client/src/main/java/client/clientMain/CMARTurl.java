@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -72,7 +73,7 @@ public class CMARTurl {
 	 * @return
 	 */
 	public StringBuilder getAppURL(){
-		return appURL;
+		return new StringBuilder(appURL);
 	}
 	/**
 	 * Gets the port number the website is running on
@@ -83,19 +84,60 @@ public class CMARTurl {
 	}
 	
 	public URI build(String page, Map<String, String> data) throws URISyntaxException, UnsupportedEncodingException{
-		URIBuilder builder = new URIBuilder();
-		builder.setScheme("http");
-		builder.setHost(ipURL.toString());
-		builder.setPort(appPort);
-		builder.setPath(appURL.toString() + page);
-		for (Entry<String, String> entry : data.entrySet()) {
-			builder.addParameter(entry.getKey(), URLEncoder.encode(entry.getValue(), "UTF-8"));
+		if(RunSettings.isVerbose()){
+			System.out.println("\t\t\tCMARTurl.build()");
+			System.out.println("\t\t\t"+page);
+			System.out.println("\t\t\t"+data);
 		}
-		return builder.build();
+		
+		StringBuilder uri = new StringBuilder("http://" + ipURL.toString() + ":" + appPort + page);
+		for (Entry<String, String> entry : data.entrySet()) {
+			uri.append(entry.getKey()+"=" + entry.getValue()+"&");
+		}
+		
+		if(uri.charAt(uri.length()-1) == '&'){
+			uri.deleteCharAt(uri.length()-1);
+		}
+		
+		return URI.create(uri.toString());
+//		URIBuilder builder = new URIBuilder();
+//		builder.setScheme("http");
+//		builder.setHost(ipURL.toString());
+//		builder.setPort(appPort);
+//		String[] strings = page.split("\\?");
+//		builder.setPath(strings[0]);
+//		if(strings.length > 1){
+//			String[] params = strings[1].split("&");
+////			System.err.println(Arrays.asList(params));
+//			for (String param : params) {
+//				String[] p = param.split("=");
+////				if(p[0].equals("authToken")){
+////					builder.addParameter(p[0], p[1]);
+//////					System.err.println(p[1]);
+////				}else{
+//					System.err.println(Arrays.toString(p));
+//					builder.addParameter(p[0], URLEncoder.encode(p[1], "UTF-8"));
+////				}
+//			}
+//		}
+//		for (Entry<String, String> entry : data.entrySet()) {
+//			builder.addParameter(entry.getKey(), URLEncoder.encode(entry.getValue(), "UTF-8"));
+//		}
+//		URI uri = builder.build();
+//		if(RunSettings.isVerbose()){
+//			System.out.println("\t\t\t"+uri);
+//		}
+//		return uri;
 	}
 
 	public URI build(String page) throws UnsupportedEncodingException, URISyntaxException {
 		return build(page, new HashMap<String, String>());
+	}
+	
+	public static void main(String[] args) throws UnsupportedEncodingException, URISyntaxException {
+		CMARTurl cmarTurl = new CMARTurl(new StringBuilder("http://10.1.0.11:80/cmart-1"));
+		System.out.println(cmarTurl.build("/cmart-1/viewitem?userID=89926&authToken=[B@15a7b655&itemID=41544"));
+		System.out.println(URI.create("http://10.1.0.11:80/cmart-1/viewitem?userID=89926&authToken=[B@15a7b655&itemID=41544"));
 	}
 	
 }

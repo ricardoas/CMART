@@ -49,7 +49,7 @@ public class UpdateUserPage extends Page{
 	 * @throws JsonParseException 
 	 * @throws InterruptedException 
 	 */
-	public StringBuilder makeDecision() throws JsonParseException, JsonMappingException, IOException, InterruptedException{
+	@Override public StringBuilder makeDecision() throws JsonParseException, JsonMappingException, IOException, InterruptedException{
 		StringBuilder nextPage=new StringBuilder();		// the HTTP response after submitting a request
 		if(RunSettings.isRepeatedRun()==false){
 			action=xmlDocument.createElement("action");

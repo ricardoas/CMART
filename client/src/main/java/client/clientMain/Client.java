@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -23,6 +25,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.ProtocolException;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
@@ -49,6 +52,7 @@ import client.Pages.LogOutPage;
 import client.Pages.LoginPage;
 import client.Pages.MyAccountPage;
 import client.Pages.Page;
+import client.Pages.PageType;
 import client.Pages.RegisterUserPage;
 import client.Pages.SearchPage;
 import client.Pages.SellItemConfirmPage;
@@ -132,29 +136,6 @@ public class Client extends Thread{
 
 	private ArrayList<PoolingHttpClientConnectionManager> httpClientConnectionManagers=new ArrayList<>();
 	private LinkedList<CloseableHttpClient>httpclients=new LinkedList<>();
-
-	// Page numbers for all the pages
-	protected static final int LOGIN_PAGE_NUM=1;
-	protected static final int REGISTER_PAGE_NUM=2;
-	protected static final int ITEM_PAGE_NUM=3;
-	protected static final int MYACCOUNT_PAGE_NUM=4;
-	protected static final int UPDATEUSER_PAGE_NUM=5;
-	protected static final int SELLITEM_PAGE_NUM=6;
-	protected static final int BIDCONFIRM_PAGE_NUM=7;
-	protected static final int SELLITEMCONFIRM_PAGE_NUM=8;
-	protected static final int BROWSE_PAGE_NUM=9;
-	protected static final int BUYITEM_PAGE_NUM=10;
-	protected static final int UPLOADIMAGES_PAGE_NUM=11;
-	protected static final int VIEWUSER_PAGE_NUM=12;
-	protected static final int CONFIRMBUY_PAGE_NUM=13;
-	protected static final int LOGOUT_PAGE_NUM=14;
-	protected static final int HOME_PAGE_NUM=15;
-	protected static final int SEARCH_PAGE_NUM=16;
-	protected static final int BIDHISTORY_PAGE_NUM=17;
-	protected static final int ASKQUESTION_PAGE_NUM=18;
-	protected static final int LEAVECOMMENT_PAGE_NUM=19;
-	protected static final int CONFIRMCOMMENT_PAGE_NUM=20;
-	protected static final int ANSWERQUESTION_PAGE_NUM=21;
 	private HttpClientBuilder httpClientBuilder;
 
 
@@ -290,86 +271,71 @@ public class Client extends Thread{
 	 * Runs the client through each page
 	 */
 	public void run(){
-		int i=0;
+		int i = 0;
 		try (CloseableHttpClient client = httpClientBuilder.build()) {
 			httpclients.add(client);
-			while(exit==false){		// while the client is not exiting the system
+			while (!exit) { // while the client is not exiting the system
 				i++;
-				if(verbose)System.out.println("Page Number: "+i);
-				if(verbose)System.out.println(currentURL);
+				if (verbose) {
+					System.out.println("Page Number: " + i);
+//					System.out.println(currentURL);
+				}
 
-				Page activePage=new Page(currentURL,currentPageType,lastURL,this).toPageType();	// declares a general page from the URL and returns a page of the specific type
-				lastURL=currentURL;
-				lastPageType=currentPageType;
-				currentPageType=activePage.getPageType();		// gets the page type of the current page
-				// transitions to the next page, returning the next URL
-				switch(currentPageType){
-				case 0: exit=true;break;
-				case LOGIN_PAGE_NUM:	currentURL=((LoginPage)activePage).makeDecision(); break;
-				case REGISTER_PAGE_NUM:	currentURL=((RegisterUserPage)activePage).makeDecision(); break;
-				case ITEM_PAGE_NUM: currentURL=((ItemPage)activePage).makeDecision(); break;
-				case MYACCOUNT_PAGE_NUM:	currentURL=((MyAccountPage)activePage).makeDecision(); break;
-				case UPDATEUSER_PAGE_NUM:	currentURL=((UpdateUserPage)activePage).makeDecision(); break;
-				case SELLITEM_PAGE_NUM: currentURL=((SellItemPage)activePage).makeDecision(); break;
-				case BIDCONFIRM_PAGE_NUM: currentURL=((BidConfirmPage)activePage).makeDecision(); break;
-				case SELLITEMCONFIRM_PAGE_NUM:	currentURL=((SellItemConfirmPage)activePage).makeDecision(); break;
-				case BROWSE_PAGE_NUM: currentURL=((BrowsePage)activePage).makeDecision(); break;
-				case BUYITEM_PAGE_NUM: currentURL=((BuyItemPage)activePage).makeDecision(); break;
-				case UPLOADIMAGES_PAGE_NUM: currentURL=((UploadImagesPage)activePage).makeDecision(); break;
-				case VIEWUSER_PAGE_NUM: currentURL=((ViewUserPage)activePage).makeDecision(); break;
-				case CONFIRMBUY_PAGE_NUM: currentURL=((ConfirmBuyPage)activePage).makeDecision(); break;
-				case LOGOUT_PAGE_NUM: currentURL=((LogOutPage)activePage).makeDecision(); break;
-				case HOME_PAGE_NUM: currentURL=((HomePage)activePage).makeDecision(); break;
-				case SEARCH_PAGE_NUM: currentURL=((SearchPage)activePage).makeDecision(); break;
-				case BIDHISTORY_PAGE_NUM: currentURL=((BidHistoryPage)activePage).makeDecision(); break;
-				case ASKQUESTION_PAGE_NUM: currentURL=((AskQuestionPage)activePage).makeDecision(); break;
-				case LEAVECOMMENT_PAGE_NUM: currentURL=((LeaveCommentPage)activePage).makeDecision(); break;
-				case CONFIRMCOMMENT_PAGE_NUM: currentURL=((ConfirmCommentPage)activePage).makeDecision(); break;
-				case ANSWERQUESTION_PAGE_NUM: currentURL=((AnswerQuestionPage)activePage).makeDecision(); break;
+				Page activePage = new Page(currentURL, currentPageType, lastURL, this).toPageType();
+
+				lastURL = currentURL;
+				lastPageType = currentPageType;
+				currentPageType = activePage.getPageType();
+				if (currentPageType == 0) {
+					exit = true;
+				} else {
+					currentURL = activePage.makeDecision();
 				}
 				activePage.shutdownThreads();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			this.exit=true;
-			this.loggedIn=false;
-			System.out.println("Client "+clientInfo.getUsername()+" Exiting Due To Error");
+		} catch (IOException | InterruptedException | URISyntaxException | ParseException e) {
+			this.exit = true;
+			this.loggedIn = false;
+			System.out.println(System.currentTimeMillis() + " Client (#" + clientInfo.getClientIndex() + ") " + clientInfo.getUsername()
+					+ " Exiting Due To Error " + cg.getActiveClients().size());
 			System.err.println(currentURL);
 			System.err.println(lastURL);
-			System.err.println("Client Index: " + clientInfo.getClientIndex());
-			// if the client is to clear its cache when logging out
-			if (rand.nextDouble() < RunSettings.getClearCacheOnExit())
-				clientInfo.clearCaches(); // clear caches
+			if (rand.nextDouble() < RunSettings.getClearCacheOnExit()) {
+				clientInfo.clearCaches();
+			}
 			cg.activeToRemove(clientInfo, this); // moves the client
 			cg.getClientSessionStats().addClientSession(numPagesOpened, totalRT, requestErrors, startTime, true, 1.);
 		}
-		for (ItemPage ip:openTabs){
+
+		for (ItemPage ip : openTabs) {
 			ip.cancelTimer();
 		}
-		System.out.println("Client "+clientInfo.getUsername()+" Exiting");
-		if(exitDueToRepeatChange)
-			System.out.println("Client Index "+clientInfo.getClientIndex()+" left due to change in repeated run");
-		if(rand.nextDouble()<RunSettings.getClearCacheOnExit())		// if the client is to clear its cache when logging out
-			clientInfo.clearCaches();							// clear caches
-		if(currentPageType!=REGISTER_PAGE_NUM)
-			cg.activeToInactive(clientInfo,this);	// moves the client to being inactive
-		else
-			cg.activeToRemove(clientInfo,this);	// moves the client to being inactive
+
+		System.out.println(System.currentTimeMillis() + " Client (#" + clientInfo.getClientIndex() + ") " + clientInfo.getUsername() + " Exiting "
+				+ cg.getActiveClients().size());
+
+		if (exitDueToRepeatChange) {
+			System.out.println("Client Index " + clientInfo.getClientIndex() + " left due to change in repeated run");
+		}
+		if (rand.nextDouble() < RunSettings.getClearCacheOnExit()) {
+			clientInfo.clearCaches();
+		}
+		if (currentPageType != PageType.REGISTER_PAGE_NUM.getCode()) {
+			cg.activeToInactive(clientInfo, this);
+		} else {
+			cg.activeToRemove(clientInfo, this); 
+		}
 		double annoyedProb;
 
-		if(exitDueToError==true){
-			annoyedProb=1.;
-			System.err.println(currentURL);
-			System.err.println(lastURL);
-			System.err.println(currentPageType);
-			System.err.println(lastPageType);
-			System.err.println("Client Index: "+clientInfo.getClientIndex());
+		if (exitDueToError) {
+			annoyedProb = 1.;
+		} else if (finalLogoutProb == 0) {
+			annoyedProb = 0;
+		} else {
+			annoyedProb = (restProb * (finalLogoutProb - origLogoutProb)) / (finalLogoutProb * (restProb + origLogoutProb));
 		}
-		else if(finalLogoutProb==0)
-			annoyedProb=0;
-		else
-			annoyedProb=(restProb*(finalLogoutProb-origLogoutProb))/(finalLogoutProb*(restProb+origLogoutProb));
-		cg.getClientSessionStats().addClientSession(numPagesOpened, totalRT, requestErrors,startTime, exitDueToError,annoyedProb);
+
+		cg.getClientSessionStats().addClientSession(numPagesOpened, totalRT, requestErrors, startTime, exitDueToError, annoyedProb);
 
 		outputClientXML();
 	}
