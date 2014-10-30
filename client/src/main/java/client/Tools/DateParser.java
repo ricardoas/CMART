@@ -6,8 +6,6 @@ import java.util.Date;
 
 public class DateParser {
 
-	private static final SimpleDateFormat FORMAT = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
-
 	/**
 	 * Converts a string of specified formatting to a date
 	 * @param s - String
@@ -15,7 +13,7 @@ public class DateParser {
 	 * @throws ParseException 
 	 */
 	public static Date stringToDate(String s) throws ParseException{
-		return FORMAT.parse(s);
+		return new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy").parse(s);
 	}
 
 	/**
@@ -26,8 +24,7 @@ public class DateParser {
 	 * @throws ParseException 
 	 */
 	public static String dateToString(Date d) {
-		return FORMAT.format(d);
-
+		return new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy").format(d);
 	}
 
 }

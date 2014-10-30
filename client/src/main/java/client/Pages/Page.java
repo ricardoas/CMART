@@ -22,7 +22,7 @@ import org.apache.http.client.utils.URIUtils;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
@@ -429,9 +429,9 @@ public class Page {
 		if(verbose)System.out.println("URLSTRING "+urlString);
 		String inputLine;	// each line being read in
 
-		//		ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
+		//		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
 		//		cm.setMaxTotal(100);
-		//		HttpClient httpclient = new DefaultHttpClient(cm);
+		//		HttpClient httpclient = new CloseableHttpClient(cm);
 		try{
 			URI uri=URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), urlString.toString().replace(" ", "%20"), null, null);
 			HttpGet httpget = new HttpGet(uri);
@@ -605,9 +605,9 @@ public class Page {
 	 * @return Returns the response as StringBuilder from the redirected page
 	 */
 	protected StringBuilder openHTML5PageWithRedirect(StringBuilder urlString){
-		//		ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
+		//		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
 		//		cm.setMaxTotal(100);
-		//		HttpClient httpclient = new DefaultHttpClient(cm);
+		//		HttpClient httpclient = new CloseableHttpClient(cm);
 		PageTimePair 	finalPagePair=null;
 		try{
 			finalPagePair = openURLHTML5(urlString,null);
@@ -1534,10 +1534,10 @@ public class Page {
 		Client client;
 		int size=3145728;
 		int len;
-		DefaultHttpClient httpclient;
+		CloseableHttpClient httpclient;
 		boolean inCache;
 
-		private GetImageNew(String URLsuffix, Client client,DefaultHttpClient httpclient, boolean inCache){
+		private GetImageNew(String URLsuffix, Client client,CloseableHttpClient httpclient, boolean inCache){
 			if(verbose)System.out.println("Get Image: "+URLsuffix);
 			this.suffix=URLsuffix;
 			this.client=client;
@@ -1639,9 +1639,9 @@ public class Page {
 		Client client;
 		StringBuilder line=new StringBuilder();
 		String newline;
-		DefaultHttpClient httpclient;
+		CloseableHttpClient httpclient;
 		boolean inCache;
-		private GetJSCSSNew(String URLsuffix, Client client,DefaultHttpClient httpclient,boolean inCache){
+		private GetJSCSSNew(String URLsuffix, Client client,CloseableHttpClient httpclient,boolean inCache){
 			if(verbose)System.out.println("Get JS: "+URLsuffix);
 			this.suffix=URLsuffix;
 			this.client=client;

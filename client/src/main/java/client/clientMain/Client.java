@@ -1,26 +1,61 @@
 package client.clientMain;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.Random;
+import java.util.TreeMap;
 
-import org.w3c.dom.*;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolException;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.protocol.HttpContext;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
-
-import org.apache.http.*;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.DefaultRedirectStrategy;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.protocol.HttpContext;
-
-
-import client.Items.*;
-import client.Pages.*;
+import client.Items.ItemCG;
+import client.Pages.AnswerQuestionPage;
+import client.Pages.AskQuestionPage;
+import client.Pages.BidConfirmPage;
+import client.Pages.BidHistoryPage;
+import client.Pages.BrowsePage;
+import client.Pages.BuyItemPage;
+import client.Pages.ConfirmBuyPage;
+import client.Pages.ConfirmCommentPage;
+import client.Pages.HomePage;
+import client.Pages.ItemPage;
+import client.Pages.LeaveCommentPage;
+import client.Pages.LogOutPage;
+import client.Pages.LoginPage;
+import client.Pages.MyAccountPage;
+import client.Pages.Page;
+import client.Pages.RegisterUserPage;
+import client.Pages.SearchPage;
+import client.Pages.SellItemConfirmPage;
+import client.Pages.SellItemPage;
+import client.Pages.UpdateUserPage;
+import client.Pages.UploadImagesPage;
+import client.Pages.ViewUserPage;
 
 /**
  * Runs a client through the application
@@ -95,8 +130,8 @@ public class Client extends Thread{
 	private double expBuyRate=1/2;		// exponential rate at which someone is likely to make another buy after already making them
 	private ArrayList<ItemPage> openTabs=new ArrayList<ItemPage>();	// pages of tabs in addition to the original open page that have been opened
 
-	ArrayList<ThreadSafeClientConnManager> threadSafeClientConnManagers=new ArrayList<ThreadSafeClientConnManager>();
-	private LinkedList<DefaultHttpClient>httpclients=new LinkedList<DefaultHttpClient>();
+	private ArrayList<PoolingHttpClientConnectionManager> httpClientConnectionManagers=new ArrayList<>();
+	private LinkedList<CloseableHttpClient>httpclients=new LinkedList<>();
 
 	// Page numbers for all the pages
 	protected static final int LOGIN_PAGE_NUM=1;
@@ -120,6 +155,7 @@ public class Client extends Thread{
 	protected static final int LEAVECOMMENT_PAGE_NUM=19;
 	protected static final int CONFIRMCOMMENT_PAGE_NUM=20;
 	protected static final int ANSWERQUESTION_PAGE_NUM=21;
+	private HttpClientBuilder httpClientBuilder;
 
 
 	/**
@@ -159,15 +195,16 @@ public class Client extends Thread{
 			}
 		}
 
-		// initializes the connection manager and http clients
-		// uses 2 ports per httpclient
-		// also sets up httpclients for automatic redirects
-		for (int i=0;i<2;i++){
-			ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager();
+//		// initializes the connection manager and http clients
+//		// uses 2 ports per httpclient
+//		// also sets up httpclients for automatic redirects
+//		for (int i=0;i<2;i++){
+			PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
 			cm.setMaxTotal(100);
-			DefaultHttpClient  httpclient = new DefaultHttpClient(cm);
-
-			httpclient.setRedirectStrategy(new DefaultRedirectStrategy() {                
+			
+			httpClientBuilder = HttpClientBuilder.create();
+			httpClientBuilder.setConnectionManager(cm);
+			httpClientBuilder.setRedirectStrategy(new DefaultRedirectStrategy() {                
 				public boolean isRedirected(HttpRequest request, HttpResponse response, HttpContext context)  {
 					boolean isRedirect=false;
 					try {
@@ -187,9 +224,9 @@ public class Client extends Thread{
 					return isRedirect;
 				}
 			});
-			httpclients.add(httpclient);
-			threadSafeClientConnManagers.add(cm);
-		}
+			
+			httpClientConnectionManagers.add(cm);
+//		}
 
 		// Determines the network delay based on the exponential distribution of the provided average
 		if(RunSettings.isNetworkDelay())
@@ -254,11 +291,13 @@ public class Client extends Thread{
 	 */
 	public void run(){
 		int i=0;
-		while(exit==false){		// while the client is not exiting the system
-			i++;
-			if(verbose)System.out.println("Page Number: "+i);
-			if(verbose)System.out.println(currentURL);
-			try {
+		try (CloseableHttpClient client = httpClientBuilder.build()) {
+			httpclients.add(client);
+			while(exit==false){		// while the client is not exiting the system
+				i++;
+				if(verbose)System.out.println("Page Number: "+i);
+				if(verbose)System.out.println(currentURL);
+
 				Page activePage=new Page(currentURL,currentPageType,lastURL,this,cg).toPageType();	// declares a general page from the URL and returns a page of the specific type
 				lastURL=currentURL;
 				lastPageType=currentPageType;
@@ -289,23 +328,20 @@ public class Client extends Thread{
 				case ANSWERQUESTION_PAGE_NUM: currentURL=((AnswerQuestionPage)activePage).makeDecision(); break;
 				}
 				activePage.shutdownThreads();
-			} catch (Exception e) {
-				e.printStackTrace();
-				this.exit=true;
-				this.loggedIn=false;
-				System.out.println("Client "+clientInfo.getUsername()+" Exiting Due To Error");
-
-				for(DefaultHttpClient h:httpclients)
-					h.getConnectionManager().shutdown();
-
-						System.err.println(currentURL);
-						System.err.println(lastURL);
-						System.err.println("Client Index: "+clientInfo.getClientIndex());
-						if(rand.nextDouble()<RunSettings.getClearCacheOnExit())		// if the client is to clear its cache when logging out
-							clientInfo.clearCaches();							// clear caches
-						cg.activeToRemove(clientInfo,this);	// moves the client 
-						cg.getClientSessionStats().addClientSession(numPagesOpened, totalRT, requestErrors, startTime,true,1.);
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			this.exit=true;
+			this.loggedIn=false;
+			System.out.println("Client "+clientInfo.getUsername()+" Exiting Due To Error");
+			System.err.println(currentURL);
+			System.err.println(lastURL);
+			System.err.println("Client Index: " + clientInfo.getClientIndex());
+			// if the client is to clear its cache when logging out
+			if (rand.nextDouble() < RunSettings.getClearCacheOnExit())
+				clientInfo.clearCaches(); // clear caches
+			cg.activeToRemove(clientInfo, this); // moves the client
+			cg.getClientSessionStats().addClientSession(numPagesOpened, totalRT, requestErrors, startTime, true, 1.);
 		}
 		for (ItemPage ip:openTabs){
 			ip.cancelTimer();
@@ -335,9 +371,6 @@ public class Client extends Thread{
 			annoyedProb=(restProb*(finalLogoutProb-origLogoutProb))/(finalLogoutProb*(restProb+origLogoutProb));
 		cg.getClientSessionStats().addClientSession(numPagesOpened, totalRT, requestErrors,startTime, exitDueToError,annoyedProb);
 
-		for(DefaultHttpClient h:httpclients){
-			h.getConnectionManager().shutdown();
-		}
 		outputClientXML();
 	}
 
@@ -960,7 +993,7 @@ public class Client extends Thread{
 	 * Returns the next HTTPClient on the list
 	 * @return
 	 */
-	public synchronized DefaultHttpClient getHttpClient(){
+	public synchronized CloseableHttpClient getHttpClient(){
 		httpclients.offerLast(httpclients.pollFirst());
 		return httpclients.peekLast();
 	}
