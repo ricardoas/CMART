@@ -6,7 +6,7 @@ import java.sql.Connection;
 import java.util.Date;
 
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -378,12 +378,12 @@ public abstract class DBPopulator {
 	
 	public abstract int getNoOfImages(long itemID);
 	
-	CommonsHttpSolrServer SOLR_SERVER = null;
+	HttpSolrServer SOLR_SERVER = null;
 	
 	public void initSolr(){
 		if(SOLR_SERVER==null)
 		try {
-			SOLR_SERVER = new CommonsHttpSolrServer(CreateAll.SOLR_URL);
+			SOLR_SERVER = new HttpSolrServer(CreateAll.SOLR_URL);
 			SOLR_SERVER.setDefaultMaxConnectionsPerHost(CreateAll.SOLR_MAX_CONNS);
 			
 			SOLR_SERVER.setSoTimeout(20000);
