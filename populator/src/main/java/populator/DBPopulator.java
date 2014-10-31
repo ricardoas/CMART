@@ -382,7 +382,7 @@ public abstract class DBPopulator {
 	
 	public void initSolr(){
 		if(SOLR_SERVER==null)
-		try {
+//		try {
 			SOLR_SERVER = new HttpSolrServer(CreateAll.SOLR_URL);
 			SOLR_SERVER.setDefaultMaxConnectionsPerHost(CreateAll.SOLR_MAX_CONNS);
 			
@@ -391,10 +391,10 @@ public abstract class DBPopulator {
 			SOLR_SERVER.setMaxTotalConnections(CreateAll.SOLR_MAX_CONNS);
 			SOLR_SERVER.setFollowRedirects(false);
 			SOLR_SERVER.setParser(new XMLResponseParser());
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-			System.out.println("initSolr (DBPopulator): Could not connect to Solr server");
-		}
+//		} catch (MalformedURLException e) {
+//			e.printStackTrace();
+//			System.out.println("initSolr (DBPopulator): Could not connect to Solr server");
+//		}
 	}
 	
 	Integer commit = 0;
