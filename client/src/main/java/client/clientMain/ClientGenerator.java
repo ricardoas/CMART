@@ -264,7 +264,7 @@ public class ClientGenerator extends Thread{
 		long numberOfUsers = Long.parseLong(openPopulateUser(cmarturl.build(cmarturl.getAppURL().append("/getusers?").toString(), data)).toString());
 		int pageLimit = (int) (Math.floor((numberOfUsers - 1) / 25) - 1);
 		
-		for (int k = 0; k < 30; k++) {
+		for (int k = 0; k < 3; k++) {
 			long pageNo;
 			do {
 				pageNo = rand.nextInt(pageLimit);
@@ -304,11 +304,7 @@ public class ClientGenerator extends Thread{
 	 * @throws IOException 
 	 */
 	private StringBuilder openPopulateUser(URI uri) throws IOException{
-		
-		if(RunSettings.isVerbose()){
-			System.out.println("PopulateUser "+uri);
-		}
-		
+
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		builder.setConnectionManager(new BasicHttpClientConnectionManager());
 		try(CloseableHttpClient client = builder.build();

@@ -73,7 +73,7 @@ public class CMARTurl {
 	 * @return
 	 */
 	public StringBuilder getAppURL(){
-		return new StringBuilder(appURL);
+		return new StringBuilder("");
 	}
 	/**
 	 * Gets the port number the website is running on
@@ -90,7 +90,7 @@ public class CMARTurl {
 			System.out.println("\t\t\t"+data);
 		}
 		
-		StringBuilder uri = new StringBuilder("http://" + ipURL.toString() + ":" + appPort + page);
+		StringBuilder uri = new StringBuilder("http://" + ipURL.toString() + ":" + appPort + "/" + appURL + page);
 		for (Entry<String, String> entry : data.entrySet()) {
 			uri.append(entry.getKey()+"=" + entry.getValue()+"&");
 		}
@@ -100,34 +100,6 @@ public class CMARTurl {
 		}
 		
 		return URI.create(uri.toString());
-//		URIBuilder builder = new URIBuilder();
-//		builder.setScheme("http");
-//		builder.setHost(ipURL.toString());
-//		builder.setPort(appPort);
-//		String[] strings = page.split("\\?");
-//		builder.setPath(strings[0]);
-//		if(strings.length > 1){
-//			String[] params = strings[1].split("&");
-////			System.err.println(Arrays.asList(params));
-//			for (String param : params) {
-//				String[] p = param.split("=");
-////				if(p[0].equals("authToken")){
-////					builder.addParameter(p[0], p[1]);
-//////					System.err.println(p[1]);
-////				}else{
-//					System.err.println(Arrays.toString(p));
-//					builder.addParameter(p[0], URLEncoder.encode(p[1], "UTF-8"));
-////				}
-//			}
-//		}
-//		for (Entry<String, String> entry : data.entrySet()) {
-//			builder.addParameter(entry.getKey(), URLEncoder.encode(entry.getValue(), "UTF-8"));
-//		}
-//		URI uri = builder.build();
-//		if(RunSettings.isVerbose()){
-//			System.out.println("\t\t\t"+uri);
-//		}
-//		return uri;
 	}
 
 	public URI build(String page) throws UnsupportedEncodingException, URISyntaxException {
@@ -138,6 +110,8 @@ public class CMARTurl {
 		CMARTurl cmarTurl = new CMARTurl(new StringBuilder("http://10.1.0.11:80/cmart-1"));
 		System.out.println(cmarTurl.build("/cmart-1/viewitem?userID=89926&authToken=[B@15a7b655&itemID=41544"));
 		System.out.println(URI.create("http://10.1.0.11:80/cmart-1/viewitem?userID=89926&authToken=[B@15a7b655&itemID=41544"));
+		System.out.println(URI.create("http://150.165.15.113:9080//cmart-1/search?userID=136626&authToken=[B@494ef09a&pageNo=0&itemsPP=25&sortCol=1&sortDec=0&searchTerm=sports unprinted unprinted"));
+		
 	}
 	
 }
