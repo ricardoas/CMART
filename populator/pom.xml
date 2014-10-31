@@ -28,7 +28,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>client.clientMain.RunSettings</mainClass>
+							<mainClass>populator.CreateAll</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
