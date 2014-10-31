@@ -340,7 +340,7 @@ public class Page {
 			System.out.println("URLSTRING " + urlString);
 		}
 
-		URI uri = client.getCMARTurl().build(urlString.toString());
+		URI uri = client.getCMARTurl().build(urlString.toString().replace(" ", "%20"));
 		HttpGet httpget = new HttpGet(uri);
 		Stopwatch sw = new Stopwatch();
 
@@ -759,7 +759,8 @@ public class Page {
 			sw.start();
 
 		try{
-			URI uri=URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), urlStringS.replace(" ", "%20"), null, null);
+//			URI uri=URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), urlStringS.replace(" ", "%20"), null, null);
+			URI uri=client.getCMARTurl().build(urlStringS.replace(" ", "%20"));
 			HttpGet httpget = new HttpGet(uri);
 			HttpResponse response = client.getHttpClient().execute(httpget);
 			HttpEntity entity = response.getEntity();
@@ -981,8 +982,8 @@ public class Page {
 		}
 		URI uri;
 		try {
-			uri = URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), url.toString().replace(" ", "%20"), null, null);
-
+//			uri = URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), url.toString().replace(" ", "%20"), null, null);
+			uri=client.getCMARTurl().build(url.toString().replace(" ", "%20"));
 			UrlEncodedFormEntity entityPost = new UrlEncodedFormEntity(formparams, "UTF-8");
 			HttpPost httppost = new HttpPost(uri);
 			httppost.setEntity(entityPost);
@@ -1096,8 +1097,8 @@ public class Page {
 
 		URI uri;
 		try {
-			uri = URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), url.replace(" ", "%20"), null, null);
-
+//			uri = URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), url.replace(" ", "%20"), null, null);
+			uri=client.getCMARTurl().build(url.replace(" ", "%20"));
 			HttpPost httppost=new HttpPost(uri);
 			MultipartEntity reqEntity = new MultipartEntity();
 			for (Entry<String,StringBuilder> e:data.entrySet()){
@@ -1212,7 +1213,8 @@ public class Page {
 		//Stopwatch sw=new Stopwatch();	// starts timing how long it takes to open the webpage
 
 		try {
-			URI uri=URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), urlStringS, null, null);
+//			URI uri=URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), urlStringS, null, null);
+			URI uri=client.getCMARTurl().build(urlStringS.replace(" ", "%20"));
 			HttpGet httpget = new HttpGet(uri);
 
 			HttpResponse response = client.getHttpClient().execute(httpget);
@@ -1445,8 +1447,9 @@ public class Page {
 			int attempts=0;
 			while(attempts<3){
 				try {			
-					URI uri = URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), new StringBuilder(client.getCMARTurl().getAppURL()).append("/").append(suffix).toString().replace(" ", "%20"), null, null);
-
+//					URI uri = URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), new StringBuilder(client.getCMARTurl().getAppURL()).append("/").append(suffix).toString().replace(" ", "%20"), null, null);
+					URI uri=client.getCMARTurl().build(suffix.replace(" ", "%20"));
+					
 					HttpGet httpget = new HttpGet(uri);
 
 					HttpResponse response = httpclient.execute(httpget);
@@ -1550,8 +1553,9 @@ public class Page {
 			while(attempts<3){
 				try {			
 
-					URI uri = URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), new StringBuilder(client.getCMARTurl().getAppURL()).append("/").append(suffix).toString().replace(" ", "%20"), null, null);
-
+//					URI uri = URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), new StringBuilder(client.getCMARTurl().getAppURL()).append("/").append(suffix).toString().replace(" ", "%20"), null, null);
+					URI uri=client.getCMARTurl().build(suffix.replace(" ", "%20"));
+					
 					HttpGet httpget = new HttpGet(uri);
 
 					if(inCache=true)
