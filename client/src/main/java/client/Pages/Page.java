@@ -109,6 +109,7 @@ public class Page {
 
 	// strings used in pages
 	private static final String HTML_TEXT="<HTML>";
+	private static final String HEAD_TEXT="<HEAD>";
 	private static final String JPG_TEXT=".jpg";
 	private static final String JPG_TEXTQ=".jpg\"";
 	private static final String PNG_TEXT=".png";
@@ -207,7 +208,7 @@ public class Page {
 	 * @return 
 	 */
 	private boolean isURI(String string) {
-		return !string.startsWith(HTML_TEXT) && !string.startsWith("NEXTLINK") && !string.startsWith("{\"");
+		return !string.startsWith(HTML_TEXT) && !string.startsWith("NEXTLINK") && !string.startsWith("{\"") && !string.startsWith(HEAD_TEXT);
 	}
 
 	/**
@@ -415,7 +416,7 @@ public class Page {
 			return ret;
 		} catch (IOException e) {
 			System.err.println("Could not connect (HTTP4) to " + uri);
-			e.printStackTrace();
+//			e.printStackTrace();
 			client.incRequestErrors();
 			httpRequestAttempts++;
 			if (httpRequestAttempts < 3){
@@ -1208,60 +1209,53 @@ public class Page {
 	protected StringBuilder openAJAXRequest(StringBuilder urlString){
 		StringBuilder ret = new StringBuilder();		// the source code of the page
 		if(verbose)System.out.println("AJAXURLSTRING "+urlString);
-		String inputLine;	// each line being read in
-		String urlStringS=urlString.toString().replace(" ", "%20");
+//		String urlStringS=urlString.toString().replace(" ", "%20");
 		//Stopwatch sw=new Stopwatch();	// starts timing how long it takes to open the webpage
 
-		try {
+
+		try{
 //			URI uri=URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), urlStringS, null, null);
-			URI uri=client.getCMARTurl().build(urlStringS.replace(" ", "%20"));
+			URI uri=client.getCMARTurl().build(urlString.toString().replace(" ", "%20"));
 			HttpGet httpget = new HttpGet(uri);
-
-			HttpResponse response = client.getHttpClient().execute(httpget);
-
-			HttpEntity entity = response.getEntity();
-			BufferedReader br = new BufferedReader(new InputStreamReader(entity.getContent()));	// opens a BufferedReader to read the response of the HTTP request
-
-			while((inputLine=br.readLine())!=null){
-				ret.append(inputLine);	// creates the response
-			}
-			if(RunSettings.isNetworkDelay()){
-				try{Thread.sleep(client.getNetworkDelay());}
-				catch(InterruptedException e){
-					br.close();
-					return null;
+			
+			try(CloseableHttpResponse response = client.getHttpClient().execute(httpget);
+					BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));	// opens a BufferedReader to read the response of the HTTP request
+					){
+				
+				String inputLine; // each line being read in
+				while ((inputLine = br.readLine()) != null) {
+					ret.append(inputLine);
 				}
+				
+				if(RunSettings.isNetworkDelay()){
+					try{Thread.sleep(client.getNetworkDelay());}
+					catch(InterruptedException e){
+						br.close();
+						return null;
+					}
+				}
+				
+				if(RunSettings.isGetExtras()){
+					if(urlString.indexOf("index?")!=-1)
+						getImagesNew(ret,new Stopwatch());
+				}
+				
+				br.close();
+				if(verbose)System.out.println("RET AJAX OPENURL: "+ret);
+				return ret;
+				
+			} catch (IOException | IllegalStateException | NullPointerException e) {
+				e.printStackTrace();
+				return null;
 			}
-
-			if(RunSettings.isGetExtras()){
-				if(urlString.indexOf("index?")!=-1)
-					getImagesNew(ret,new Stopwatch());
-			}
-
-			br.close();
-			if(verbose)System.out.println("RET AJAX OPENURL: "+ret);
-
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			return null;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		} catch (URISyntaxException e) {
+			
+		} catch (URISyntaxException | UnsupportedEncodingException e) {
 			e.printStackTrace();
 			System.err.println(pageType);
 			System.err.println(lastPageType);
 			System.err.println(lastURL);
 			return null;
-		} catch (IllegalStateException e){
-			e.printStackTrace();
-			return null;
-		}catch(NullPointerException e){
-			e.printStackTrace();
-			return null;
 		}
-
-		return ret;
 	}
 
 

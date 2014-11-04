@@ -277,7 +277,7 @@ public class Client extends Thread{
 			while (!exit) { // while the client is not exiting the system
 				i++;
 				if (verbose) {
-					System.out.println("Page Number: " + i);
+					System.out.println("Client " + this.getClientID() + " Page Number: " + i);
 //					System.out.println(currentURL);
 				}
 
@@ -293,7 +293,7 @@ public class Client extends Thread{
 				}
 				activePage.shutdownThreads();
 			}
-		} catch (IOException | InterruptedException | URISyntaxException | ParseException e) {
+		} catch (Exception e) {
 			this.exit = true;
 			this.loggedIn = false;
 			System.out.println(System.currentTimeMillis() + " Client (#" + clientInfo.getClientIndex() + ") " + clientInfo.getUsername()
@@ -306,6 +306,7 @@ public class Client extends Thread{
 			cg.activeToRemove(clientInfo, this); // moves the client
 			cg.getClientSessionStats().addClientSession(numPagesOpened, totalRT, requestErrors, startTime, true, 1.);
 		}
+		System.out.println("Client.run()");
 
 		for (ItemPage ip : openTabs) {
 			ip.cancelTimer();
