@@ -60,7 +60,7 @@ public class CollectStats extends TimerTask {
 
 	private void outputStats() throws IOException {
 		StringBuilder histStats = new StringBuilder("Hist ");
-		System.out.println("Number of Active Clients: " + this.cg.getActiveClients().size());
+		System.out.println("Number of Active Clients: " + this.cg.getNumberOfActiveClients());
 		System.out.println("Number of Requests: " + this.oldHistogram.getNumEntries() + ", 90% RT: " + this.oldHistogram.getPercentile(0.9));
 
 		if (RunSettings.isVerbose()) {
@@ -71,7 +71,7 @@ public class CollectStats extends TimerTask {
 		}
 
 		if (RunSettings.isOutputThinkTimes()) {
-			this.outputReqs(this.cg.getActiveClients().size(), this.oldHistogram.getNumEntries());
+			this.outputReqs(this.cg.getNumberOfActiveClients(), this.oldHistogram.getNumEntries());
 		}
 
 		ArrayList<Long> RTDist = new ArrayList<Long>();

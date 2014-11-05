@@ -9,16 +9,18 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -56,7 +58,11 @@ import client.Tools.Stats;
 
 public class ClientGenerator extends Thread{
 
-	private Random rand=new Random();		// random seed generator
+	private Random rand;
+	private Set<Client> clients;
+	private Semaphore semaphore;
+	
+	
 	private double newClientProb=0.1;		// the probability that the next client activated in the system is a new client
 	private ArrayList<ClientInfo>activeClients=new ArrayList<ClientInfo>();		// ArrayList of the client info of the clients active in the system
 	private ArrayList<ClientInfo>inactiveClients=new ArrayList<ClientInfo>();	// ArrayList of the client info of the clients inactive in the system
@@ -70,7 +76,7 @@ public class ClientGenerator extends Thread{
 	ExecutorService threadExecutorC = Executors.newCachedThreadPool();		// thread pool for the clients
 	ScheduledExecutorService threadExecutorRC = Executors.newScheduledThreadPool(10) ;		// thread pool for RunClients
 	private ArrayList<Long> hotItems=new ArrayList<Long>();			// list of "hot" items in CMART
-	private ChangePopularity cp=new ChangePopularity(40,470000,300000);
+	private ChangePopularity cp;
 	private CMARTurl cmarturl;				// set of URLs for C-MART application
 	private int origClientNum=0;			// number of inactive clients initially loaded from C-MART
 	private ScheduledExecutorService timer;
@@ -81,9 +87,12 @@ public class ClientGenerator extends Thread{
 	private Document readXmlDocument;		// xml document of all clients to be read in for repeated run
 
 	public ClientGenerator(CMARTurl cmarturl) throws ClientGeneratorException {
+		this.rand = new Random();
+		this.clients = new HashSet<>();
+		this.semaphore = new Semaphore(RunSettings.getStableUsers());
+		this.cp =new ChangePopularity(40,470000,300000);
 		this.cmarturl = cmarturl;
 		this.timer = Executors.newSingleThreadScheduledExecutor();
-
 		try {
 			// prepare the xml document to record when clients are created
 			xmlDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
@@ -200,39 +209,53 @@ public class ClientGenerator extends Thread{
 				}
 			} else{
 				double rampupTime=RunSettings.getRampupTime()*1000;
-				while(!exit){
-					if (System.currentTimeMillis() < (startTime + rampupTime)) {
-						try {
-							Thread.sleep((long) (rampupTime / RunSettings.getStableUsers()));
-						}catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-					synchronized (this) {
-						while (getUsers() >= RunSettings.getStableUsers()) {
-							try {
-								wait();
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-						}
+				while(!exit && System.currentTimeMillis() < (startTime + rampupTime)){
+					try {
+						Thread.sleep((long) (rampupTime / RunSettings.getStableUsers()));
+					}catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 					if(!exit){
+						try {
+							semaphore.acquire();
+						} catch (InterruptedException e1) {
+							e1.printStackTrace();
+						}
 						RunClient rc = new RunClient(this);
 						addUser();
 						threadExecutorRC.execute(rc);
-						if(System.currentTimeMillis() < (startTime+rampupTime)){
-							while(getUsers() < RunSettings.getStableUsers()/rampupTime*(System.currentTimeMillis()-startTime)){
-								RunClient nrc = new RunClient(this);	
-								addUser();	
-								threadExecutorRC.execute(nrc);
+						while(clients.size() < RunSettings.getStableUsers()/rampupTime*(System.currentTimeMillis()-startTime)){
+							try {
+								semaphore.acquire();
+							} catch (InterruptedException e1) {
+								e1.printStackTrace();
 							}
+							RunClient nrc = new RunClient(this);	
+							addUser();	
+							threadExecutorRC.execute(nrc);
 						}
-						if((inactiveClients.size()-100)>origClientNum)
+					}
+				}
+				System.out.println("OUT OF RAMP UP");
+				
+				while (!exit) {
+					try {
+						semaphore.acquire();
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
+					}
+
+					if (!exit) {
+						RunClient rc = new RunClient(this);
+						addUser();
+						threadExecutorRC.execute(rc);
+						if ((inactiveClients.size() - 100) > origClientNum) {
 							cutInactiveClients();
+						}
 					}
 				}
 			}
+
 		} else {
 			NodeList listOfClients = readXmlDocument.getElementsByTagName("client");
 			// Schedules all clients to run at the same time as in the previous
@@ -324,14 +347,15 @@ public class ClientGenerator extends Thread{
 	 * Indicates a connection has been added
 	 */
 	private synchronized void addUser(){
-		activeUsers+=1;
+		activeUsers++;
 	}
 
 	/**
 	 * Indicates a connection has been removed and notifies the parent that the connection is finished
 	 */
 	private synchronized void delUser(){
-		activeUsers-=1;
+//		System.out.println("\t\tClientGenerator.delUser()");
+		activeUsers--;
 		notify();
 	}
 	/**
@@ -404,9 +428,20 @@ public class ClientGenerator extends Thread{
 	 * Returns a list of the active clients
 	 * @return
 	 */
+	@Deprecated
 	public ArrayList<ClientInfo> getActiveClients() {
 		return activeClients;
 	}
+
+	/**
+	 * Returns a list of the active clients
+	 * @return
+	 */
+	public int getNumberOfActiveClients() {
+		return clients.size();
+//		return aC.size();
+	}
+
 	/**
 	 * Returns a list of the inactive clients
 	 * @return inactiveClients
@@ -428,15 +463,25 @@ public class ClientGenerator extends Thread{
 	 * @param c - the client to move
 	 */
 	public void activeToInactive(ClientInfo info,Client c){
+		if(clients.remove(c)){
+			semaphore.release();
+//			System.err.println(remove+ info.getUserID().toString());
+		}
 		synchronized(aC){
-			if(aC.indexOf(c)!=-1)
+			if(aC.indexOf(c)!=-1){
+//				System.out.println("\t\tClientGenerator.activeToInactive() REMOVED FROM AC");
 				aC.remove(aC.indexOf(c));
+			}
 		}
 		synchronized(activeClients){
-			if(activeClients.indexOf(info)!=-1)
+			if(activeClients.indexOf(info)!=-1){
 				activeClients.remove(activeClients.indexOf(info));
+//				System.out.println("\t\tClientGenerator.activeToInactive() REMOVED FROM ACTIVECLIENTS " + activeClients.size());
+			}
 		}
+	
 		synchronized(inactiveClients){
+//			System.out.println("\t\tClientGenerator.activeToInactive() ADDED TO INACTIVE");
 			inactiveClients.add(info);
 		}
 		delUser();
@@ -448,10 +493,18 @@ public class ClientGenerator extends Thread{
 	 * @param c
 	 */
 	public synchronized void activeToRemove(ClientInfo info,Client c){
-		if(aC.indexOf(c)!=-1)
+		if(clients.remove(c)){
+			semaphore.release();
+//			System.err.println(remove+ info.getUserID().toString());
+		}
+		if(aC.indexOf(c)!=-1){
+//			System.out.println("\t\tClientGenerator.activeToRemove() REMOVED FROM AC");
 			aC.remove(aC.indexOf(c));
-		if(activeClients.indexOf(info)!=-1)
+		}
+		if(activeClients.indexOf(info)!=-1){
 			activeClients.remove(activeClients.indexOf(info));
+//			System.out.println("\t\tClientGenerator.activeToRemove() REMOVED FROM ACTIVECLIENTS " + activeClients.size());
+		}
 		delUser();
 	}
 
@@ -537,18 +590,23 @@ public class ClientGenerator extends Thread{
 		threadExecutorC.shutdown();				// shuts down the client generation process
 		threadExecutorRC.shutdown();
 		int i=0;
-		while(activeClients.size()>0&&i<20){	// while there are still active clients and 20 interrupt attempts have been tried
+		while(activeClients.size()>0&&i<20){	// while there are still active clients and 20 interrupt attempts have been tried FIXME CHANGE TO WATCH CLIENTS
 			i++;
-
-			for (int m=0;m<aC.size();m++){			// tells all clients to exit after next request
-				aC.get(m).setExit(true);
-				aC.get(m).interrupt();				// if the client is thinking
-				try {
-					Thread.sleep(25);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+			
+			for (Client client : clients) {
+				client.setExit(true);
+				client.interrupt();
 			}
+
+//			for (int m=0;m<aC.size();m++){			// tells all clients to exit after next request
+//				aC.get(m).setExit(true);
+//				aC.get(m).interrupt();				// if the client is thinking
+//				try {
+//					Thread.sleep(25);
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//			}
 
 			//stops taking stats once there are no more clients in the system
 
@@ -757,7 +815,7 @@ public class ClientGenerator extends Thread{
 				timer.schedule(cpus,t2, TimeUnit.MILLISECONDS);
 			} else{
 				double origStableUsers=(double)RunSettings.getStableUsers();
-				double origUsers=(double)cg.aC.size();
+				double origUsers=(double)cg.aC.size();//FIXME CHANGE TO CLIENTS.SIZE()
 				double origClientsAdded=(double)RunSettings.getMeanClientsPerMinute();
 
 
@@ -789,39 +847,46 @@ public class ClientGenerator extends Thread{
 	 *
 	 */
 	private class RunClient extends Thread{
-		ClientInfo clientToRun=null;		// information of the client to run
-		CMARTurl cmarturl=RunSettings.getCMARTurl();
-		StringBuilder startPage=new StringBuilder(cmarturl.getAppURL()).append("/index"); 	// page the client starts on (home page)
-		ClientGenerator cg;					// the client generator that created the client
+		private ClientInfo clientToRun;
+		private StringBuilder startPage;
+		
+		private RunClient(){
+			this.startPage = new StringBuilder(RunSettings.getCMARTurl().getAppURL()).append("/index").append(RunSettings.isHTML4()?"":".html");
+		}
 	
 		public void run(){
 			if(RunSettings.isRepeatedRun()){
 				addActiveClient(clientToRun);
 				addUser();
 			}
-			if(!RunSettings.isHTML4())	// if HTML5
-				startPage.append(".html");		// switch to HTML5 home page
+			
 			if (clientToRun!=null){				// if the client info exists
-				Client p;						// create the client
 				try {
-					//start the client running in system
-					System.out.println("Starting Client: "+clientToRun.getUsername()+", Number of Active Clients = "+activeClients.size());
-					p = new Client(clientToRun,startPage,cmarturl,cg);
+					
+					Client p = new Client(clientToRun,startPage,RunSettings.getCMARTurl(), ClientGenerator.this);
 					synchronized(aC){
 						aC.add(p);
 					}
+					synchronized (clients) {
+						clients.add(p);
+					}
+					System.out.println("Starting Client: "+clientToRun.getUsername()+", Number of Active Clients = "+clients.size());
 					threadExecutorC.execute(p);
 					//p.start();
-				} catch (UnknownHostException e) {
-					e.printStackTrace();
 				} catch (IOException e) {
-					e.printStackTrace();
+					System.err.println("Error creating Client " + clientToRun);
+					if(RunSettings.isVerbose()){
+						e.printStackTrace();
+					}
 				}
-	
+			}else{
+				System.err.println("Cannot create user!");
+				//semaphore.release(); FIXME should i uncomment this?
 			}
 		}
 		private RunClient(ClientGenerator cg){
-			this.cg=cg;							// client generator creating the client
+			this();
+//			this.cg=cg;							// client generator creating the client
 			// creates a client node in the xmlDocument for the client about to be run
 			Element client=xmlDocument.createElement("client");
 			Element child=xmlDocument.createElement("clientIndex");
@@ -829,7 +894,7 @@ public class ClientGenerator extends Thread{
 			child.setTextContent(Long.toString(index));
 			client.appendChild(child);
 			child=xmlDocument.createElement("runTime");
-			child.setTextContent(Long.toString(new Date().getTime()-startTime));
+			child.setTextContent(Long.toString(System.currentTimeMillis()-startTime));
 			client.appendChild(child);
 			Element cI=xmlDocument.createElement("clientInfo");
 			if(rand.nextDouble()>newClientProb){	// using a client whose info already exists
@@ -902,7 +967,8 @@ public class ClientGenerator extends Thread{
 		 * @param client - Node of the client from readXmlDocument that is to be run
 		 */
 		private RunClient(ClientGenerator cg, Node client){
-			this.cg=cg;
+			this();
+//			this.cg=cg;
 			this.clientToRun=new ClientInfo();
 			// Sets the client info according to that in the readXmlDocument
 			clientToRun.setClientIndex(Long.parseLong(((Element)client).getElementsByTagName("clientIndex").item(0).getTextContent()));

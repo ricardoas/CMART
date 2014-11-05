@@ -5,9 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -25,7 +23,6 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.ProtocolException;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
@@ -37,29 +34,9 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import client.Items.ItemCG;
-import client.Pages.AnswerQuestionPage;
-import client.Pages.AskQuestionPage;
-import client.Pages.BidConfirmPage;
-import client.Pages.BidHistoryPage;
-import client.Pages.BrowsePage;
-import client.Pages.BuyItemPage;
-import client.Pages.ConfirmBuyPage;
-import client.Pages.ConfirmCommentPage;
-import client.Pages.HomePage;
 import client.Pages.ItemPage;
-import client.Pages.LeaveCommentPage;
-import client.Pages.LogOutPage;
-import client.Pages.LoginPage;
-import client.Pages.MyAccountPage;
 import client.Pages.Page;
 import client.Pages.PageType;
-import client.Pages.RegisterUserPage;
-import client.Pages.SearchPage;
-import client.Pages.SellItemConfirmPage;
-import client.Pages.SellItemPage;
-import client.Pages.UpdateUserPage;
-import client.Pages.UploadImagesPage;
-import client.Pages.ViewUserPage;
 
 /**
  * Runs a client through the application
@@ -147,7 +124,7 @@ public class Client extends Thread{
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	Client(ClientInfo userInfo, StringBuilder startURL,CMARTurl cmarturl,ClientGenerator cg) throws UnknownHostException, IOException{
+	Client(ClientInfo userInfo, StringBuilder startURL,CMARTurl cmarturl,ClientGenerator cg) throws IOException{
 		this.cg=cg;
 		this.cmarturl=cmarturl;
 		this.clientInfo=userInfo;
@@ -297,9 +274,9 @@ public class Client extends Thread{
 			this.exit = true;
 			this.loggedIn = false;
 			System.out.println(System.currentTimeMillis() + " Client (#" + clientInfo.getClientIndex() + ") " + clientInfo.getUsername()
-					+ " Exiting Due To Error " + cg.getActiveClients().size());
-			System.err.println(currentURL);
-			System.err.println(lastURL);
+					+ " Exiting Due To Error " + cg.getNumberOfActiveClients());
+//			System.err.println(currentURL);
+//			System.err.println(lastURL);
 			if (rand.nextDouble() < RunSettings.getClearCacheOnExit()) {
 				clientInfo.clearCaches();
 			}
@@ -313,7 +290,7 @@ public class Client extends Thread{
 		}
 
 		System.out.println(System.currentTimeMillis() + " Client (#" + clientInfo.getClientIndex() + ") " + clientInfo.getUsername() + " Exiting "
-				+ cg.getActiveClients().size());
+				+ cg.getNumberOfActiveClients());
 
 		if (exitDueToRepeatChange) {
 			System.out.println("Client Index " + clientInfo.getClientIndex() + " left due to change in repeated run");
@@ -339,6 +316,7 @@ public class Client extends Thread{
 		cg.getClientSessionStats().addClientSession(numPagesOpened, totalRT, requestErrors, startTime, exitDueToError, annoyedProb);
 
 		outputClientXML();
+//		System.out.println("\tClient.run() SUCCESSFUL EXIT");
 	}
 
 
@@ -1067,4 +1045,19 @@ public class Client extends Thread{
 	public void setChangeDueToRepeatChange(boolean changeDueToRepeatChange) {
 		this.changeDueToRepeatChange = changeDueToRepeatChange;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((clientInfo == null) ? 0 : clientInfo.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return clientInfo.equals(((Client)obj).clientInfo);
+	}
+	
+	
 }
