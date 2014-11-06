@@ -81,7 +81,7 @@ public class CollectStats extends TimerTask {
 
 		this.outputRT(this.oldHistogram.getNumEntries(), RTDist);
 
-		StringBuilder regularSiteStats = openURL((new StringBuilder(this.cg.getCMARTurl().getFullURL()).append("/statistics")).toString());
+		StringBuilder regularSiteStats = openURL((new StringBuilder(RunSettings.getCMARTurl().getFullURL()).append("/statistics")).toString());
 		ArrayList<StringBuilder> metrics = new ArrayList<StringBuilder>();
 		int start = 0;
 		int end = 0;

@@ -110,7 +110,7 @@ public class RunSettings {
 			}
 			
 			System.out.println("Starting Client Generator");
-			ClientGenerator cg = new ClientGenerator(getCMARTurl());
+			ClientGenerator cg = new ClientGenerator();
 			cg.start();
 
 			try {

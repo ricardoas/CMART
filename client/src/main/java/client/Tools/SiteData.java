@@ -14,7 +14,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 
-import client.clientMain.CMARTurl;
+import client.clientMain.RunSettings;
 
 /**
  * Used to get time distributions from CMART Gets a histogram describing how
@@ -30,13 +30,11 @@ public class SiteData {
 
 	private final String outputFileLocation;
 	private final boolean printOutput;
-	private final CMARTurl cmarturl;
-
 	/**
 	 * Accesses the stats page to reset it Does not save data
 	 */
-	public SiteData(CMARTurl cmarturl) {
-		this("", false, cmarturl);
+	public SiteData() {
+		this("", false);
 	}
 
 	/**
@@ -47,10 +45,9 @@ public class SiteData {
 	 * @param printOutput
 	 *            TODO
 	 */
-	public SiteData(String outputFileLocation, boolean printOutput, CMARTurl cmarturl) {
+	public SiteData(String outputFileLocation, boolean printOutput) {
 		this.outputFileLocation = outputFileLocation.concat("siteData.csv");
 		this.printOutput = printOutput;
-		this.cmarturl = cmarturl;
 	}
 
 	/**
@@ -68,7 +65,7 @@ public class SiteData {
 			HttpClientBuilder builder = HttpClientBuilder.create();
 			builder.setConnectionManager(new BasicHttpClientConnectionManager());
 			try(CloseableHttpClient client = builder.build();
-					CloseableHttpResponse response = client.execute(new HttpGet(cmarturl.build(cmarturl.getAppURL().append("/statistics").toString())));
+					CloseableHttpResponse response = client.execute(new HttpGet(RunSettings.getCMARTurl().build("/statistics")));
 				){
 				if (printOutput) {
 					StringBuilder content = new StringBuilder();

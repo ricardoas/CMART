@@ -274,7 +274,7 @@ public class Client extends Thread{
 			this.exit = true;
 			this.loggedIn = false;
 			System.out.println(System.currentTimeMillis() + " Client (#" + clientInfo.getClientIndex() + ") " + clientInfo.getUsername()
-					+ " Exiting Due To Error " + cg.getNumberOfActiveClients());
+					+ " Exiting Due To Error ");
 //			System.err.println(currentURL);
 //			System.err.println(lastURL);
 			if (rand.nextDouble() < RunSettings.getClearCacheOnExit()) {
@@ -289,8 +289,7 @@ public class Client extends Thread{
 			ip.cancelTimer();
 		}
 
-		System.out.println(System.currentTimeMillis() + " Client (#" + clientInfo.getClientIndex() + ") " + clientInfo.getUsername() + " Exiting "
-				+ cg.getNumberOfActiveClients());
+		System.out.println(System.currentTimeMillis() + " Client (#" + clientInfo.getClientIndex() + ") " + clientInfo.getUsername() + " Exiting ");
 
 		if (exitDueToRepeatChange) {
 			System.out.println("Client Index " + clientInfo.getClientIndex() + " left due to change in repeated run");

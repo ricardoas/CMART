@@ -19,9 +19,9 @@ import com.jmatio.types.MLDouble;
 
 public class OutputPageRT {
 	private String outputFileLocation; // the location to output the csv file
-	private ArrayList<Histogram> hists;
+	private Histogram[] hists;
 
-	public OutputPageRT(ArrayList<Histogram> hists, String outputFileLocation) {
+	public OutputPageRT(Histogram[] hists, String outputFileLocation) {
 		this.hists = hists;
 		this.outputFileLocation = outputFileLocation.concat("pageRTHistograms.csv");
 	}
@@ -40,7 +40,7 @@ public class OutputPageRT {
 			}
 
 			if (RunSettings.isOutputMatlab()) {
-				double[][] src = new double[this.hists.size()][this.hists.get(0).getNumBins()];
+				double[][] src = new double[this.hists.length][this.hists[0].getNumBins()];
 				int i = 0;
 				for (Histogram h : this.hists) {
 					for (int j = 0; j < h.getNumBins(); j++) {

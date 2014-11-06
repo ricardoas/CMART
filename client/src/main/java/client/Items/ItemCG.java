@@ -677,7 +677,8 @@ public class ItemCG {
 			itemRating += this.client.getAlreadyBidFactor();
 		}
 
-		if (this.client.getCg().getHotItems().contains(this.id)) {
+//		if (this.client.getCg().getHotItems().contains(this.id)) {
+		if (this.client.getCg().isHot(this.id)) {
 			itemRating += this.client.getHotItemFactor();
 		}
 		if (this.recommended) {
