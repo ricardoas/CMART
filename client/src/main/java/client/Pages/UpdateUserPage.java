@@ -322,6 +322,22 @@ public class UpdateUserPage extends Page{
 		if (data.get("lastname").equals(client.getClientInfo().getLastName())==false){
 			changes.add(("lastname"));
 			data.put(("lastname"),typingError(client.getClientInfo().getLastName()));}
+		
+		if(data.get("street") == null){
+			System.err.println("asdas");
+		}
+
+		if(client == null){
+			System.err.println("asdas");
+		}
+
+		if(client.getClientInfo() == null){
+			System.err.println("asdas");
+		}
+
+		if(client.getClientInfo().getAddress() == null){
+			System.err.println("asdas");
+		}
 
 		if (data.get("street").equals(client.getClientInfo().getAddress())==false){
 			changes.add(("street"));

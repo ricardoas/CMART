@@ -5,10 +5,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.TreeMap;
 
@@ -45,49 +46,36 @@ import client.Pages.PageType;
  */
 
 public class Client extends Thread{
-	private ClientGenerator cg;			// client generator creating the client
-	private CMARTurl cmarturl;			// parts of the URL for the application
-	private boolean verbose=RunSettings.isVerbose();		// output debug information
-	private Random rand=new Random();		// random seed
+
 	private ClientInfo clientInfo;			// info of the client
-	private boolean loggedIn=false;			// if the client is logged in
 	private StringBuilder currentURL;		// URL the client is currently viewing
 	private StringBuilder lastURL;			// URL of previous page
-	private int currentPageType=0;			// Page type of the current page
-	private int lastPageType=0;				// page number of the previous page opened
-	private  TreeMap<Long,ItemCG> currentBids=new TreeMap<Long,ItemCG>();			// tracks items from the client is currently bidding on
-	private TreeMap<Long,ItemCG> endedAuctions=new TreeMap<Long,ItemCG>();		// tracks items that the user has won
-	private  TreeMap<Long,ItemCG> purchasedItems=new TreeMap<Long,ItemCG>();		// tracks items the user has purchased (buyNow)
-	private  TreeMap<Long,ItemCG> sellingItems=new TreeMap<Long,ItemCG>();		// tracks items the user is selling
-	private  TreeMap<Long,ItemCG> soldItems=new TreeMap<Long,ItemCG>();			// tracks items the user has sold
-	private boolean exit=false;					// if the client is to exit
-	private double typingSpeed=0;				// characters typed per millisecond;
-	private double typingErrorRate=0;			// character typing error rate
-	private boolean formFiller=false;			// if the client is a form filler
-	private int loginAttempts=0;				// number of times the client has attempted to login/register
-	private long lastItemID;					// itemID of last item opened
-	private ArrayList<String>errors=new ArrayList<String>();	// list of errors on an HTML5 page
-	private int numPagesOpened=0;			// number of pages the client has opened
-	private long totalRT=0;					// total response time for all opened pages
-	private int requestErrors=0;			// number of errors the client has had making a request
-	private long startTime;					// time the client started accessing the website
-	private boolean exitDueToError=false;	// if the client exits the website due to an error
-	private double origLogoutProb=0;		// original logout probability on a page
-	private double finalLogoutProb=0;		// logout probability after response time modifications
-	private double restProb=0;				// probability of non-logout options before normalization
-	private long networkDelay=0;			// additional network delay to be added
-	private Document xmlDocument;						// xml document to output of user actions
-	private int actionNum=0;							// action number that the user is on
-	private Element actionsElement;						// Element of all the actions
-	private Document readXmlDocument;					// xml document of actions to be read in for a repeated run
-	private boolean exitDueToRepeatChange=false;		// if the client exits due to a variation from the xml document
-	private boolean changeDueToRepeatChange=false;		// if the client does something different from the xml document that does not require the client to exit
+	private final ClientGenerator cg;			// client generator creating the client
+	private final CMARTurl cmarturl;			// parts of the URL for the application
+	private int RTthreshold;
+	
+	private final Random rand; // random seed
+	
+	private final long[] last4RT;	// the response times of the last four pages opened
+	// the RT threshold (ms) above which the logout probability increases, and below which the number of tabs to open increases
+
+
+	private double typingSpeed;				// characters typed per millisecond;
+	private double typingErrorRate;			// character typing error rate
+
+	private PoolingHttpClientConnectionManager connectionManager;
+	private HttpClientBuilder httpClientBuilder;
+	private CloseableHttpClient httpclient;
+
+
+	private final long networkDelay;			// additional network delay to be added
+	private final boolean formFiller;			// if the client is a form filler
 
 	// factors which determine the relative importance of each element of an item profile when determining interest in it
 	private double titleWordsFactor=2;	
 	private double descriptionWordsFactor=1;
-	private double numPicsFactor=3;
 	private double sellerRatingFactor=1;
+	private double numPicsFactor=3;
 	private double endDateDiffFactor=1;
 	private double startPriceFactor=3;
 	private double priceDiffFactor=1;
@@ -99,10 +87,38 @@ public class Client extends Thread{
 	private double recommendedFactor=2;
 	private double answersFactor=0.4;
 
+	private Document readXmlDocument;					// xml document of actions to be read in for a repeated run
+	private Document xmlDocument;						// xml document to output of user actions
+	private Element actionsElement;						// Element of all the actions
+
+	private boolean loggedIn=false;			// if the client is logged in
+	private int currentPageType=0;			// Page type of the current page
+	private int lastPageType=0;				// page number of the previous page opened
+	private  TreeMap<Long,ItemCG> currentBids=new TreeMap<Long,ItemCG>();			// tracks items from the client is currently bidding on
+	private TreeMap<Long,ItemCG> endedAuctions=new TreeMap<Long,ItemCG>();		// tracks items that the user has won
+	private  TreeMap<Long,ItemCG> purchasedItems=new TreeMap<Long,ItemCG>();		// tracks items the user has purchased (buyNow)
+	private  TreeMap<Long,ItemCG> sellingItems=new TreeMap<Long,ItemCG>();		// tracks items the user is selling
+	private  TreeMap<Long,ItemCG> soldItems=new TreeMap<Long,ItemCG>();			// tracks items the user has sold
+	private boolean exit=false;					// if the client is to exit
+	private int loginAttempts=0;				// number of times the client has attempted to login/register
+	private long lastItemID;					// itemID of last item opened
+	private ArrayList<String>errors=new ArrayList<String>();	// list of errors on an HTML5 page
+	private int numPagesOpened=0;			// number of pages the client has opened
+	private long totalRT=0;					// total response time for all opened pages
+	private int requestErrors=0;			// number of errors the client has had making a request
+	private long startTime;					// time the client started accessing the website
+	private boolean exitDueToError=false;	// if the client exits the website due to an error
+	private double origLogoutProb=0;		// original logout probability on a page
+	private double finalLogoutProb=0;		// logout probability after response time modifications
+	private double restProb=0;				// probability of non-logout options before normalization
+	private int actionNum=0;							// action number that the user is on
+	private boolean exitDueToRepeatChange=false;		// if the client exits due to a variation from the xml document
+	private boolean changeDueToRepeatChange=false;		// if the client does something different from the xml document that does not require the client to exit
+
+
+
 	private String message="";
 	private StringBuilder previousSearchTerm=new StringBuilder();			// the query last searched for
-	private long[] last4RT=new long[4];	// the response times of the last four pages opened
-	private int RTthreshold;			// the RT threshold (ms) above which the logout probability increases, and below which the number of tabs to open increases
 	private long clientID;				// id of the client in the database
 	private int itemsBought=0;			// number of items the client has bought in this session
 	private int itemsBid=0;				// number of items the client has bid on in this session
@@ -111,151 +127,146 @@ public class Client extends Thread{
 	private double expBuyRate=1/2;		// exponential rate at which someone is likely to make another buy after already making them
 	private ArrayList<ItemPage> openTabs=new ArrayList<ItemPage>();	// pages of tabs in addition to the original open page that have been opened
 
-	private ArrayList<PoolingHttpClientConnectionManager> httpClientConnectionManagers=new ArrayList<>();
-	private LinkedList<CloseableHttpClient>httpclients=new LinkedList<>();
-	private HttpClientBuilder httpClientBuilder;
 
 
 	/**
 	 * Creates a new client
-	 * @param buyProbability
 	 * @param userInfo - client information
 	 * @param startURL - URL of the page to open first
+	 * @param buyProbability
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 */
-	Client(ClientInfo userInfo, StringBuilder startURL,CMARTurl cmarturl,ClientGenerator cg) throws IOException{
-		this.cg=cg;
-		this.cmarturl=cmarturl;
-		this.clientInfo=userInfo;
-		this.currentURL=startURL;
-		this.lastURL=startURL;
+	public Client(ClientInfo userInfo, StringBuilder startURL,ClientGenerator cg) throws IOException{
+		this.clientInfo = userInfo;
+		this.currentURL = startURL;
+		this.lastURL = startURL;
+		this.cg = cg;
 
-		for (int i=0;i<4;i++)		// sets initial past page response times to zero
-			last4RT[i]=0;
-		do{
-		RTthreshold=(int)(RunSettings.getRTthreshold()*(0.4*(rand.nextDouble()-0.5)+1));	// randomly adjusts the RTthreshold to add variance for different clients
-		}while(RTthreshold<=0);
-		//set Typing speed/error rate
-		double typeSpeedRand=rand.nextDouble();
-		for(Double m:RunSettings.getTypingSpeedDist().keySet()){
-			if (typeSpeedRand<m){
-				this.typingSpeed=RunSettings.getTypingSpeedDist().get(m)+10*(rand.nextDouble()-0.5);
-				if(verbose)System.out.println("Typing Speed: "+this.typingSpeed/5+" wpm");
-				this.typingSpeed=this.typingSpeed/60000.;
-				break;
-			}
-		}
-		for(Double m:RunSettings.getTypingErrorRate().keySet()){
-			if (this.typingSpeed<m){
-				this.typingErrorRate=RunSettings.getTypingErrorRate().get(m)+(rand.nextDouble()-0.5)*0.001;
-				break;
-			}
-		}
+		this.cmarturl = RunSettings.getCMARTurl();
 
-//		// initializes the connection manager and http clients
-//		// uses 2 ports per httpclient
-//		// also sets up httpclients for automatic redirects
-//		for (int i=0;i<2;i++){
-			PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-			cm.setMaxTotal(100);
-			
-			httpClientBuilder = HttpClientBuilder.create();
-			httpClientBuilder.setConnectionManager(cm);
-			httpClientBuilder.setRedirectStrategy(new DefaultRedirectStrategy() {                
-				public boolean isRedirected(HttpRequest request, HttpResponse response, HttpContext context)  {
-					boolean isRedirect=false;
-					try {
-						if(response.containsHeader("Location")){
-							response.setHeader("Location", response.getFirstHeader("Location").getValue().replace(" ","%20"));
-						}
-						isRedirect = super.isRedirected(request, response, context);
-					} catch (ProtocolException e) {
-						e.printStackTrace();
-					}
-					if (!isRedirect) {
-						int responseCode = response.getStatusLine().getStatusCode();
-						if (responseCode == 301 || responseCode == 302) {
-							return true;
-						}
-					}
-					return isRedirect;
+		this.last4RT = new long[4];
+		for (int i = 0; i < 4; i++) {
+			this.last4RT[i] = 0;
+		}
+		
+		this.rand = new Random();
+		
+		do {
+			this.RTthreshold = (int) (RunSettings.getRTthreshold() * (0.4 * (this.rand.nextDouble() - 0.5) + 1));
+			// randomly adjusts the RTthreshold to add variance for different clients
+		} while (this.RTthreshold <= 0);
+
+		double typeSpeedRand = this.rand.nextDouble();
+		for (Entry<Double, Double> entry : RunSettings.getTypingSpeedDist().entrySet()) {
+			if (typeSpeedRand < entry.getKey()) {
+				this.typingSpeed = (entry.getValue() + 10 * (this.rand.nextDouble() - 0.5)) / 60000;
+				if (RunSettings.isVerbose()){
+					System.out.println("Typing Speed: " + (60000. * this.typingSpeed) / 5 + " wpm");
 				}
-			});
-			
-			httpClientConnectionManagers.add(cm);
-//		}
+				break;
+			}
+		}
+		
+		for (Entry<Double, Double> entry : RunSettings.getTypingErrorRate().entrySet()) {
+			if (this.typingSpeed < entry.getKey()) {
+				this.typingErrorRate = entry.getValue() + (this.rand.nextDouble() - 0.5) * 0.001;
+				break;
+			}
+		}
+
+		connectionManager = new PoolingHttpClientConnectionManager();
+		connectionManager.setMaxTotal(100);
+
+		this.httpClientBuilder = HttpClientBuilder.create();
+		this.httpClientBuilder.setConnectionManager(connectionManager);
+		this.httpClientBuilder.setRedirectStrategy(new DefaultRedirectStrategy() {
+			public boolean isRedirected(HttpRequest request, HttpResponse response, HttpContext context) {
+				boolean isRedirect = false;
+				try {
+					if (response.containsHeader("Location")) {
+						response.setHeader("Location", response.getFirstHeader("Location").getValue().replace(" ", "%20"));
+					}
+					isRedirect = super.isRedirected(request, response, context);
+				} catch (ProtocolException e) {
+					e.printStackTrace();
+				}
+				if (!isRedirect) {
+					int responseCode = response.getStatusLine().getStatusCode();
+					if (responseCode == 301 || responseCode == 302) {
+						return true;
+					}
+				}
+				return isRedirect;
+			}
+		});
 
 		// Determines the network delay based on the exponential distribution of the provided average
-		if(RunSettings.isNetworkDelay())
-			networkDelay=(long) cg.expDist(RunSettings.getNetworkDelayAvg());
+		this.networkDelay = RunSettings.isNetworkDelay() ? (long) cg.expDist(RunSettings.getNetworkDelayAvg()) : 0;
 
 		// form filler (10% chance of being a form filler)
-		if (rand.nextDouble()>0.9)
-			this.formFiller=true;
+		this.formFiller = (rand.nextDouble() > 0.9);
 
 		// adjusts the fudge factors for the individual client (adjusts each by a possible +-20%)		
-		this.titleWordsFactor*=(1.+(rand.nextDouble()-0.5)*0.4);			
-		this.descriptionWordsFactor*=(1.+(rand.nextDouble()-0.5)*0.4);
-		this.sellerRatingFactor*=(1.+(rand.nextDouble()-0.5)*0.4);
-		this.numPicsFactor*=(1.+(rand.nextDouble()-0.5)*0.4);
-		this.endDateDiffFactor*=(1.+(rand.nextDouble()-0.5)*0.4);
-		this.startPriceFactor*=(1.+(rand.nextDouble()-0.5)*0.4);
-		this.priceDiffFactor*=(1.+(rand.nextDouble()-0.5)*0.4);
-		this.listRankingFactor*=(1.+(rand.nextDouble()-0.5)*0.4);
-		this.commonSearchTermsFactor*=(1.+(rand.nextDouble()-0.5)*0.4);
-		this.commonSearchTermsFactor*=(1.+(rand.nextDouble()-0.5)*0.4);
-		this.alreadyBidFactor*=(1.+(rand.nextDouble()-0.5)*0.4);
-		this.categoryDepthFactor*=(1.+(rand.nextDouble()-0.5)*0.4);
-		this.hotItemFactor*=(1.+(rand.nextDouble()-0.5)*0.4);
-		this.recommendedFactor*=(1.+(rand.nextDouble()-0.5)*0.4);
-		this.answersFactor*=(1.+(rand.nextDouble()-0.5)*0.4);
+		this.titleWordsFactor *= (1. + (rand.nextDouble() - 0.5) * 0.4);
+		this.descriptionWordsFactor *= (1. + (rand.nextDouble() - 0.5) * 0.4);
+		this.sellerRatingFactor *= (1. + (rand.nextDouble() - 0.5) * 0.4);
+		this.numPicsFactor *= (1. + (rand.nextDouble() - 0.5) * 0.4);
+		this.endDateDiffFactor *= (1. + (rand.nextDouble() - 0.5) * 0.4);
+		this.startPriceFactor *= (1. + (rand.nextDouble() - 0.5) * 0.4);
+		this.priceDiffFactor *= (1. + (rand.nextDouble() - 0.5) * 0.4);
+		this.listRankingFactor *= (1. + (rand.nextDouble() - 0.5) * 0.4);
+		this.commonSearchTermsFactor *= (1. + (rand.nextDouble() - 0.5) * 0.4);
+		//this.commonSearchTermsFactor *= (1. + (rand.nextDouble() - 0.5) * 0.4);//FIXME was this duplicated on purpose?
+		this.alreadyBidFactor *= (1. + (rand.nextDouble() - 0.5) * 0.4);
+		this.categoryDepthFactor *= (1. + (rand.nextDouble() - 0.5) * 0.4);
+		this.hotItemFactor *= (1. + (rand.nextDouble() - 0.5) * 0.4);
+		this.recommendedFactor *= (1. + (rand.nextDouble() - 0.5) * 0.4);
+		this.answersFactor *= (1. + (rand.nextDouble() - 0.5) * 0.4);
 
-		this.startTime=new Date().getTime();
+		this.startTime = System.currentTimeMillis();
 
 		try {
-			if(RunSettings.isRepeatedRun()){	// loads the xml document for a repeated run
-				readXmlDocument=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(new StringBuilder(RunSettings.getRepeatedXmlFolder()).append("client").append(clientInfo.getClientIndex()).append(".xml").toString()));
-			}else{
-				// prepares the xml document for the client's actions
-				xmlDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-				Element root = xmlDocument.createElement("Client");
-				xmlDocument.appendChild(root);
-				Element child = xmlDocument.createElement("UserID");  
-				child.setTextContent(clientInfo.getUserID().toString());  
-				root.appendChild(child); 
-				child = xmlDocument.createElement("Username");  
-				child.setTextContent(clientInfo.getUsername().toString());  
-				root.appendChild(child);  
-				child = xmlDocument.createElement("password");  
-				child.setTextContent(clientInfo.getPassword().toString());  
+			if (RunSettings.isRepeatedRun()) {
+				this.readXmlDocument = DocumentBuilderFactory
+						.newInstance()
+						.newDocumentBuilder()
+						.parse(new File(new StringBuilder(RunSettings.getRepeatedXmlFolder()).append("client").append(clientInfo.getClientIndex())
+								.append(".xml").toString()));
+			} else {
+				this.xmlDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+				Element root = this.xmlDocument.createElement("Client");
+				this.xmlDocument.appendChild(root);
+				Element child = this.xmlDocument.createElement("UserID");
+				child.setTextContent(this.clientInfo.getUserID().toString());
 				root.appendChild(child);
-				Element actions = xmlDocument.createElement("actions");    
+				child = this.xmlDocument.createElement("Username");
+				child.setTextContent(this.clientInfo.getUsername().toString());
+				root.appendChild(child);
+				child = this.xmlDocument.createElement("password");
+				child.setTextContent(this.clientInfo.getPassword().toString());
+				root.appendChild(child);
+				Element actions = this.xmlDocument.createElement("actions");
 				root.appendChild(actions);
-				actionsElement=actions;
+				this.actionsElement = actions;
 			}
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-		} catch (TransformerFactoryConfigurationError e) {
-			e.printStackTrace();
-		} catch (SAXException e) {
-			e.printStackTrace();
+		} catch (ParserConfigurationException | TransformerFactoryConfigurationError | SAXException e) {
+			System.err.println("Could not load client xml file");
 		}
-
 	}
 
 	/**
 	 * Runs the client through each page
 	 */
 	public void run(){
-		int i = 0;
+		int openedPagesCounter = 0;
+		
 		try (CloseableHttpClient client = httpClientBuilder.build()) {
-			httpclients.add(client);
+			this.httpclient = client;
 			while (!exit) { // while the client is not exiting the system
-				i++;
-				if (verbose) {
-					System.out.println("Client " + this.getClientID() + " Page Number: " + i);
-//					System.out.println(currentURL);
+				openedPagesCounter++;
+				if (RunSettings.isVerbose()) {
+					System.out.println("Client " + this.getClientID() + " Page Number: " + openedPagesCounter + " Current Page Type: " + PageType.values()[currentPageType]);
 				}
 
 				Page activePage = new Page(currentURL, currentPageType, lastURL, this).toPageType();
@@ -270,7 +281,7 @@ public class Client extends Thread{
 				}
 				activePage.shutdownThreads();
 			}
-		} catch (Exception e) {
+		} catch (IOException | ParseException | InterruptedException | URISyntaxException e) {
 			this.exit = true;
 			this.loggedIn = false;
 			System.out.println(System.currentTimeMillis() + " Client (#" + clientInfo.getClientIndex() + ") " + clientInfo.getUsername()
@@ -283,7 +294,6 @@ public class Client extends Thread{
 			cg.activeToRemove(clientInfo, this); // moves the client
 			cg.getClientSessionStats().addClientSession(numPagesOpened, totalRT, requestErrors, startTime, true, 1.);
 		}
-		System.out.println("Client.run()");
 
 		for (ItemPage ip : openTabs) {
 			ip.cancelTimer();
@@ -934,12 +944,11 @@ public class Client extends Thread{
 	}
 
 	/**
-	 * Returns the next HTTPClient on the list
+	 * Returns the HTTPClient
 	 * @return
 	 */
-	public synchronized CloseableHttpClient getHttpClient(){
-		httpclients.offerLast(httpclients.pollFirst());
-		return httpclients.peekLast();
+	public CloseableHttpClient getHttpClient(){
+		return httpclient;
 	}
 
 	/**

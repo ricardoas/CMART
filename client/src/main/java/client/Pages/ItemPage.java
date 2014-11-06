@@ -291,7 +291,7 @@ public class ItemPage extends Page{
 
 		updateProbabilities();
 
-		if(RunSettings.isRepeatedRun()==false){
+		if(!RunSettings.isRepeatedRun()){
 
 			nextLink=new StringBuilder(getRandomStringBuilderFromDist(nextPageProbabilities));
 			String nextLinkS=nextLink.toString();
@@ -797,6 +797,7 @@ public class ItemPage extends Page{
 
 				//TODO: replace this - i think it comes up when there is a bad bid made
 				if(AJAXurl.indexOf("</HTML>")==-1){
+//					System.out.println("\t\tItemPage.AJAXRequest.run()\t" +  + "\t" + AJAXurl);
 					StringBuilder itemPrice=openAJAXRequest(AJAXurl);
 
 					if(itemPrice!=null&&itemPrice.length()>0){

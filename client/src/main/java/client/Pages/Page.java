@@ -50,7 +50,6 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIUtils;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
@@ -208,7 +207,7 @@ public class Page {
 	 * @return 
 	 */
 	private boolean isURI(String string) {
-		return !string.startsWith(HTML_TEXT) && !string.startsWith("NEXTLINK") && !string.startsWith("{\"") && !string.startsWith(HEAD_TEXT);
+		return !string.startsWith(HTML_TEXT) && !string.startsWith("NEXTLINK") && !string.startsWith("{\"");
 	}
 
 	/**

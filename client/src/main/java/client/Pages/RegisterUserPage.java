@@ -44,6 +44,7 @@ public class RegisterUserPage extends Page {
 	 * @throws InterruptedException 
 	 */
 	@Override public StringBuilder makeDecision() throws JsonParseException, JsonMappingException, IOException, InterruptedException{
+		try{
 		StringBuilder newPage=new StringBuilder();		// the page to be returned after the registration post
 		StringBuilder nextLink=new StringBuilder(client.getCMARTurl().getAppURL());	// the link to send the data to
 		String threeDigits=Integer.toString(rand.nextInt(999));	// used if username or email is taken
@@ -314,6 +315,10 @@ public class RegisterUserPage extends Page {
 		}
 
 		return newPage;
+		}catch(Exception e ){
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	/**

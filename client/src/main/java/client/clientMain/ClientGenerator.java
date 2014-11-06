@@ -226,17 +226,13 @@ public class ClientGenerator extends Thread{
 					if(!exit){
 						try {
 							semaphore.acquire();
+							threadExecutorRC.execute(new RunClient());
+							while(clients.size() < RunSettings.getStableUsers()/rampupTime*(System.currentTimeMillis()-startTime)){
+								semaphore.acquire();
+								threadExecutorRC.execute(new RunClient());
+							}
 						} catch (InterruptedException e1) {
 							e1.printStackTrace();
-						}
-						threadExecutorRC.execute(new RunClient());
-						while(clients.size() < RunSettings.getStableUsers()/rampupTime*(System.currentTimeMillis()-startTime)){
-							try {
-								semaphore.acquire();
-							} catch (InterruptedException e1) {
-								e1.printStackTrace();
-							}
-							threadExecutorRC.execute(new RunClient());
 						}
 					}
 				}
@@ -245,13 +241,12 @@ public class ClientGenerator extends Thread{
 				while (!exit) {
 					try {
 						semaphore.acquire();
+						if (!exit) {
+							threadExecutorRC.execute(new RunClient());
+							cutInactiveClients();
+						}
 					} catch (InterruptedException e1) {
 						e1.printStackTrace();
-					}
-
-					if (!exit) {
-						threadExecutorRC.execute(new RunClient());
-						cutInactiveClients();
 					}
 				}
 			}
@@ -285,7 +280,8 @@ public class ClientGenerator extends Thread{
 		data.put("totalUsers", Integer.toString(1));
 		
 		CMARTurl cmarturl = RunSettings.getCMARTurl();
-		long numberOfUsers = Long.parseLong(openPopulateUser(cmarturl .build(cmarturl.getAppURL().append("/getusers?").toString(), data)).toString());
+		System.err.println(cmarturl.build("/getusers?", data));
+		long numberOfUsers = Long.parseLong(openPopulateUser(cmarturl.build("/getusers?", data)).toString());
 		int pageLimit = (int) (Math.floor((numberOfUsers - 1) / 25) - 1);
 		
 		for (int k = 0; k < 3; k++) {
@@ -299,7 +295,7 @@ public class ClientGenerator extends Thread{
 			data.put("pageNo", Long.toString(pageNo));
 			data.put("itemsPP", Integer.toString(25));
 
-			StringBuilder ret = openPopulateUser(cmarturl.build(cmarturl.getAppURL().append("/getusers?").toString(), data));
+			StringBuilder ret = openPopulateUser(cmarturl.build("/getusers?", data));
 			try (Scanner input = new Scanner(ret.toString());) {
 
 				while (input.hasNextLine()) {
@@ -715,46 +711,22 @@ public class ClientGenerator extends Thread{
 	private class RunClient extends Thread{
 		
 		private final ClientInfo clientToRun;
-		private StringBuilder startPage;
+		private final StringBuilder startPage;
 		
-		public void run(){
-			if (clientToRun!=null){				// if the client info exists
-				try {
-					
-					Client p = new Client(clientToRun,startPage,RunSettings.getCMARTurl(), ClientGenerator.this);
-					synchronized (clients) {
-						clients.add(p);
-						System.out.println("Starting Client: "+clientToRun.getUsername()+", Number of Active Clients = "+clients.size());
-					}
-					threadExecutorC.execute(p);
-					//p.start();
-				} catch (IOException e) {
-					System.err.println("Error creating Client " + clientToRun);
-					if(RunSettings.isVerbose()){
-						e.printStackTrace();
-					}
-				}
-			}else{
-				System.err.println("Cannot create user!");
-				//semaphore.release(); FIXME should i uncomment this?
-			}
-		}
 		private RunClient(){
 			this.startPage = new StringBuilder(RunSettings.getCMARTurl().getAppURL()).append("/index").append(RunSettings.isHTML4()?"":".html");
-
-//			this.cg=cg;							// client generator creating the client
+		
 			// creates a client node in the xmlDocument for the client about to be run
 			Element client=xmlDocument.createElement("client");
 			Element child=xmlDocument.createElement("clientIndex");
 			long index = clientIndex.getAndIncrement();
-//			long index=getClientIndex();
 			child.setTextContent(Long.toString(index));
 			client.appendChild(child);
 			child=xmlDocument.createElement("runTime");
 			child.setTextContent(Long.toString(System.currentTimeMillis()-startTime));
 			client.appendChild(child);
 			Element cI=xmlDocument.createElement("clientInfo");
-
+		
 			ClientInfo inactiveClient = null;
 			if (rand.nextDouble() > newClientProb && (inactiveClient = getInactiveClient()) != null) {
 				this.clientToRun = inactiveClient;
@@ -762,7 +734,7 @@ public class ClientGenerator extends Thread{
 				this.clientToRun = new ClientInfo();
 			}
 			this.clientToRun.setClientIndex(index);
-
+		
 			/**
 			 * Puts client information into xmlDocument
 			 */
@@ -799,11 +771,11 @@ public class ClientGenerator extends Thread{
 				cache.appendChild(child);
 			}
 			cI.appendChild(cache);
-	
+		
 			client.appendChild(cI);
 			root.appendChild(client);
 		}
-	
+		
 		/**
 		 * RunClient for repeated runs
 		 * @param client - Node of the client from readXmlDocument that is to be run
@@ -819,7 +791,24 @@ public class ClientGenerator extends Thread{
 			clientToRun.setPassword(new StringBuilder(clientInfo.getElementsByTagName("password").item(0).getTextContent()));
 			clientToRun.setRegistered(Boolean.parseBoolean(clientInfo.getElementsByTagName("registered").item(0).getTextContent()));
 		}
-	
+		
+		public void run(){
+			assert clientToRun != null: "Should not be null at this point.";
+			try {
+
+				Client p = new Client(clientToRun,startPage,ClientGenerator.this);
+				synchronized (clients) {
+					clients.add(p);
+					System.out.println("Starting Client: "+clientToRun.getUsername()+", Number of Active Clients = "+ clients.size());
+				}
+				threadExecutorC.execute(p);
+			} catch (IOException e) {
+				System.err.println("Error creating Client " + clientToRun);
+				if(RunSettings.isVerbose()){
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	/**

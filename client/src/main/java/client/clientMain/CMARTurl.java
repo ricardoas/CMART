@@ -3,13 +3,11 @@ package client.clientMain;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.client.utils.URIUtils;
 
 public class CMARTurl {
 
@@ -90,7 +88,8 @@ public class CMARTurl {
 			System.out.println("\t\t\t"+data);
 		}
 		
-		StringBuilder uri = new StringBuilder("http://" + ipURL.toString() + ":" + appPort + "/" + appURL + page);
+//		StringBuilder uri = new StringBuilder("http://" + ipURL.toString() + ":" + appPort + appURL + page);
+		StringBuilder uri = new StringBuilder(appURL + page);
 		for (Entry<String, String> entry : data.entrySet()) {
 			uri.append(entry.getKey()+"=" + entry.getValue()+"&");
 		}
@@ -98,8 +97,11 @@ public class CMARTurl {
 		if(uri.charAt(uri.length()-1) == '&'){
 			uri.deleteCharAt(uri.length()-1);
 		}
-		
-		return URI.create(uri.toString());
+		if(uri.toString().contains("HEAD")){
+			System.out.println("\t\t"+uri.toString());
+		}
+		return URIUtils.createURI("http", ipURL.toString(), appPort, uri.toString(), null, null);
+//		return URI.create(uri.toString());
 	}
 
 	public URI build(String page) throws UnsupportedEncodingException, URISyntaxException {
