@@ -414,8 +414,10 @@ public class Page {
 
 			return ret;
 		} catch (IOException e) {
-			System.err.println("Could not connect (HTTP4) to " + uri);
-//			e.printStackTrace();
+			if(verbose){
+				System.err.println("Could not connect (HTTP4) to " + uri);
+				e.printStackTrace();
+			}
 			client.incRequestErrors();
 			httpRequestAttempts++;
 			if (httpRequestAttempts < 3){
@@ -1215,9 +1217,8 @@ public class Page {
 		try{
 //			URI uri=URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), urlStringS, null, null);
 			URI uri=client.getCMARTurl().build(urlString.toString().replace(" ", "%20"));
-			HttpGet httpget = new HttpGet(uri);
-			
-			try(CloseableHttpResponse response = client.getHttpClient().execute(httpget);
+			try(
+					CloseableHttpResponse response = client.getHttpClient().execute(new HttpGet(uri));
 					BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));	// opens a BufferedReader to read the response of the HTTP request
 					){
 				
@@ -1226,33 +1227,38 @@ public class Page {
 					ret.append(inputLine);
 				}
 				
-				if(RunSettings.isNetworkDelay()){
-					try{Thread.sleep(client.getNetworkDelay());}
-					catch(InterruptedException e){
-						br.close();
-						return null;
-					}
+				if (RunSettings.isNetworkDelay()) {
+					Thread.sleep(client.getNetworkDelay());
 				}
 				
 				if(RunSettings.isGetExtras()){
-					if(urlString.indexOf("index?")!=-1)
+					if(urlString.indexOf("index?")!=-1){
 						getImagesNew(ret,new Stopwatch());
+					}
 				}
 				
-				br.close();
-				if(verbose)System.out.println("RET AJAX OPENURL: "+ret);
+				if(verbose){
+					System.out.println("RET AJAX OPENURL: "+ret);
+				}
 				return ret;
 				
-			} catch (IOException | IllegalStateException | NullPointerException e) {
-				e.printStackTrace();
+			} catch (IOException | IllegalStateException | NullPointerException | InterruptedException e) {
+				if(verbose){
+					e.printStackTrace();
+					System.err.println(pageType);
+					System.err.println(lastPageType);
+					System.err.println(lastURL);
+				}
 				return null;
 			}
 			
 		} catch (URISyntaxException | UnsupportedEncodingException e) {
-			e.printStackTrace();
-			System.err.println(pageType);
-			System.err.println(lastPageType);
-			System.err.println(lastURL);
+			if(verbose){
+				e.printStackTrace();
+				System.err.println(pageType);
+				System.err.println(lastPageType);
+				System.err.println(lastURL);
+			}
 			return null;
 		}
 	}
@@ -1681,12 +1687,14 @@ public class Page {
 				start=str.lastIndexOf("src=\"",end)+"src=\"".length();
 
 		}
-		while(getConnectionCount()>0){try {
-			wait();
-		} catch (InterruptedException e) {
-			threadExecutor.shutdownNow();
-			break;
-		}}
+		while (getConnectionCount() > 0) {
+			try {
+				wait();
+			} catch (InterruptedException e) {
+				threadExecutor.shutdownNow();
+				break;
+			}
+		}
 		sw.pause();
 		return sw;
 	}

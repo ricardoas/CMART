@@ -856,4 +856,8 @@ public class ClientGenerator extends Thread{
 		}
 	}
 
+	public synchronized void addClientSession(int numPagesOpened, long totalRT, int requestErrors, long startTime, boolean exitDueToError, double annoyedLeaveProb) {
+		this.csd.addClientSession(numPagesOpened, totalRT, requestErrors, startTime, exitDueToError, annoyedLeaveProb);
+	}
+
 }

@@ -5,9 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -91,15 +89,17 @@ public class Client extends Thread{
 	private Document xmlDocument;						// xml document to output of user actions
 	private Element actionsElement;						// Element of all the actions
 
-	private boolean loggedIn=false;			// if the client is logged in
-	private int currentPageType=0;			// Page type of the current page
-	private int lastPageType=0;				// page number of the previous page opened
+	private boolean exit;					// if the client is to exit
+	private int lastPageType;				// page number of the previous page opened
+	private int currentPageType;			// Page type of the current page
+	private boolean loggedIn;			// if the client is logged in
+
+	
 	private  TreeMap<Long,ItemCG> currentBids=new TreeMap<Long,ItemCG>();			// tracks items from the client is currently bidding on
 	private TreeMap<Long,ItemCG> endedAuctions=new TreeMap<Long,ItemCG>();		// tracks items that the user has won
 	private  TreeMap<Long,ItemCG> purchasedItems=new TreeMap<Long,ItemCG>();		// tracks items the user has purchased (buyNow)
 	private  TreeMap<Long,ItemCG> sellingItems=new TreeMap<Long,ItemCG>();		// tracks items the user is selling
 	private  TreeMap<Long,ItemCG> soldItems=new TreeMap<Long,ItemCG>();			// tracks items the user has sold
-	private boolean exit=false;					// if the client is to exit
 	private int loginAttempts=0;				// number of times the client has attempted to login/register
 	private long lastItemID;					// itemID of last item opened
 	private ArrayList<String>errors=new ArrayList<String>();	// list of errors on an HTML5 page
@@ -263,57 +263,58 @@ public class Client extends Thread{
 		
 		try (CloseableHttpClient client = httpClientBuilder.build()) {
 			this.httpclient = client;
-			while (!exit) { // while the client is not exiting the system
+			while (!this.exit) { // while the client is not exiting the system
 				openedPagesCounter++;
 				if (RunSettings.isVerbose()) {
-					System.out.println("Client " + this.getClientID() + " Page Number: " + openedPagesCounter + " Current Page Type: " + PageType.values()[currentPageType]);
+					System.out.println("Client " + this.getClientID() + " Page Number: " + openedPagesCounter + " Current Page Type: "
+							+ PageType.values()[currentPageType]);
 				}
 
-				Page activePage = new Page(currentURL, currentPageType, lastURL, this).toPageType();
+				Page activePage = new Page(this.currentURL, this.currentPageType, this.lastURL, this).toPageType();
 
-				lastURL = currentURL;
-				lastPageType = currentPageType;
-				currentPageType = activePage.getPageType();
-				if (currentPageType == 0) {
-					exit = true;
+				this.lastURL = this.currentURL;
+				this.lastPageType = this.currentPageType;
+				this.currentPageType = activePage.getPageType();
+				
+				if (currentPageType == PageType.NONE.getCode()) {
+					this.exit = true;
 				} else {
-					currentURL = activePage.makeDecision();
+					this.currentURL = activePage.makeDecision();
 				}
 				activePage.shutdownThreads();
 			}
-		} catch (IOException | ParseException | InterruptedException | URISyntaxException e) {
+			
+			System.out.println(System.currentTimeMillis() + " Client (#" + clientInfo.getClientIndex() + ") " + clientInfo.getUsername() + " Exiting ");
+
+			if (currentPageType != PageType.REGISTER_PAGE_NUM.getCode()) {
+				cg.activeToInactive(clientInfo, this);
+			} else {
+				cg.activeToRemove(clientInfo, this); 
+			}
+
+		} catch (Exception e) {
+//		} catch (IOException | ParseException | InterruptedException | URISyntaxException e) {
 			this.exit = true;
 			this.loggedIn = false;
 			System.out.println(System.currentTimeMillis() + " Client (#" + clientInfo.getClientIndex() + ") " + clientInfo.getUsername()
 					+ " Exiting Due To Error ");
-//			System.err.println(currentURL);
-//			System.err.println(lastURL);
-			if (rand.nextDouble() < RunSettings.getClearCacheOnExit()) {
-				clientInfo.clearCaches();
-			}
 			cg.activeToRemove(clientInfo, this); // moves the client
-			cg.getClientSessionStats().addClientSession(numPagesOpened, totalRT, requestErrors, startTime, true, 1.);
+//			cg.addClientSession(numPagesOpened, totalRT, requestErrors, startTime, true, 1.);
 		}
 
 		for (ItemPage ip : openTabs) {
 			ip.cancelTimer();
 		}
 
-		System.out.println(System.currentTimeMillis() + " Client (#" + clientInfo.getClientIndex() + ") " + clientInfo.getUsername() + " Exiting ");
+		if (rand.nextDouble() < RunSettings.getClearCacheOnExit()) {
+			clientInfo.clearCaches();
+		}
 
 		if (exitDueToRepeatChange) {
 			System.out.println("Client Index " + clientInfo.getClientIndex() + " left due to change in repeated run");
 		}
-		if (rand.nextDouble() < RunSettings.getClearCacheOnExit()) {
-			clientInfo.clearCaches();
-		}
-		if (currentPageType != PageType.REGISTER_PAGE_NUM.getCode()) {
-			cg.activeToInactive(clientInfo, this);
-		} else {
-			cg.activeToRemove(clientInfo, this); 
-		}
+		
 		double annoyedProb;
-
 		if (exitDueToError) {
 			annoyedProb = 1.;
 		} else if (finalLogoutProb == 0) {
@@ -322,10 +323,9 @@ public class Client extends Thread{
 			annoyedProb = (restProb * (finalLogoutProb - origLogoutProb)) / (finalLogoutProb * (restProb + origLogoutProb));
 		}
 
-		cg.getClientSessionStats().addClientSession(numPagesOpened, totalRT, requestErrors, startTime, exitDueToError, annoyedProb);
+		cg.addClientSession(numPagesOpened, totalRT, requestErrors, startTime, exitDueToError, annoyedProb);
 
 		outputClientXML();
-//		System.out.println("\tClient.run() SUCCESSFUL EXIT");
 	}
 
 
@@ -437,7 +437,7 @@ public class Client extends Thread{
 	 * Increases the number of login/register attempts of the user by 1
 	 */
 	public void incLoginAttempts(){
-		this.loginAttempts+=1;
+		this.loginAttempts++;
 	}
 
 	/**
@@ -573,7 +573,7 @@ public class Client extends Thread{
 	 * Tracks that the number of items the client has bought has increased by one
 	 */
 	public void incItemsBought(){
-		this.itemsBought+=1;
+		this.itemsBought++;
 	}
 
 	/**
@@ -588,7 +588,7 @@ public class Client extends Thread{
 	 * Tracks that the number of items the client has bid on has increased by one
 	 */
 	public void incItemsBid(){
-		this.itemsBid+=1;
+		this.itemsBid++;
 	}
 
 	/**
@@ -603,7 +603,7 @@ public class Client extends Thread{
 	 * Tracks that the number of items the client has put up for sale has increased by one
 	 */
 	public void incItemsSold(){
-		this.itemsSold+=1;
+		this.itemsSold++;
 	}
 
 	/**
@@ -663,7 +663,7 @@ public class Client extends Thread{
 	 * @param itemID - the itemID in the database
 	 * @param item
 	 */
-	public void addToCurrentBids(long itemID,ItemCG item){
+	public void addToCurrentBids(long itemID, ItemCG item) {
 		this.currentBids.put(itemID, item);
 	}
 
@@ -672,7 +672,7 @@ public class Client extends Thread{
 	 * @param itemID - the itemID in the database
 	 * @param item
 	 */
-	public void addToEndedAuctions(long itemID,ItemCG item){
+	public void addToEndedAuctions(long itemID, ItemCG item) {
 		this.endedAuctions.put(itemID, item);
 	}
 
@@ -771,10 +771,12 @@ public class Client extends Thread{
 	 * @param itemID - itemID in database
 	 */
 	public void removeItemOfInterest(long itemID){
-		if(clientInfo.getItemsOfInterest().containsKey(itemID))
+//		if (clientInfo.getItemsOfInterest().containsKey(itemID)) {
 			clientInfo.getItemsOfInterest().remove(itemID);
-		if(clientInfo.getItemsOfInterestRatings().containsKey(itemID))
+//		}
+//		if (clientInfo.getItemsOfInterestRatings().containsKey(itemID)) {
 			clientInfo.getItemsOfInterestRatings().remove(itemID);
+//		}
 	}
 
 	/**
