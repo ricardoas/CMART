@@ -274,9 +274,6 @@ public class Client extends Thread{
 					System.out.println("Client " + this.getClientID() + " Page Number: " + openedPagesCounter + " Current Page Type: "
 							+ PageType.values()[currentPageType]);
 				}
-				System.out.println("Client " + this.getClientID() + " Page Number: " + openedPagesCounter + " Current Page Type: "
-						+ PageType.values()[currentPageType]);
-				
 
 				Page activePage = new Page(this.currentURL, this.currentPageType, this.lastURL, this).toPageType();
 
@@ -286,9 +283,9 @@ public class Client extends Thread{
 				
 				if (currentPageType == PageType.NONE.getCode()) {
 					this.exit = true;
-				} else if (currentPageType == PageType.SELLITEMCONFIRM_PAGE_NUM.getCode()){
-					System.out.println("Client.run()");
-					this.exit = true;
+//				} else if (currentPageType == PageType.SELLITEMCONFIRM_PAGE_NUM.getCode()){
+//					System.out.println("Client.run()");
+//					this.exit = true;
 				}else{
 					this.currentURL = activePage.makeDecision();
 				}

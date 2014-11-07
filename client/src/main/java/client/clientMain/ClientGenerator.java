@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -758,6 +759,7 @@ public class ClientGenerator extends Thread{
 			child.setTextContent(Boolean.toString(clientToRun.isRegistered()));
 			cI.appendChild(child);
 			Element cache=xmlDocument.createElement("imageCache");
+				
 			for(Entry<String,Image> e: clientToRun.getImageCache().entrySet()){
 				child=xmlDocument.createElement("image");
 				child.setTextContent(e.getKey());

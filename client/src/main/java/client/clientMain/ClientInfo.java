@@ -552,12 +552,12 @@ public class ClientInfo {
 			return false;
 	}
 
-	public TreeMap<String,Image>getImageCache(){
-		return this.imageCache;
+	public synchronized TreeMap<String,Image>getImageCache(){
+		return new TreeMap<String, Image>(this.imageCache);
 	}
 
-	public synchronized Map<String,StringBuilder>getJscssCache(){
-		return Collections.unmodifiableMap(this.jscssCache);
+	public synchronized TreeMap<String,StringBuilder>getJscssCache(){
+		return new TreeMap<String, StringBuilder>(this.jscssCache);
 //		return this.jscssCache;
 	}
 
@@ -604,8 +604,8 @@ public class ClientInfo {
 	 * Gets the HTML5 Cache
 	 * @return
 	 */
-	public Map<String,StringBuilder> getHTML5Cache(){
-		return Collections.unmodifiableMap(this.HTML5Cache);
+	public synchronized Map<String,StringBuilder> getHTML5Cache(){
+		return new TreeMap<String, StringBuilder>(this.HTML5Cache);
 	}
 
 
