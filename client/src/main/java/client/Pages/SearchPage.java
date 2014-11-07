@@ -692,9 +692,11 @@ public class SearchPage extends Page{
 	public void getQuestions() throws JsonParseException, JsonMappingException, IOException, ParseException{
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode node = mapper.readValue(html.toString(), JsonNode.class);
-		for (int i=0;i<node.get("questions").size();i++){
-			QuestionCG question=new QuestionCG(node.get("question").get(i));
-			client.getClientInfo().addHTML5QuestionCache(question);
+		if(node.get("questions")!=null){
+			for (int i=0;i<node.get("questions").size();i++){
+				QuestionCG question=new QuestionCG(node.get("questions").get(i));
+				client.getClientInfo().addHTML5QuestionCache(question);
+			}
 		}
 	}
 

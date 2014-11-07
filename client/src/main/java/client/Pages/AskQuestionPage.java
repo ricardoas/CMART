@@ -21,13 +21,15 @@ import client.clientMain.RunSettings;
  */
 
 public class AskQuestionPage extends Page{
-	HashMap<String, StringBuilder> data = new HashMap<String, StringBuilder>();	// data to be sent to the login page
-	StringBuilder question=new StringBuilder();
-	double pageRTFactor=1.;
+	private HashMap<String, StringBuilder> data;	// data to be sent to the login page
+	private StringBuilder question=new StringBuilder();
+	private double pageRTFactor;
 
 	public AskQuestionPage(Page page){
 		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL);
-		client.pageSpecificRT(pageRTFactor);	// change RT threshold depending on page type
+		this.data = new HashMap<>();
+		this.pageRTFactor = 1;
+		this.client.pageSpecificRT(pageRTFactor);	// change RT threshold depending on page type
 	}
 
 	/**
@@ -40,15 +42,27 @@ public class AskQuestionPage extends Page{
 	 * @throws URISyntaxException 
 	 */
 	@Override public StringBuilder makeDecision() throws UnsupportedEncodingException, IOException, InterruptedException, URISyntaxException{
-		StringBuilder nextLink=new StringBuilder(client.getCMARTurl().getAppURL());	// link to send the login data to
-		StringBuilder nextURL=new StringBuilder();	// the response page returned after the login attempt
+		StringBuilder nextLink = new StringBuilder(client.getCMARTurl().getAppURL());
+		// link to send the login data to
+		StringBuilder nextURL = new StringBuilder();
+		// the response page returned after the login attempt
 
-		if(RunSettings.isRepeatedRun()==false){
+		if(!RunSettings.isRepeatedRun()){
 			if(HTML4){
-			searchData=getFormData("search");
-			data=getFormData("askquestion");
+				this.searchData = getFormData("search");
+				this.data = getFormData("askquestion");
+				
+				if(searchData.containsKey("userID")){
+					this.data.put("userID", searchData.get("userID"));
+				}
+				
+				if(searchData.containsKey("authToken")){
+					this.data.put("authToken", searchData.get("authToken"));
+				}
+				
+				this.data.put("itemID", new StringBuilder().append(client.getLastItemID()));
 			}
-			
+
 			action=xmlDocument.createElement("action");
 			action.setAttribute("id",client.getActionNum());
 			Element currentPage=xmlDocument.createElement("currentPage");
@@ -61,12 +75,12 @@ public class AskQuestionPage extends Page{
 
 
 			int numWordsInQuestion;
-			do{
-				numWordsInQuestion=(int)Math.round(rand.nextGaussian()*5+15);
-			}while(numWordsInQuestion<=0);
-			for (int i=0;i<numWordsInQuestion;i++){
+			do {
+				numWordsInQuestion = (int) Math.round(rand.nextGaussian() * 5 + 15);
+			} while (numWordsInQuestion <= 0);
+			for (int i = 0; i < numWordsInQuestion; i++) {
 				question.append(getRandomStringBuilderFromDist(RunSettings.getTitleWords()));
-				if (i!=numWordsInQuestion-1)
+				if (i != numWordsInQuestion - 1)
 					question.append(" ");
 				else
 					question.append("?");
@@ -74,11 +88,11 @@ public class AskQuestionPage extends Page{
 
 			data.put("question", typingError(question));
 			
-			if(!HTML4){
+			if (!HTML4) {
 				data.put("useHTML5", new StringBuilder("1"));
 				data.put("userID", client.getClientInfo().getHTML5Cache().get("userID"));
 				data.put("authToken", client.getClientInfo().getHTML5Cache().get("authToken"));
-				data.put("itemID",new StringBuilder().append(client.getLastItemID()));
+				data.put("itemID", new StringBuilder().append(client.getLastItemID()));
 			}
 			
 		}else{
@@ -147,36 +161,37 @@ public class AskQuestionPage extends Page{
 
 
 		// Think Time
-		try{Thread.sleep(getThinkTime());}
-		catch(InterruptedException e){
+		try {
+			Thread.sleep(getThinkTime());
+		} catch (InterruptedException e) {
 			client.setExit(true);
 			return null;
 		}
 
-		if(RunSettings.isRepeatedRun()==false){
-			Element child=xmlDocument.createElement("url");
+		if(!RunSettings.isRepeatedRun()){
+			Element child = xmlDocument.createElement("url");
 			child.setTextContent(new StringBuilder(nextLink).append("/askquestion").toString());
 			request.appendChild(child);
-			for (Entry<String,StringBuilder> e:data.entrySet()){
-				child=xmlDocument.createElement("data");
+			for (Entry<String, StringBuilder> e : data.entrySet()) {
+				child = xmlDocument.createElement("data");
 				child.setAttribute("name", e.getKey());
 				child.setTextContent(e.getValue().toString());
 				request.appendChild(child);
 			}
 			// submits the ask question request and receives the response
-			if (HTML4){
-				child=xmlDocument.createElement("type");
+			if (HTML4) {
+				child = xmlDocument.createElement("type");
 				child.setTextContent("POST");
 				request.appendChild(child);
-				nextURL=doSubmit(nextLink.append("/askquestion"),data);
-			}else{
-				child=xmlDocument.createElement("type");
+				nextURL = doSubmit(nextLink.append("/askquestion"), data);
+			} else {
+				child = xmlDocument.createElement("type");
 				child.setTextContent("GET");
 				request.appendChild(child);
-				nextURL=openHTML5PageWithRedirect(nextLink.append("/askquestion?").append(createURL(data)));
+				nextURL = openHTML5PageWithRedirect(nextLink.append("/askquestion?").append(createURL(data)));
 			}
 
-			child=xmlDocument.createElement("thinkTime");
+			child = xmlDocument.createElement("thinkTime");
 			child.setTextContent(Integer.toString(pageThinkTime));
 			action.appendChild(child);
 			action.appendChild(request);
@@ -199,17 +214,20 @@ public class AskQuestionPage extends Page{
 	 * @return Think time in ms
 	 */
 	private int getThinkTime(){
-		int thinkTime=typingErrorThinkTime;
-		if(RunSettings.isRepeatedRun()==false){
-			thinkTime+=(int)expDist(initialThinkTime)+(int)(((question.length())/client.getTypingSpeed()));
-		}else{
-			thinkTime=Integer.parseInt(((Element)action).getElementsByTagName("thinkTime").item(0).getTextContent());
+		int thinkTime = typingErrorThinkTime;
+		if (!RunSettings.isRepeatedRun()) {
+			thinkTime += (int) expDist(initialThinkTime) + (int) (((question.length()) / client.getTypingSpeed()));
+		} else {
+			thinkTime = Integer.parseInt(((Element) action).getElementsByTagName("thinkTime").item(0).getTextContent());
 		}
-		if (verbose)System.out.println("User: "+client.getClientInfo().getUsername()+" - Think Time: "+thinkTime+" ms");
-		if (RunSettings.isOutputThinkTimes()==true)
+		if (verbose){
+			System.out.println("User: " + client.getClientInfo().getUsername() + " - Think Time: " + thinkTime + " ms");
+		}
+		if (RunSettings.isOutputThinkTimes()){
 			client.getCg().getThinkTimeHist().add(thinkTime);
-		pageThinkTime=thinkTime;
-		return Math.max((int) ((thinkTime-(new Date().getTime()-pageOpenTime))/RunSettings.getThinkTimeSpeedUpFactor()),0);
+		}
+		this.pageThinkTime = thinkTime;
+		return Math.max((int) ((thinkTime - (new Date().getTime() - pageOpenTime)) / RunSettings.getThinkTimeSpeedUpFactor()), 0);
 	}
 
 

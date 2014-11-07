@@ -81,7 +81,7 @@ public class SiteData {
 					EntityUtils.consume(response.getEntity());
 				}
 				return;
-			} catch (IOException | URISyntaxException e) {
+			} catch (IOException | IllegalArgumentException e) {
 				System.err.println("Problem collecting SiteData. Attempt:" + attempts);
 				e.printStackTrace();
 			}

@@ -26,18 +26,21 @@ import client.clientMain.RunSettings;
 
 public class UpdateUserPage extends Page{
 
-	boolean updateEmail=false;
-	boolean updatePassword=false;
-	boolean updateAddress=false;
-	HashMap<String, StringBuilder>data=new HashMap<String,StringBuilder>();
-	double pageRTFactor=1.1;
-	int bonusCharacters=0;
+	private boolean updateEmail;
+	private boolean updatePassword;
+	private boolean updateAddress;
+	private HashMap<String, StringBuilder>data;
+	private double pageRTFactor;
+	private int bonusCharacters;
 
 	public UpdateUserPage(Page page){
-		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL);
-		client.pageSpecificRT(pageRTFactor);	// change RT threshold depending on page type
-		if(HTML4)
-			searchData=getFormData("search");
+		super(page.url, page.html, page.client, page.pageType, page.pageOpenTime, page.lastPageType, page.lastURL);
+		this.data = new HashMap<String, StringBuilder>();
+		this.pageRTFactor = 1.1;
+		client.pageSpecificRT(pageRTFactor); 
+		if (HTML4){
+			searchData = getFormData("search");
+		}
 	}
 
 	/**
@@ -51,7 +54,7 @@ public class UpdateUserPage extends Page{
 	 */
 	@Override public StringBuilder makeDecision() throws JsonParseException, JsonMappingException, IOException, InterruptedException{
 		StringBuilder nextPage=new StringBuilder();		// the HTTP response after submitting a request
-		if(RunSettings.isRepeatedRun()==false){
+		if(!RunSettings.isRepeatedRun()){
 			action=xmlDocument.createElement("action");
 			action.setAttribute("id",client.getActionNum());
 			Element currentPage=xmlDocument.createElement("currentPage");
@@ -65,19 +68,21 @@ public class UpdateUserPage extends Page{
 
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode node = null;
-			if(!HTML4)
-				node=mapper.readValue(html.toString(), JsonNode.class);		
-			String formAction=null;;		// action field of the form
-			if(rand.nextDouble()<0.3){
-				updateEmail=true;
+			if (!HTML4)
+				node = mapper.readValue(html.toString(), JsonNode.class);
+			String formAction = null;
+			
+			if (rand.nextDouble() < 0.3) {
+				updateEmail = true;
 			}
-			if(rand.nextDouble()<0.3){
-				updatePassword=true;
+			if (rand.nextDouble() < 0.3) {
+				updatePassword = true;
 			}
-			if(rand.nextDouble()<0.3){
-				updateAddress=true;
+			if (rand.nextDouble() < 0.3) {
+				updateAddress = true;
 				client.getClientInfo().createAddress();
 			}
+			
 			if(HTML4){		// gets data in the form
 				int start=html.indexOf("<form name=\"register_user\" action=\"")+("<form name=\"register_user\" action=\"").length();
 				int end=html.indexOf("\" class=\"nice\"",start);
@@ -105,7 +110,7 @@ public class UpdateUserPage extends Page{
 			ArrayList<String>changes=new ArrayList<String>();		// determines and fields which need to be updated
 
 			if(verbose)System.out.println(data);
-			if(HTML4==true){
+			if(HTML4){
 				if(html.indexOf("The passwords you entered are different Make sure both of the passwords are the same")!=-1)
 					updatePassword=true;
 				if(html.indexOf("The email addresses you entered are different Make sure both of the email addresses are the same")!=-1)
@@ -122,7 +127,7 @@ public class UpdateUserPage extends Page{
 
 
 			// if the password is to be updated
-			if (updatePassword==true){
+			if (updatePassword){
 				long numCharNewPassword=8+rand.nextInt(5);
 				StringBuilder newPassword=new StringBuilder();
 				for (int i=0;i<numCharNewPassword;i++){
@@ -150,7 +155,7 @@ public class UpdateUserPage extends Page{
 				}
 			}
 
-			if (updateEmail==true){
+			if (updateEmail){
 				data.put("email1", typingError(client.getClientInfo().getEmail()));
 				data.put("email2",  typingError(client.getClientInfo().getEmail()));
 				changes.add("email1");
@@ -175,8 +180,9 @@ public class UpdateUserPage extends Page{
 
 
 			// Think Time
-			try{Thread.sleep(getThinkTime(changes));}
-			catch(InterruptedException e){
+			try {
+				Thread.sleep(getThinkTime(changes));
+			} catch (InterruptedException e) {
 				client.setExit(true);
 				return null;
 			}
@@ -322,23 +328,6 @@ public class UpdateUserPage extends Page{
 		if (data.get("lastname").equals(client.getClientInfo().getLastName())==false){
 			changes.add(("lastname"));
 			data.put(("lastname"),typingError(client.getClientInfo().getLastName()));}
-		
-		if(data.get("street") == null){
-			System.err.println("asdas");
-		}
-
-		if(client == null){
-			System.err.println("asdas");
-		}
-
-		if(client.getClientInfo() == null){
-			System.err.println("asdas");
-		}
-
-		if(client.getClientInfo().getAddress() == null){
-			System.err.println("asdas");
-		}
-
 		if (data.get("street").equals(client.getClientInfo().getAddress())==false){
 			changes.add(("street"));
 			data.put(("street"),typingError(client.getClientInfo().getAddress()));}

@@ -232,11 +232,13 @@ public class ItemPage extends Page{
 						client.getClientInfo().addHTML5SellerCache(seller);
 
 						item.resetNumQuestions();
-						for (int i=0;i<node.get("questions").size();i++){
-							QuestionCG question=new QuestionCG(node.get("questions").get(i));
-							client.getClientInfo().addHTML5QuestionCache(question);
-							if(question.isQuestion())
-								item.incQuestionNum();
+						if(node.get("questions")!=null){
+							for (int i=0;i<node.get("questions").size();i++){
+								QuestionCG question=new QuestionCG(node.get("questions").get(i));
+								client.getClientInfo().addHTML5QuestionCache(question);
+								if(question.isQuestion())
+									item.incQuestionNum();
+							}
 						}
 					}
 				} catch (JsonParseException e) {
@@ -379,6 +381,8 @@ public class ItemPage extends Page{
 					child=xmlDocument.createElement("type");
 					child.setTextContent("POST");
 					request.appendChild(child);
+					System.out.println("\tItemPage.makeDecision() bnd ="+ buyNowData);
+					System.out.println("\tItemPage.makeDecision() sd ="+ searchData);
 					nextPage=doSubmit(nextPage.append("/buyitem"),buyNowData);
 				}else{
 					Element child=xmlDocument.createElement("url");
@@ -406,7 +410,8 @@ public class ItemPage extends Page{
 				int end=html.indexOf(nextLinkS);
 				int start=html.lastIndexOf("href=\".",end)+"href=\".".length();
 				end=html.indexOf("\">",start);
-				nextPage.append(html.subSequence(start,end));			
+				nextPage.append(html.subSequence(start,end));	
+				System.out.println("\tItemPage.makeDecision() = " + nextPage);
 			}
 			else{
 				if(HTML4){

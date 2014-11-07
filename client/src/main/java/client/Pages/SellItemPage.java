@@ -54,9 +54,6 @@ public class SellItemPage extends Page {
 		if(HTML4){
 			data=getFormData("sellitem");
 			searchData=getFormData("search");
-			System.out.println("  \tSellItemPage.makeDecision() ");
-			System.out.println("  \t" + data);
-			System.out.println("  \t" + searchData);
 		}
 
 		updateProbabilities();

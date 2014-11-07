@@ -204,11 +204,8 @@ public class ClientGenerator extends Thread{
 			if(!RunSettings.isStaticUserload()){
 				while(!exit){
 					try {
-						// delay is an exponential function dependent on the average number of clients to be generated per minute
-						int delay = RunSettings.getMeanClientsPerMinute()==0? 0:(int)getPareto(60000/RunSettings.getMeanClientsPerMinute());	// delay between generating clients
-						Thread.sleep(delay);
+						Thread.sleep(calcDelay());
 					} catch (InterruptedException e) {
-						e.printStackTrace();
 					}
 					
 					if(!exit){
@@ -221,7 +218,6 @@ public class ClientGenerator extends Thread{
 					try {
 						Thread.sleep((long) (rampupTime / RunSettings.getStableUsers()));
 					}catch (InterruptedException e) {
-						e.printStackTrace();
 					}
 					if(!exit){
 						try {
@@ -266,6 +262,14 @@ public class ClientGenerator extends Thread{
 			}
 		}
 		timer.shutdownNow();			
+	}
+
+	/**
+	 * Delay is an exponential function dependent on the average number of clients to be generated per minute
+	 * @return delay between generating clients 
+	 */
+	private int calcDelay() {
+		return RunSettings.getMeanClientsPerMinute() == 0 ? 0 : (int) getPareto(60000 / RunSettings.getMeanClientsPerMinute());
 	}
 
 	/**
@@ -495,7 +499,6 @@ public class ClientGenerator extends Thread{
 			try {
 				Thread.sleep(3500);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
 			}
 			threadExecutorC.shutdown();			// reattempt to shutdown client threads
 			threadExecutorRC.shutdown();
@@ -551,8 +554,10 @@ public class ClientGenerator extends Thread{
 				String xmlString = result.getWriter().toString();
 				out.write(xmlString);
 			}catch(Exception e){
-				e.printStackTrace();
 				System.err.println("Could not output clients xml.");
+				if(RunSettings.isVerbose()){
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -596,33 +601,34 @@ public class ClientGenerator extends Thread{
 	 *
 	 */
 	private static class ChangePeakUsersSlope extends Thread{
-		double newSlope;		// in clients added per ms
-		long endTime;
-		ClientGenerator cg;
-		private ChangePeakUsersSlope(double newSlope, long endTime,ClientGenerator cg){
-			this.newSlope=newSlope/60000;
-			this.endTime=endTime;
-			this.cg=cg;
+		private double newSlope; // in clients added per ms
+		private long endTime;
+		private ClientGenerator cg;
+
+		private ChangePeakUsersSlope(double newSlope, long endTime, ClientGenerator cg) {
+			this.newSlope = newSlope / 60000;
+			this.endTime = endTime;
+			this.cg = cg;
 		}
+		
 		public void run(){
 			System.out.println("Increasing the Peak User value by "+newSlope*60000+" clients per minute");
-			long startTime=System.currentTimeMillis();
-			int startValue=RunSettings.getStableUsers();
-			if(endTime!=-1){
-				while(System.currentTimeMillis()<endTime){
-					RunSettings.setStableUsers(startValue+(int)(((double)(System.currentTimeMillis()-startTime))*newSlope));
-					try{Thread.sleep(2000);} 	
-					catch(InterruptedException e){
-						e.printStackTrace();
+			long startTime = System.currentTimeMillis();
+			int startValue = RunSettings.getStableUsers();
+			if (endTime != -1) {
+				while (System.currentTimeMillis() < endTime) {
+					RunSettings.setStableUsers(startValue + (int) (((double) (System.currentTimeMillis() - startTime)) * newSlope));
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
 					}
 				}
-			}
-			else{
-				while(!cg.exit){
-					RunSettings.setStableUsers(startValue+(int)(((double)(System.currentTimeMillis()-startTime))*newSlope));
-					try{Thread.sleep(2000);} 	
-					catch(InterruptedException e){
-						e.printStackTrace();
+			} else {
+				while (!cg.exit) {
+					RunSettings.setStableUsers(startValue + (int) (((double) (System.currentTimeMillis() - startTime)) * newSlope));
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
 					}
 				}
 			}
@@ -734,6 +740,7 @@ public class ClientGenerator extends Thread{
 				this.clientToRun = new ClientInfo();
 			}
 			this.clientToRun.setClientIndex(index);
+//			System.err.println(index + " " + clientToRun.getUserID() + " " + clientToRun.getUsername());
 		
 			/**
 			 * Puts client information into xmlDocument
@@ -784,26 +791,25 @@ public class ClientGenerator extends Thread{
 			this.startPage = new StringBuilder(RunSettings.getCMARTurl().getAppURL()).append("/index").append(RunSettings.isHTML4()?"":".html");
 			this.clientToRun=new ClientInfo();
 			// Sets the client info according to that in the readXmlDocument
-			clientToRun.setClientIndex(Long.parseLong(((Element)client).getElementsByTagName("clientIndex").item(0).getTextContent()));
+			this.clientToRun.setClientIndex(Long.parseLong(((Element)client).getElementsByTagName("clientIndex").item(0).getTextContent()));
 			Element clientInfo=(Element)((Element)client).getElementsByTagName("clientInfo").item(0);
-			clientToRun.setUserID(new StringBuilder(clientInfo.getElementsByTagName("userID").item(0).getTextContent()));
-			clientToRun.setUsername(new StringBuilder(clientInfo.getElementsByTagName("username").item(0).getTextContent()));
-			clientToRun.setPassword(new StringBuilder(clientInfo.getElementsByTagName("password").item(0).getTextContent()));
-			clientToRun.setRegistered(Boolean.parseBoolean(clientInfo.getElementsByTagName("registered").item(0).getTextContent()));
+			this.clientToRun.setUserID(new StringBuilder(clientInfo.getElementsByTagName("userID").item(0).getTextContent()));
+			this.clientToRun.setUsername(new StringBuilder(clientInfo.getElementsByTagName("username").item(0).getTextContent()));
+			this.clientToRun.setPassword(new StringBuilder(clientInfo.getElementsByTagName("password").item(0).getTextContent()));
+			this.clientToRun.setRegistered(Boolean.parseBoolean(clientInfo.getElementsByTagName("registered").item(0).getTextContent()));
 		}
 		
 		public void run(){
-			assert clientToRun != null: "Should not be null at this point.";
+			assert this.clientToRun != null: "Should not be null at this point.";
 			try {
-
-				Client p = new Client(clientToRun,startPage,ClientGenerator.this);
+				Client p = new Client(this.clientToRun,startPage,ClientGenerator.this);
 				synchronized (clients) {
 					clients.add(p);
-					System.out.println("Starting Client: "+clientToRun.getUsername()+", Number of Active Clients = "+ clients.size());
+					System.out.println("Starting Client: " + this.clientToRun.getUsername() + ", Number of Active Clients = " + clients.size());
 				}
 				threadExecutorC.execute(p);
 			} catch (IOException e) {
-				System.err.println("Error creating Client " + clientToRun);
+				System.err.println("Error creating Client " + this.clientToRun);
 				if(RunSettings.isVerbose()){
 					e.printStackTrace();
 				}

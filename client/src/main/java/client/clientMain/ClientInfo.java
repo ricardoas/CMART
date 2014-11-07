@@ -2,6 +2,8 @@ package client.clientMain;
 
 import java.awt.Image;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
 
@@ -223,8 +225,10 @@ public class ClientInfo {
 	 * Creates an address for a user from a distribution
 	 */
 	public void createAddress(){
+		
 		double index=binarySearch((Double[])RunSettings.getStreetNames().keySet().toArray(new Double[RunSettings.getStreetNames().size()]),rand.nextDouble(),0,RunSettings.getStreetNames().size()-1);
 
+		this.address = new StringBuilder();
 		this.address=this.address.append(rand.nextInt(1000)).append(" ");
 		this.address=this.address.append(RunSettings.getStreetNames().get(index));
 		int suffix=rand.nextInt(5);
@@ -247,6 +251,7 @@ public class ClientInfo {
 		this.USStateCode=new StringBuilder(Integer.toString(determineUSStateCode()));
 
 
+		this.zipcode = new StringBuilder();
 		this.zipcode.append(rand.nextInt(100000));
 		for (int i=0;i<(5-this.zipcode.length());i++)
 			this.zipcode.insert(0, '0');
@@ -551,8 +556,9 @@ public class ClientInfo {
 		return this.imageCache;
 	}
 
-	public TreeMap<String,StringBuilder>getJscssCache(){
-		return this.jscssCache;
+	public synchronized Map<String,StringBuilder>getJscssCache(){
+		return Collections.unmodifiableMap(this.jscssCache);
+//		return this.jscssCache;
 	}
 
 	/**
@@ -598,8 +604,8 @@ public class ClientInfo {
 	 * Gets the HTML5 Cache
 	 * @return
 	 */
-	public TreeMap<String,StringBuilder> getHTML5Cache(){
-		return this.HTML5Cache;
+	public Map<String,StringBuilder> getHTML5Cache(){
+		return Collections.unmodifiableMap(this.HTML5Cache);
 	}
 
 

@@ -860,7 +860,7 @@ public class Page {
 			client.setExit(true);
 			client.setExitDueToError(true);
 			return new PageTimePair(new StringBuilder(HTTP_RESPONSE_ERROR),sw);
-		} catch (URISyntaxException e) {
+		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 			System.err.println("HTTP request error: "+urlString);
 			return new PageTimePair(new StringBuilder(HTTP_RESPONSE_ERROR),sw);
@@ -971,7 +971,7 @@ public class Page {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	protected StringBuilder doSubmit(StringBuilder url,HashMap<String, StringBuilder> data) throws UnsupportedEncodingException, IOException, InterruptedException{
+	protected StringBuilder doSubmit(StringBuilder url,HashMap<String, StringBuilder> data) throws InterruptedException{ //UnsupportedEncodingException, IOException, 
 		threadExecutor = Executors.newFixedThreadPool(RunSettings.getConnPerPage());
 		StringBuilder urlOrig=new StringBuilder(url);
 		StringBuilder ret = new StringBuilder();		// the source code of the page
@@ -984,101 +984,119 @@ public class Page {
 		}
 		URI uri;
 		try {
-//			uri = URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), url.toString().replace(" ", "%20"), null, null);
+			//			uri = URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), url.toString().replace(" ", "%20"), null, null);
 			uri=client.getCMARTurl().build(url.toString().replace(" ", "%20"));
 			UrlEncodedFormEntity entityPost = new UrlEncodedFormEntity(formparams, "UTF-8");
 			HttpPost httppost = new HttpPost(uri);
 			httppost.setEntity(entityPost);
 			Stopwatch sw=new Stopwatch();	// starts the Stopwatch to time the response time
-			HttpResponse response = client.getHttpClient().execute(httppost);
 
-			HttpEntity entity = response.getEntity();
-			BufferedReader br = new BufferedReader(new InputStreamReader(entity.getContent()));	// opens a BufferedReader to read the response of the HTTP request
+			try(CloseableHttpResponse response = client.getHttpClient().execute(httppost);
+					BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));	// opens a BufferedReader to read the response of the HTTP request
+					){
 
-			while((inputLine=br.readLine())!=null){
-				//	System.out.println(inputLine);
-				ret.append(inputLine);	// creates the response
-			}
-			if(RunSettings.isNetworkDelay()){
-				try{Thread.sleep(client.getNetworkDelay());}
-				catch(InterruptedException e){
-					br.close();
-					return null;
+				while((inputLine=br.readLine())!=null){
+					//	System.out.println(inputLine);
+					ret.append(inputLine);	// creates the response
 				}
-			}
-			sw.pause();
-			br.close();
-			if(response.getStatusLine().getStatusCode()>=400){
-				this.responseTime=sw.stop();	// stops the Stopwatch and determines the final response time
-				client.getCg().getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
-				client.addRT(responseTime);	// indexes the response time as the latest reponse time for the client
-				client.incRequestErrors();
-				client.incNumPagesOpened();
-				client.incTotalRT(this.responseTime);
-
-				if (httpRequestAttempts<3){
-					httpRequestAttempts++;
-					try{Thread.sleep((long) (expDist(1500)/RunSettings.getThinkTimeSpeedUpFactor()));}
+				if(RunSettings.isNetworkDelay()){
+					try{Thread.sleep(client.getNetworkDelay());}
 					catch(InterruptedException e){
+						br.close();
+						return null;
 					}
-					ret=doSubmit(urlOrig,data);
-					if (httpRequestAttempts<3)
-						return ret;
 				}
+
+				sw.pause();
+				if(response.getStatusLine().getStatusCode()>=400){
+					this.responseTime=sw.stop();	// stops the Stopwatch and determines the final response time
+					client.getCg().getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
+					client.addRT(responseTime);	// indexes the response time as the latest reponse time for the client
+					client.incRequestErrors();
+					client.incNumPagesOpened();
+					client.incTotalRT(this.responseTime);
+
+					if (httpRequestAttempts<3){
+						httpRequestAttempts++;
+						try{Thread.sleep((long) (expDist(1500)/RunSettings.getThinkTimeSpeedUpFactor()));}
+						catch(InterruptedException e){
+						}
+						ret=doSubmit(urlOrig,data);
+						if (httpRequestAttempts<3)
+							return ret;
+					}
+					threadExecutor.shutdown();
+					//	httpclient.getConnectionManager().shutdown();
+					System.err.println("HTTP request error: "+url+" "+data);
+					client.setExit(true);
+					client.setExitDueToError(true);
+					return new StringBuilder(HTTP_RESPONSE_ERROR);
+				}
+
+				if(RunSettings.isGetExtras()){
+					sw=getJsCssNew(ret,sw);		// Downloads the JS of any js files not already cached
+					sw=getImagesNew(ret,sw);	// Downloads any jpg on the page that is not already in the image cache
+				}
+				this.responseTime=sw.stop();		// gets the final response time
 				threadExecutor.shutdown();
 				//	httpclient.getConnectionManager().shutdown();
-				System.err.println("HTTP request error: "+url+" "+data);
+				client.getCg().getStats().getActiveHistogram().add(responseTime);		// adds the response time to the stats
+				client.getCg().addPageRT(getPageType(ret), responseTime);	// saves the response time for the specific page
+				client.addRT(responseTime);	// adds the response time to the clients most recent response time
+				client.incTotalRT(responseTime);
+				client.incNumPagesOpened();
+				if(verbose)System.out.println("RET "+ret);
+				
+				return ret;
+			} catch (IOException e) {
+				if(verbose){
+					System.err.println("Could not create connection");
+					System.err.println(urlOrig);
+					e.printStackTrace();
+				}
+				client.incRequestErrors();
+				httpRequestAttempts++;
+				if (httpRequestAttempts < 3)
+					return doSubmit(urlOrig, data);
+				threadExecutor.shutdown();
 				client.setExit(true);
 				client.setExitDueToError(true);
 				return new StringBuilder(HTTP_RESPONSE_ERROR);
 			}
-
-			if(RunSettings.isGetExtras()){
-				sw=getJsCssNew(ret,sw);		// Downloads the JS of any js files not already cached
-				sw=getImagesNew(ret,sw);	// Downloads any jpg on the page that is not already in the image cache
-			}
-			this.responseTime=sw.stop();		// gets the final response time
-			threadExecutor.shutdown();
-			//	httpclient.getConnectionManager().shutdown();
-			client.getCg().getStats().getActiveHistogram().add(responseTime);		// adds the response time to the stats
-			client.getCg().addPageRT(getPageType(ret), responseTime);	// saves the response time for the specific page
-			client.addRT(responseTime);	// adds the response time to the clients most recent response time
-			client.incTotalRT(responseTime);
-			client.incNumPagesOpened();
-			if(verbose)System.out.println("RET "+ret);
-
-
-		} catch (URISyntaxException e1) {
-			e1.printStackTrace();
-		} catch (NoHttpResponseException e){
-			System.err.println("Could not create connection");
-			System.err.println(urlOrig);
-			client.incRequestErrors();
-			httpRequestAttempts++;
-			ret=doSubmit(urlOrig,data);
-			if (httpRequestAttempts<3)
-				return ret;
-			threadExecutor.shutdown();
-			//httpclient.getConnectionManager().shutdown();
-			client.setExit(true);
-			client.setExitDueToError(true);
-			return new StringBuilder(HTTP_RESPONSE_ERROR);
-		}catch (SocketException e){
-			System.err.println("Could not create connection");
-			System.err.println(urlOrig);
-			client.incRequestErrors();
-			httpRequestAttempts++;
-			ret=doSubmit(urlOrig,data);
-			if (httpRequestAttempts<3)
-				return ret;
-			threadExecutor.shutdown();
-			//httpclient.getConnectionManager().shutdown();
-			client.setExit(true);
-			client.setExitDueToError(true);
+		}catch(IllegalArgumentException | UnsupportedEncodingException e) {
 			return new StringBuilder(HTTP_RESPONSE_ERROR);
 		}
 
-		return ret;
+
+//		} catch (IllegalArgumentException e1) {
+//			e1.printStackTrace();
+//		} catch (NoHttpResponseException e){
+//			System.err.println("Could not create connection");
+//			System.err.println(urlOrig);
+//			client.incRequestErrors();
+//			httpRequestAttempts++;
+//			ret=doSubmit(urlOrig,data);
+//			if (httpRequestAttempts<3)
+//				return ret;
+//			threadExecutor.shutdown();
+//			//httpclient.getConnectionManager().shutdown();
+//			client.setExit(true);
+//			client.setExitDueToError(true);
+//			return new StringBuilder(HTTP_RESPONSE_ERROR);
+//		}catch (SocketException e){
+//			System.err.println("Could not create connection");
+//			System.err.println(urlOrig);
+//			client.incRequestErrors();
+//			httpRequestAttempts++;
+//			ret=doSubmit(urlOrig,data);
+//			if (httpRequestAttempts<3)
+//				return ret;
+//			threadExecutor.shutdown();
+//			//httpclient.getConnectionManager().shutdown();
+//			client.setExit(true);
+//			client.setExitDueToError(true);
+//			return new StringBuilder(HTTP_RESPONSE_ERROR);
+//		}
 	}
 
 
@@ -1181,7 +1199,7 @@ public class Page {
 			client.incNumPagesOpened();
 			if(verbose)System.out.println("RET "+ret);
 
-		} catch (URISyntaxException e1) {
+		} catch (IllegalArgumentException e1) {
 			e1.printStackTrace();
 		}catch (NoHttpResponseException e){
 			System.err.println("Could not create connection");
@@ -1252,7 +1270,7 @@ public class Page {
 				return null;
 			}
 			
-		} catch (URISyntaxException | UnsupportedEncodingException e) {
+		} catch (IllegalArgumentException e) {
 			if(verbose){
 				e.printStackTrace();
 				System.err.println(pageType);
@@ -1518,7 +1536,7 @@ public class Page {
 					e.printStackTrace();
 				} catch (IOException e) {
 					e.printStackTrace();
-				} catch (URISyntaxException e) {
+				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
 				}
 			}
@@ -1590,7 +1608,7 @@ public class Page {
 					break;
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
-				} catch (URISyntaxException e) {
+				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
 				}catch(ConnectException e){
 					System.err.println("Could not create connection");
@@ -2237,5 +2255,4 @@ public class Page {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

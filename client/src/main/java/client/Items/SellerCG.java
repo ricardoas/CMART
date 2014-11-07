@@ -8,9 +8,9 @@ public class SellerCG {
 	private long rating;
 
 	public SellerCG(JsonNode node) {
-		this.id = node.get("seller").get("id").getLongValue();
-		this.name = node.get("seller").get("name").getTextValue();
-		this.rating = node.get("seller").get("rating").getLongValue();
+		this.id = node.get("id").getLongValue();
+		this.name = node.get("name").getTextValue();
+		this.rating = node.get("rating").getLongValue();
 	}
 
 	/**

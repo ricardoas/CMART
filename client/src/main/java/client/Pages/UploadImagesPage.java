@@ -114,6 +114,7 @@ public class UploadImagesPage extends Page {
 				System.err.println(data);
 				System.err.println(pics);
 				System.err.println(nextPage);
+				System.err.println(html);
 			}
 
 			child=xmlDocument.createElement("thinkTime");

@@ -84,7 +84,7 @@ public class RunSettings {
 	private static TreeMap<Long,ArrayList<Long>> categoriesParentsStorage=new TreeMap<Long,ArrayList<Long>>();	// mapping of category parentIDs to their child categories
 	private static TreeMap<Integer,ArrayList<Double>> transitionProbabilities=new TreeMap<Integer,ArrayList<Double>>();
 
-	public static void main(String[] args) throws ClientGeneratorException{
+	public static void main(String[] args) throws ClientGeneratorException, IOException{
 
 		// FIX PROBLEM WHEN RUNNING CLIENT ON NON-ENGLISH LOCALE
 		Locale.setDefault(Locale.ENGLISH);
@@ -103,21 +103,19 @@ public class RunSettings {
 		initializeRunSettings(configFileName); 
 		
 		if (ableToRun) {
-			try {
-				initializeDistributions();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			
+			initializeDistributions();
 			
 			System.out.println("Starting Client Generator");
+			
 			ClientGenerator cg = new ClientGenerator();
 			cg.start();
 
 			try {
 				Thread.sleep(60000 * timeToRun);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
 			}
+			
 			exitSystem(cg);
 		}
 		System.out.println("END= " + System.currentTimeMillis());

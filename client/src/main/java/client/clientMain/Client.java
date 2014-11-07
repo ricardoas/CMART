@@ -181,7 +181,12 @@ public class Client extends Thread{
 		this.httpClientBuilder = HttpClientBuilder.create();
 		this.httpClientBuilder.setConnectionManager(connectionManager);
 		this.httpClientBuilder.setRedirectStrategy(new DefaultRedirectStrategy() {
-			public boolean isRedirected(HttpRequest request, HttpResponse response, HttpContext context) {
+			
+			/**
+			 * {@inheritDoc}
+			 */
+			@Override
+			public boolean isRedirected(HttpRequest request, HttpResponse response, HttpContext context) throws ProtocolException {
 				boolean isRedirect = false;
 				try {
 					if (response.containsHeader("Location")) {
@@ -269,6 +274,9 @@ public class Client extends Thread{
 					System.out.println("Client " + this.getClientID() + " Page Number: " + openedPagesCounter + " Current Page Type: "
 							+ PageType.values()[currentPageType]);
 				}
+				System.out.println("Client " + this.getClientID() + " Page Number: " + openedPagesCounter + " Current Page Type: "
+						+ PageType.values()[currentPageType]);
+				
 
 				Page activePage = new Page(this.currentURL, this.currentPageType, this.lastURL, this).toPageType();
 
@@ -278,7 +286,10 @@ public class Client extends Thread{
 				
 				if (currentPageType == PageType.NONE.getCode()) {
 					this.exit = true;
-				} else {
+				} else if (currentPageType == PageType.SELLITEMCONFIRM_PAGE_NUM.getCode()){
+					System.out.println("Client.run()");
+					this.exit = true;
+				}else{
 					this.currentURL = activePage.makeDecision();
 				}
 				activePage.shutdownThreads();
@@ -1022,8 +1033,10 @@ public class Client extends Thread{
 
 				out.close();
 			}catch(Exception e){
-				e.printStackTrace();
 				System.err.println("Could not output page response time data");
+				if(RunSettings.isVerbose()){
+					e.printStackTrace();
+				}
 			}
 		}
 	}
