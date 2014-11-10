@@ -2,10 +2,11 @@ package client.clientMain;
 
 import java.awt.Image;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
+
+import org.apache.commons.lang.RandomStringUtils;
 
 import client.Items.ItemCG;
 import client.Items.QuestionCG;
@@ -19,7 +20,7 @@ import client.Items.SellerCG;
  */
 
 public class ClientInfo {
-	private Random rand=new Random();
+	private Random rand = new Random();
 
 	private StringBuilder username;						// username of client
 	private StringBuilder firstName;						// first name of client
@@ -39,8 +40,15 @@ public class ClientInfo {
 	private long clientIndex;							// index for the client generator indicating order clients were created
 	private StringBuilder authToken;						// client's authToken for C-MART
 
-	private TreeMap<String,Image>imageCache=new TreeMap<String,Image>();					// cache of images viewed by the client
-	private TreeMap<String,StringBuilder>jscssCache=new TreeMap<String,StringBuilder>();		// cache of the javascript files already opened by the client
+	private TreeMap<String, Image> imageCache = new TreeMap<String, Image>();                   
+	// cache of images viewed by the client
+	private TreeMap<String, StringBuilder> jscssCache = new TreeMap<String, StringBuilder>();
+	// cache of the javascript files already opened by the client
+	
+	
+	
+	
+	
 	private TreeMap<String,StringBuilder>HTML5Cache=new TreeMap<String,StringBuilder>();		// cache of HTML5 data
 	private TreeMap<Long,ItemCG>HTML5ItemCache=new TreeMap<Long,ItemCG>();					// cache of the Item data for HTML5
 	private TreeMap<Long,SellerCG>HTML5SellerCache=new TreeMap<Long,SellerCG>();			// cache of the Seller data for HTML5
@@ -95,11 +103,13 @@ public class ClientInfo {
 
 		this.registered=true;
 		createNewCreditCard();
-
-		if (rand.nextInt()>0.7)
-			prepopulateCache();
 		
-		this.prepopulateToCache();	// prepopulates the cache
+		synchronized(this){
+			if (rand.nextInt()>0.7){
+				prepopulateCache();
+			}
+			this.prepopulateToCache();	// prepopulates the cache
+		}
 	}
 
 	/**
@@ -117,11 +127,11 @@ public class ClientInfo {
 	 */
 	private void createUserNameAndPassword(){
 		this.username=new StringBuilder(this.firstName).append(this.lastName).append(randomDigits(4));
-		StringBuilder pwd=new StringBuilder();
 		int pwdLength=5+rand.nextInt(8);
-		for (int i=0;i<pwdLength;i++){
-			pwd=pwd.append((char)(rand.nextInt(78)+48));
-		}
+		StringBuilder pwd=new StringBuilder(RandomStringUtils.randomAlphanumeric(pwdLength));
+//		for (int i=0;i<pwdLength;i++){
+//			pwd=pwd.append((char)(rand.nextInt(78)+48));
+//		}
 		this.password=pwd;
 	}
 
@@ -166,9 +176,7 @@ public class ClientInfo {
 		this.creditCardNumber=new StringBuilder(cardNum.concat(Integer.toString(10-lastDigit)));
 		this.cvv2=new StringBuilder(Long.toString(randomDigits(3)));
 
-		StringBuilder month=new StringBuilder(Integer.toString(rand.nextInt(12)));
-		if (month.length()==1)
-			month=new StringBuilder("0").append(month);
+		StringBuilder month=new StringBuilder(String.format("%02d", rand.nextInt(12)));
 		String year=Long.toString(rand.nextInt(3)+Calendar.getInstance().get(Calendar.YEAR)+1);
 		this.creditCardExpiry=month.append(year);
 
@@ -251,10 +259,7 @@ public class ClientInfo {
 		this.USStateCode=new StringBuilder(Integer.toString(determineUSStateCode()));
 
 
-		this.zipcode = new StringBuilder();
-		this.zipcode.append(rand.nextInt(100000));
-		for (int i=0;i<(5-this.zipcode.length());i++)
-			this.zipcode.insert(0, '0');
+		this.zipcode = new StringBuilder(String.format("%05d", rand.nextInt(100000)));
 	}
 
 	/**
@@ -262,109 +267,7 @@ public class ClientInfo {
 	 * @return The state number
 	 */
 	private int determineUSStateCode(){
-		int USStateCode=0;
-		String USState=this.USState.toString();
-		if (USState.equals("ALABAMA")||USState.equals("AL"))
-			USStateCode=1;
-		if (USState.equals("ALASKA")||USState.equals("AK"))
-			USStateCode=2;
-		if (USState.equals("ARIZONA")||USState.equals("AZ"))
-			USStateCode=3;
-		if (USState.equals("ARKANSAS")||USState.equals("AR"))
-			USStateCode=4;
-		if (USState.equals("CALIFORNIA")||USState.equals("CA"))
-			USStateCode=5;
-		if (USState.equals("COLORADO")||USState.equals("CO"))
-			USStateCode=6;
-		if (USState.equals("CONNECTICUT")||USState.equals("CT"))
-			USStateCode=7;
-		if (USState.equals("DELAWARE")||USState.equals("DE"))
-			USStateCode=8;
-		if (USState.equals("FLORIDA")||USState.equals("FL"))
-			USStateCode=9;
-		if (USState.equals("GEORGIA")||USState.equals("GA"))
-			USStateCode=10;
-		if (USState.equals("HAWAII")||USState.equals("HI"))
-			USStateCode=11;
-		if (USState.equals("IDAHO")||USState.equals("ID"))
-			USStateCode=12;
-		if (USState.equals("ILLINOIS")||USState.equals("IL"))
-			USStateCode=13;
-		if (USState.equals("INDIANA")||USState.equals("IN"))
-			USStateCode=14;
-		if (USState.equals("IOWA")||USState.equals("IA"))
-			USStateCode=15;
-		if (USState.equals("KANSAS")||USState.equals( "KS"))
-			USStateCode=16;
-		if (USState.equals("KENTUCKY")||USState.equals("KY"))
-			USStateCode=17;
-		if (USState.equals("LOUISIANA")||USState.equals("LA"))
-			USStateCode=18;
-		if (USState.equals("MAINE")||USState.equals("ME"))
-			USStateCode=19;
-		if (USState.equals("MARYLAND")||USState.equals("MD"))
-			USStateCode=20;
-		if (USState.equals("MASSACHUSETTS")||USState.equals("MA"))
-			USStateCode=21;
-		if (USState.equals("MICHIGAN")||USState.equals("MI"))
-			USStateCode=22;
-		if (USState.equals("MINNESOTA")||USState.equals("MN"))
-			USStateCode=23;
-		if (USState.equals("MISSISSIPPI")||USState.equals("MS"))
-			USStateCode=24;
-		if (USState.equals("MISSOURI")||USState.equals( "MO"))
-			USStateCode=25;
-		if (USState.equals("MONTANA")||USState.equals("MT"))
-			USStateCode=26;
-		if (USState.equals("NEBRASKA")||USState.equals("NE"))
-			USStateCode=27;
-		if (USState.equals("NEVADA")||USState.equals("NV"))
-			USStateCode=28;
-		if (USState.equals("NEW HAMPSHIRE")||USState.equals("NH"))
-			USStateCode=29;
-		if (USState.equals("NEW JERSEY")||USState.equals("NJ"))
-			USStateCode=30;
-		if (USState.equals("NEW MEXICO")||USState.equals("NM"))
-			USStateCode=31;
-		if (USState.equals("NEW YORK")||USState.equals("NY"))
-			USStateCode=32;
-		if (USState.equals("NORTH CAROLINA")||USState.equals("NC"))
-			USStateCode=33;
-		if (USState.equals("NORTH DAKOTA")||USState.equals("ND"))
-			USStateCode=34;
-		if (USState.equals("OHIO")||  USState.equals( "OH"))
-			USStateCode=35;
-		if (USState.equals("OKLAHOMA")||USState.equals("OK"))
-			USStateCode=36;
-		if (USState.equals("OREGON" )||  USState.equals("OR"))
-			USStateCode=37;
-		if (USState.equals("PENNSYLVANIA" )||  USState.equals("PA"))
-			USStateCode=38;
-		if (USState.equals("RHODE ISLAND")||USState.equals("RI"))
-			USStateCode=39;
-		if (USState.equals("SOUTH CAROLINA" )||  USState.equals("SC"))
-			USStateCode=40;
-		if (USState.equals("SOUTH DAKOTA")||  USState.equals("SD"))
-			USStateCode=41;
-		if (USState.equals("TENNESSEE")||  USState.equals("TN"))
-			USStateCode=42;
-		if (USState.equals("TEXAS")||USState.equals("TX"))
-			USStateCode=43;
-		if (USState.equals("UTAH")||USState.equals("UT"))
-			USStateCode=44;
-		if (USState.equals("VERMONT")||USState.equals("VT"))
-			USStateCode=45;
-		if (USState.equals("VIRGINIA")||USState.equals("VA"))
-			USStateCode=46;
-		if (USState.equals("WASHINGTON")||  USState.equals("WA"))
-			USStateCode=47;
-		if (USState.equals("WEST VIRGINIA")||USState.equals("WV"))
-			USStateCode=48;
-		if (USState.equals("WISCONSIN")||  USState.equals("WI"))
-			USStateCode=49;
-		if (USState.equals("WYOMING")||USState.equals("WY"))
-			USStateCode=50;
-		return USStateCode;
+		return client.Tools.USState.valueOf(USState.toString().replace(' ', '_')).getCode();
 	}
 
 	/**
@@ -537,8 +440,10 @@ public class ClientInfo {
 	 * @param url - url of the image
 	 * @param img - the image
 	 */
-	public synchronized void addImageCache(String url,Image img){
-		this.imageCache.put(url,img);
+	public void addImageCache(String url,Image img){
+		synchronized(imageCache){
+			this.imageCache.put(url,img);
+		}
 	}
 	/**
 	 * Determines if an image has already been cached
@@ -546,19 +451,27 @@ public class ClientInfo {
 	 * @return Boolean indicating if image is in cache
 	 */
 	public boolean inImageCache(String url){
-		if (this.imageCache.containsKey(url))
-			return true;
-		else
-			return false;
+		synchronized(imageCache){
+			return this.imageCache.containsKey(url);
+		}
 	}
 
-	public synchronized TreeMap<String,Image>getImageCache(){
-		return new TreeMap<String, Image>(this.imageCache);
+	/**
+	 * @return Copy of Image Cache collection for iteration.
+	 */
+	public TreeMap<String,Image>getImageCache(){
+		synchronized(imageCache){
+			return new TreeMap<String, Image>(this.imageCache);
+		}
 	}
 
-	public synchronized TreeMap<String,StringBuilder>getJscssCache(){
-		return new TreeMap<String, StringBuilder>(this.jscssCache);
-//		return this.jscssCache;
+	/**
+	 * @returnCopy of JS/CSS Cache collection for iteration.
+	 */
+	public TreeMap<String,StringBuilder>getJscssCache(){
+		synchronized(jscssCache){
+			return new TreeMap<String, StringBuilder>(this.jscssCache);
+		}
 	}
 
 	/**
@@ -567,18 +480,19 @@ public class ClientInfo {
 	 * @return Boolean indicating if js file is in cache
 	 */
 	public boolean inJSCSSCache(String url){
-		if (this.jscssCache.containsKey(url))
-			return true;
-		else
-			return false;
+		synchronized(jscssCache){
+			return this.jscssCache.containsKey(url);
+		}
 	}
 	/**
 	 * Adds a js file to the js cache
 	 * @param url - url of the js file
 	 * @param js - the javascript file
 	 */
-	public synchronized void addJSCSSCache(String url,StringBuilder js){
-		this.jscssCache.put(url,js);
+	public void addJSCSSCache(String url,StringBuilder js){
+		synchronized(jscssCache){
+			this.jscssCache.put(url,js);
+		}
 	}
 
 	/**
@@ -587,7 +501,9 @@ public class ClientInfo {
 	 * @param val
 	 */
 	public void addHTML5Cache(String key,StringBuilder val){
-		this.HTML5Cache.put(key,val);
+		synchronized(HTML5Cache){
+			this.HTML5Cache.put(key,val);
+		}
 	}
 	/**
 	 * Determines if a value for a given key is in the HTML5 cache
@@ -595,37 +511,43 @@ public class ClientInfo {
 	 * @return
 	 */
 	public boolean inHTML5Cache(String key){
-		if (this.HTML5Cache.containsKey(key))
-			return true;
-		else
-			return false;
+		synchronized(HTML5Cache){
+			return this.HTML5Cache.containsKey(key);
+		}
 	}
 	/**
 	 * Gets the HTML5 Cache
 	 * @return
 	 */
-	public synchronized Map<String,StringBuilder> getHTML5Cache(){
-		return new TreeMap<String, StringBuilder>(this.HTML5Cache);
+	public Map<String,StringBuilder> getHTML5Cache(){
+		synchronized(HTML5Cache){
+			return new TreeMap<String, StringBuilder>(this.HTML5Cache);
+		}
 	}
-
 
 	/**
 	 * @return the HTML5ItemCache
 	 */
 	public TreeMap<Long,ItemCG> getHTML5ItemCache() {
-		return this.HTML5ItemCache;
+		synchronized(HTML5ItemCache){
+			return new TreeMap<Long, ItemCG>(this.HTML5ItemCache);
+		}
 	}
 	/**
 	 * @return the HTML5SellerCache
 	 */
 	public TreeMap<Long,SellerCG> getHTML5SellerCache(){
-		return this.HTML5SellerCache;
+		synchronized(HTML5SellerCache){
+			return new TreeMap<Long, SellerCG>(this.HTML5SellerCache);
+		}
 	}
 	/**
 	 * @return the HTML5QuestionCache
 	 */
 	public TreeMap<Long,QuestionCG> getHTML5QuestionCache(){
-		return this.HTML5QuestionCache;
+		synchronized(HTML5QuestionCache){
+			return new TreeMap<Long,QuestionCG>(this.HTML5QuestionCache);
+		}
 	}
 
 	/**
@@ -633,21 +555,27 @@ public class ClientInfo {
 	 * @param item - item to be added to the cache
 	 */
 	public void addHTML5ItemCache(ItemCG item) {
-		this.HTML5ItemCache.put(item.getId(), item);
+		synchronized(HTML5ItemCache){
+			this.HTML5ItemCache.put(item.getId(), item);
+		}
 	}
 	/**
 	 * Adds a seller to the HTML5SellerCache
 	 * @param seller
 	 */
 	public void addHTML5SellerCache(SellerCG seller) {
-		this.HTML5SellerCache.put(seller.getId(), seller);
+		synchronized(HTML5SellerCache){
+			this.HTML5SellerCache.put(seller.getId(), seller);
+		}
 	}	
 	/**
 	 * Adds a question to the HTML5QuestionCache
 	 * @param question
 	 */
 	public void addHTML5QuestionCache(QuestionCG question) {
-		this.HTML5QuestionCache.put(question.getId(), question);
+		synchronized(HTML5QuestionCache){
+			this.HTML5QuestionCache.put(question.getId(), question);
+		}
 	}
 	
 
@@ -655,11 +583,21 @@ public class ClientInfo {
 	 * Clears all data from the image, css, js, HTML5, HTML5Items, HTML5Seller caches
 	 */
 	public void clearCaches(){
-		imageCache.clear();
-		jscssCache.clear();
-		HTML5Cache.clear();
-		HTML5ItemCache.clear();
-		HTML5SellerCache.clear();
+		synchronized (imageCache) {
+			imageCache.clear();
+		}
+		synchronized (jscssCache) {
+			jscssCache.clear();
+		}
+		synchronized (HTML5Cache) {
+			HTML5Cache.clear();
+		}
+		synchronized (HTML5ItemCache) {
+			HTML5ItemCache.clear();
+		}
+		synchronized (HTML5SellerCache) {
+			HTML5SellerCache.clear();
+		}
 	}
 
 	/**

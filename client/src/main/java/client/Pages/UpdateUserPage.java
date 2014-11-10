@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -128,11 +129,11 @@ public class UpdateUserPage extends Page{
 
 			// if the password is to be updated
 			if (updatePassword){
-				long numCharNewPassword=8+rand.nextInt(5);
-				StringBuilder newPassword=new StringBuilder();
-				for (int i=0;i<numCharNewPassword;i++){
-					newPassword.append(((char)(rand.nextInt(78)+48)));
-				}
+				int numCharNewPassword=8+rand.nextInt(5);
+				StringBuilder newPassword=new StringBuilder(RandomStringUtils.randomAlphanumeric(numCharNewPassword));
+//				for (int i=0;i<numCharNewPassword;i++){
+//					newPassword.append(((char)(rand.nextInt(78)+48)));
+//				}
 				if (verbose)System.out.println(newPassword);
 				client.getClientInfo().setPassword(newPassword);
 				data.put("password1", typingError(newPassword));

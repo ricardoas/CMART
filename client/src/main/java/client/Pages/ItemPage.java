@@ -187,6 +187,7 @@ public class ItemPage extends Page{
 			client.addToItemsOfInterest(itemID, item);
 		}
 		else{
+			
 			if(html.substring(0,4).equals("ITEM")){
 				itemID=Long.parseLong(html.substring(4));
 				item=client.getClientInfo().getHTML5ItemCache().get(itemID);
@@ -785,7 +786,8 @@ public class ItemPage extends Page{
 		public void run(){
 			if(html.indexOf("The bidding on this item has finished.")==-1&&url.indexOf("old=1")==-1){
 				StringBuilder AJAXurl=new StringBuilder(url).append("&itemCurrentBid=1");
-				if(!HTML4&&url.charAt(0)=='{'){
+				if (!HTML4){
+					if(url.charAt(0) == '{') {
 					try {
 						ObjectMapper mapper = new ObjectMapper();
 						JsonNode node = mapper.readValue(html.toString(), JsonNode.class);
@@ -798,6 +800,10 @@ public class ItemPage extends Page{
 					} catch (IOException e) {
 						e.printStackTrace();
 					}						
+					}else if(html.substring(0,4).equals("ITEM")){
+						long id =Long.parseLong(html.substring(4));						
+						AJAXurl=new StringBuilder(client.getCMARTurl().getAppURL()).append("/viewitem?itemID=").append(id).append("&itemCurrentBid=1");
+					}
 				}
 
 				//TODO: replace this - i think it comes up when there is a bad bid made

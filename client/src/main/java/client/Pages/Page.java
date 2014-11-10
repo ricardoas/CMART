@@ -883,7 +883,8 @@ public class Page {
 			if(i!=0) {
 				content.append("&");
 			}
-			content.append(e.getKey()).append("=").append(URLEncoder.encode(e.getValue().toString(), "UTF-8"));
+//			content.append(e.getKey()).append("=").append(URLEncoder.encode(e.getValue().toString(), "UTF-8"));
+			content.append(e.getKey()).append("=").append(e.getValue());
 			i++;
 		}
 
