@@ -290,7 +290,7 @@ public class ClientGenerator extends Thread{
 		long numberOfUsers = Long.parseLong(openPopulateUser(cmarturl.build("/getusers?", data)).toString());
 		int pageLimit = (int) (Math.floor((numberOfUsers - 1) / 25) - 1);
 		
-		for (int k = 0; k < 3; k++) {
+		for (int k = 0; k < 30; k++) {
 			long pageNo;
 			do {
 				pageNo = rand.nextInt(pageLimit);
