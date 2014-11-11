@@ -30,7 +30,7 @@ public class ClientSessionStats {
 		this.csd = new ArrayList<ClientSessionData>();
 	}
 
-	public void addClientSession(int numPagesOpened, long totalRT, int requestErrors, long startTime, boolean exitDueToError, double annoyedLeaveProb) {
+	public synchronized void addClientSession(int numPagesOpened, long totalRT, int requestErrors, long startTime, boolean exitDueToError, double annoyedLeaveProb) {
 		this.csd.add(new ClientSessionData(numPagesOpened, totalRT, requestErrors, startTime, exitDueToError, annoyedLeaveProb));
 	}
 

@@ -26,7 +26,6 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -409,7 +408,7 @@ public class Page {
 
 			threadExecutor.shutdown();
 			if(verbose){
-				System.out.println("RET "+ret);
+//				System.out.println("RET "+ret);
 			}
 
 			return ret;
@@ -748,8 +747,9 @@ public class Page {
 	 * @param urlString url of the page to be opened
 	 * @param sw stopwatch that is to be continued when timing the opening of the page
 	 * @return PageTimePair of the resulting opened webpage and a stopwatch set to the original time plus the amount required to open the webpage
+	 * @throws InterruptedException 
 	 */
-	private PageTimePair openURLHTML5(StringBuilder urlString, Stopwatch sw) throws UnknownHostException, IOException, InterruptedException{
+	private PageTimePair openURLHTML5(StringBuilder urlString, Stopwatch sw) throws InterruptedException{
 		StringBuilder ret = new StringBuilder();		// the source code of the page
 		PageTimePair finalPair;
 		if(verbose)System.out.println("URLSTRING "+urlString);
@@ -761,108 +761,78 @@ public class Page {
 			sw.start();
 
 		try{
-//			URI uri=URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), urlStringS.replace(" ", "%20"), null, null);
+			//			URI uri=URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), urlStringS.replace(" ", "%20"), null, null);
 			URI uri=client.getCMARTurl().build(urlStringS.replace(" ", "%20"));
-			HttpGet httpget = new HttpGet(uri);
-			HttpResponse response = client.getHttpClient().execute(httpget);
-			HttpEntity entity = response.getEntity();
-			BufferedReader br = new BufferedReader(new InputStreamReader(entity.getContent()));	// opens a BufferedReader to read the response of the HTTP request
 
-			while((inputLine=br.readLine())!=null){
-				//	System.out.println(inputLine);
-				ret.append(inputLine);	// creates the response
-			}
+			try (CloseableHttpResponse response = client.getHttpClient().execute(new HttpGet(uri));
+					BufferedReader br = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));) {
 
-			if(RunSettings.isNetworkDelay()){
-				try{Thread.sleep(client.getNetworkDelay());}
-				catch(InterruptedException e){
-					br.close();
-					return null;
+				while((inputLine=br.readLine())!=null){
+					//	System.out.println(inputLine);
+					ret.append(inputLine);	// creates the response
 				}
-			}
-			sw.pause();	// pauses the timer determining page response time
-			br.close();
-			if(response.getStatusLine().getStatusCode()>=400){
-				this.responseTime=sw.stop();	// stops the Stopwatch and determines the final response time
-				client.getCg().getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
-				client.addRT(responseTime);	// indexes the response time as the latest response time for the client
-				client.incRequestErrors();
-				client.incNumPagesOpened();
-				client.incTotalRT(this.responseTime);
 
-				if (httpRequestAttempts<3){
-					httpRequestAttempts++;
-					try{Thread.sleep((long) (expDist(1500)/RunSettings.getThinkTimeSpeedUpFactor()));}
+				if(RunSettings.isNetworkDelay()){
+					try{Thread.sleep(client.getNetworkDelay());}
 					catch(InterruptedException e){
+						return new PageTimePair(new StringBuilder(HTTP_RESPONSE_ERROR),sw);
 					}
-					finalPair=openURLHTML5(urlString,sw);
-					if (httpRequestAttempts<3)
-						return finalPair;
 				}
+				sw.pause();	// pauses the timer determining page response time
+				if(response.getStatusLine().getStatusCode()>=400){
+					this.responseTime=sw.stop();	// stops the Stopwatch and determines the final response time
+					client.getCg().getStats().getActiveHistogram().add(responseTime);	// adds the response time to the stats page
+					client.addRT(responseTime);	// indexes the response time as the latest response time for the client
+					client.incRequestErrors();
+					client.incNumPagesOpened();
+					client.incTotalRT(this.responseTime);
+
+					if (httpRequestAttempts<3){
+						httpRequestAttempts++;
+						try{Thread.sleep((long) (expDist(1500)/RunSettings.getThinkTimeSpeedUpFactor()));}
+						catch(InterruptedException e){
+						}
+						finalPair=openURLHTML5(urlString,sw);
+						if (httpRequestAttempts<3)
+							return finalPair;
+					}
+					threadExecutor.shutdown();
+					//	httpclient.getConnectionManager().shutdown();
+					System.err.println("HTTP request error: "+urlString);
+					client.setExit(true);
+					client.setExitDueToError(true);
+					return new PageTimePair(new StringBuilder(HTTP_RESPONSE_ERROR),sw);
+				}
+
+				if(RunSettings.isGetExtras()){
+					sw=getJsCssNew(ret,sw);		// Downloads the JS of any js files not already cached
+					sw=getImagesNew(ret,sw);	// Downloads any jpg on the page that is not already in the image cache
+				}
+
+				sw.pause();
+				return new PageTimePair(ret,sw);
+			} catch (IOException e) {
+				if(verbose){
+					System.err.println("Could not create connection");
+					e.printStackTrace();
+				}
+				client.incRequestErrors();
+				httpRequestAttempts++;
+				if (httpRequestAttempts<3)
+					return openURLHTML5(urlString,sw);
 				threadExecutor.shutdown();
-				//	httpclient.getConnectionManager().shutdown();
-				System.err.println("HTTP request error: "+urlString);
 				client.setExit(true);
 				client.setExitDueToError(true);
 				return new PageTimePair(new StringBuilder(HTTP_RESPONSE_ERROR),sw);
-
 			}
-
-			if(RunSettings.isGetExtras()){
-				sw=getJsCssNew(ret,sw);		// Downloads the JS of any js files not already cached
-				sw=getImagesNew(ret,sw);	// Downloads any jpg on the page that is not already in the image cache
-			}
-
-			sw.pause();
-
-			//	out.close();
-			//	br.close();
-			//	socket.close();
-			if(verbose)System.out.println("RET OPENURL: "+ret);
-
-			return new PageTimePair(ret,sw);
-		}catch(ConnectException e){
-			System.err.println("Could not create connection");
-			System.err.println(urlString);
-			client.incRequestErrors();
-			httpRequestAttempts++;
-			finalPair=openURLHTML5(urlString,sw);
-			if (httpRequestAttempts<3)
-				return finalPair;
-			threadExecutor.shutdown();
-			//httpclient.getConnectionManager().shutdown();
-			client.setExit(true);
-			client.setExitDueToError(true);
-			return new PageTimePair(new StringBuilder(HTTP_RESPONSE_ERROR),sw);
-		}catch(SocketException e){
-			System.err.println("Could not create connection");
-			System.err.println(urlString);
-			client.incRequestErrors();
-			httpRequestAttempts++;
-			finalPair=openURLHTML5(urlString,sw);
-			if (httpRequestAttempts<3)
-				return finalPair;
-			threadExecutor.shutdown();
-			//	httpclient.getConnectionManager().shutdown();
-			client.setExit(true);
-			client.setExitDueToError(true);
-			return new PageTimePair(new StringBuilder(HTTP_RESPONSE_ERROR),sw);
-		} catch (NoHttpResponseException e){
-			System.err.println("Could not create connection");
-			System.err.println(urlString);
-			client.incRequestErrors();
-			httpRequestAttempts++;
-			finalPair=openURLHTML5(urlString,sw);
-			if (httpRequestAttempts<3)
-				return finalPair;
-			threadExecutor.shutdown();
-			//	httpclient.getConnectionManager().shutdown();
-			client.setExit(true);
-			client.setExitDueToError(true);
-			return new PageTimePair(new StringBuilder(HTTP_RESPONSE_ERROR),sw);
 		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-			System.err.println("HTTP request error: "+urlString);
+			if(verbose){
+				System.err.println("HTTP request error: "+urlString);
+				e.printStackTrace();
+			}
+			threadExecutor.shutdown();
+			client.setExit(true);
+			client.setExitDueToError(true);
 			return new PageTimePair(new StringBuilder(HTTP_RESPONSE_ERROR),sw);
 		}
 	}
@@ -1046,7 +1016,7 @@ public class Page {
 				client.addRT(responseTime);	// adds the response time to the clients most recent response time
 				client.incTotalRT(responseTime);
 				client.incNumPagesOpened();
-				if(verbose)System.out.println("RET "+ret);
+//				if(verbose)System.out.println("RET "+ret);
 				
 				return ret;
 			} catch (IOException e) {
@@ -1198,7 +1168,7 @@ public class Page {
 			client.addRT(responseTime);	// adds the response time to the clients most recent response time
 			client.incTotalRT(responseTime);
 			client.incNumPagesOpened();
-			if(verbose)System.out.println("RET "+ret);
+//			if(verbose)System.out.println("RET "+ret);
 
 		} catch (IllegalArgumentException e1) {
 			e1.printStackTrace();
@@ -1257,7 +1227,7 @@ public class Page {
 				}
 				
 				if(verbose){
-					System.out.println("RET AJAX OPENURL: "+ret);
+//					System.out.println("RET AJAX OPENURL: "+ret);
 				}
 				return ret;
 				

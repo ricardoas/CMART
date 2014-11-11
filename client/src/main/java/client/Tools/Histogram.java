@@ -39,10 +39,13 @@ public class Histogram {
 	}
 
 	/**
-	 * Adds an entry to the histogram
+	 * Adds an entry to the histogram.
+	 * 
+	 * FIXME: I think some thread safety must be enforced here...
 	 *
 	 * @param num
 	 *            - The number of the entry to be incremented by one
+	 * 
 	 */
 	public void add(long num) {
 		int bin = (int) (num / this.binSize);

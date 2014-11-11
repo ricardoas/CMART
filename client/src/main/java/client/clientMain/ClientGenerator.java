@@ -99,7 +99,7 @@ public class ClientGenerator extends Thread{
 		this.stats = new Stats(20000, 5, 10000, this);
 		this.timer = Executors.newSingleThreadScheduledExecutor();
 		this.csd = new ClientSessionStats();
-		this.hotItems = new ArrayList<Long>();
+		this.hotItems = Collections.synchronizedList(new ArrayList<Long>());
 		this.cp = new ChangePopularity(40, 470000, 300000);
 
 		try {
@@ -215,22 +215,24 @@ public class ClientGenerator extends Thread{
 				}
 			} else{
 				double rampupTime=RunSettings.getRampupTime()*1000;
-				while(!exit && System.currentTimeMillis() < (startTime + rampupTime)){
+				while(System.currentTimeMillis() < (startTime + rampupTime)){
 					try {
 						Thread.sleep((long) (rampupTime / RunSettings.getStableUsers()));
 					}catch (InterruptedException e) {
 					}
-					if(!exit){
-						try {
+					if(exit){
+						break;
+					}
+					try {
+						do{
 							semaphore.acquire();
-							threadExecutorRC.execute(new RunClient());
-							while(clients.size() < RunSettings.getStableUsers()/rampupTime*(System.currentTimeMillis()-startTime)){
-								semaphore.acquire();
-								threadExecutorRC.execute(new RunClient());
+							if(exit){
+								break;
 							}
-						} catch (InterruptedException e1) {
-							e1.printStackTrace();
-						}
+							threadExecutorRC.execute(new RunClient());
+						}while(clients.size() < RunSettings.getStableUsers()/rampupTime*(System.currentTimeMillis()-startTime));
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
 					}
 				}
 				System.out.println("OUT OF RAMP UP");
@@ -387,13 +389,10 @@ public class ClientGenerator extends Thread{
 	 * @param info - ClientInfo of the client to move
 	 * @param c - the client to move
 	 */
-	public synchronized void activeToInactive(ClientInfo info,Client c){
+	public void activeToInactive(ClientInfo info,Client c){
 		if(clients.remove(c)){
 			semaphore.release();
-			synchronized(inactiveClients){
-				inactiveClients.add(c.getClientInfo());
-			}
-//			System.err.println(remove+ info.getUserID().toString());
+			inactiveClients.add(c.getClientInfo());
 		}
 	}
 	/**
@@ -402,7 +401,7 @@ public class ClientGenerator extends Thread{
 	 * @param info
 	 * @param c
 	 */
-	public synchronized void activeToRemove(ClientInfo info,Client c){
+	public void activeToRemove(ClientInfo info,Client c){
 		if(clients.remove(c)){
 			semaphore.release();
 //			System.err.println(remove+ info.getUserID().toString());
@@ -440,8 +439,7 @@ public class ClientGenerator extends Thread{
 	 * Returns the think time histogram distribution
 	 * @return thinkTimeHist
 	 */
-	public synchronized Histogram getThinkTimeHist() {
-		// TODO i think this should be synchronized too
+	public Histogram getThinkTimeHist() {
 		return thinkTimeHist;
 	}
 
@@ -522,7 +520,7 @@ public class ClientGenerator extends Thread{
 		timer.shutdownNow();
 	}
 	
-	public synchronized boolean isHot(Long item){
+	public boolean isHot(Long item){
 		return this.hotItems.contains(item);
 	}
 
@@ -531,8 +529,7 @@ public class ClientGenerator extends Thread{
 	 * @param pageType the page type number
 	 * @param RT response time of the page
 	 */
-	public synchronized void addPageRT(int pageType, long RT){
-		//TODO i think this should be synchronized
+	public void addPageRT(int pageType, long RT){
 		pageRTHistograms[pageType].add(RT);
 	}
 
@@ -864,7 +861,7 @@ public class ClientGenerator extends Thread{
 		}
 	}
 
-	public synchronized void addClientSession(int numPagesOpened, long totalRT, int requestErrors, long startTime, boolean exitDueToError, double annoyedLeaveProb) {
+	public void addClientSession(int numPagesOpened, long totalRT, int requestErrors, long startTime, boolean exitDueToError, double annoyedLeaveProb) {
 		this.csd.addClientSession(numPagesOpened, totalRT, requestErrors, startTime, exitDueToError, annoyedLeaveProb);
 	}
 
