@@ -63,12 +63,12 @@ public class CollectStats extends TimerTask {
 		System.out.println("Number of Active Clients: " + this.cg.getNumberOfActiveClients());
 		System.out.println("Number of Requests: " + this.oldHistogram.getNumEntries() + ", 90% RT: " + this.oldHistogram.getPercentile(0.9));
 
-		if (RunSettings.isVerbose()) {
-			for (int i = 0; i < 200; i++) {
-				histStats.append(this.oldHistogram.getHistElem(i)).append(" ");
-			}
-			System.out.println(histStats);
-		}
+//		if (RunSettings.isVerbose()) {
+//			for (int i = 0; i < 200; i++) {
+//				histStats.append(this.oldHistogram.getHistElem(i)).append(" ");
+//			}
+//			System.out.println(histStats);
+//		}
 
 		if (RunSettings.isOutputThinkTimes()) {
 			this.outputReqs(this.cg.getNumberOfActiveClients(), this.oldHistogram.getNumEntries());

@@ -114,6 +114,8 @@ public class RunSettings {
 			try {
 				Thread.sleep(60000 * timeToRun);
 			} catch (InterruptedException e) {
+				System.err.println("Execution Interrupted");
+				e.printStackTrace();
 			}
 			
 			exitSystem(cg);

@@ -382,8 +382,6 @@ public class ItemPage extends Page{
 					child=xmlDocument.createElement("type");
 					child.setTextContent("POST");
 					request.appendChild(child);
-					System.out.println("\tItemPage.makeDecision() bnd ="+ buyNowData);
-					System.out.println("\tItemPage.makeDecision() sd ="+ searchData);
 					nextPage=doSubmit(nextPage.append("/buyitem"),buyNowData);
 				}else{
 					Element child=xmlDocument.createElement("url");

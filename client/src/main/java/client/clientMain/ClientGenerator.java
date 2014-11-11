@@ -11,7 +11,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -804,14 +803,12 @@ public class ClientGenerator extends Thread{
 				Client p = new Client(this.clientToRun,startPage,ClientGenerator.this);
 				synchronized (clients) {
 					clients.add(p);
-					System.out.println("Starting Client: " + this.clientToRun.getUsername() + ", Number of Active Clients = " + clients.size());
+					System.out.println(System.currentTimeMillis() + " Starting Client: " + this.clientToRun.getUsername() + ", Number of Active Clients = " + clients.size());
 				}
 				threadExecutorC.execute(p);
 			} catch (IOException e) {
 				System.err.println("Error creating Client " + this.clientToRun);
-				if(RunSettings.isVerbose()){
-					e.printStackTrace();
-				}
+				e.printStackTrace();
 			}
 		}
 	}

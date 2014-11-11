@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.http.client.utils.URIUtils;
-
 public class CMARTurl {
 
 	private StringBuilder fullURL;			// full URL of the website
@@ -82,14 +80,8 @@ public class CMARTurl {
 	}
 	
 	public URI build(String page, Map<String, String> data) throws IllegalArgumentException{
-		if(RunSettings.isVerbose()){
-			System.out.println("\t\t\tCMARTurl.build()");
-			System.out.println("\t\t\t"+page);
-			System.out.println("\t\t\t"+data);
-		}
 		
 		StringBuilder uri = new StringBuilder("http://" + ipURL.toString() + ":" + appPort + appURL + page);
-//		StringBuilder uri = new StringBuilder(appURL + page);
 		for (Entry<String, String> entry : data.entrySet()) {
 			uri.append(entry.getKey()+"=" + entry.getValue()+"&");
 		}
@@ -97,10 +89,11 @@ public class CMARTurl {
 		if(uri.charAt(uri.length()-1) == '&'){
 			uri.deleteCharAt(uri.length()-1);
 		}
-//		if(uri.toString().contains("HEAD")){
-//			System.out.println("\t\t"+uri.toString());
-//		}
-//		return URIUtils.createURI("http", ipURL.toString(), appPort, uri.toString(), null, null);
+
+		if(RunSettings.isVerbose()){
+			System.out.println("CMARTurl.build() : " + uri.toString());
+		}
+
 		return URI.create(uri.toString());
 	}
 

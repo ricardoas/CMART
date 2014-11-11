@@ -812,10 +812,8 @@ public class Page {
 				sw.pause();
 				return new PageTimePair(ret,sw);
 			} catch (IOException e) {
-				if(verbose){
-					System.err.println("Could not create connection");
-					e.printStackTrace();
-				}
+				System.err.println("Could not create connection");
+				e.printStackTrace();
 				client.incRequestErrors();
 				httpRequestAttempts++;
 				if (httpRequestAttempts<3)
@@ -826,10 +824,8 @@ public class Page {
 				return new PageTimePair(new StringBuilder(HTTP_RESPONSE_ERROR),sw);
 			}
 		} catch (IllegalArgumentException e) {
-			if(verbose){
-				System.err.println("HTTP request error: "+urlString);
-				e.printStackTrace();
-			}
+			System.err.println("Error building url: " + urlString);
+			e.printStackTrace();
 			threadExecutor.shutdown();
 			client.setExit(true);
 			client.setExitDueToError(true);
@@ -946,7 +942,7 @@ public class Page {
 		threadExecutor = Executors.newFixedThreadPool(RunSettings.getConnPerPage());
 		StringBuilder urlOrig=new StringBuilder(url);
 		StringBuilder ret = new StringBuilder();		// the source code of the page
-		if(verbose)System.out.println("URL "+url);
+//		if(verbose)System.out.println("URL "+url);
 		String inputLine;	// each line being read in
 
 		ArrayList<NameValuePair> formparams = new ArrayList<NameValuePair>();
@@ -1020,10 +1016,10 @@ public class Page {
 				
 				return ret;
 			} catch (IOException e) {
+				System.err.println("Could not create connection");
+				e.printStackTrace();
 				if(verbose){
-					System.err.println("Could not create connection");
-					System.err.println(urlOrig);
-					e.printStackTrace();
+//					System.err.println(urlOrig);
 				}
 				client.incRequestErrors();
 				httpRequestAttempts++;
@@ -1035,39 +1031,10 @@ public class Page {
 				return new StringBuilder(HTTP_RESPONSE_ERROR);
 			}
 		}catch(IllegalArgumentException | UnsupportedEncodingException e) {
+			System.err.println("Could not create URL: " + urlOrig);
+			e.printStackTrace();
 			return new StringBuilder(HTTP_RESPONSE_ERROR);
 		}
-
-
-//		} catch (IllegalArgumentException e1) {
-//			e1.printStackTrace();
-//		} catch (NoHttpResponseException e){
-//			System.err.println("Could not create connection");
-//			System.err.println(urlOrig);
-//			client.incRequestErrors();
-//			httpRequestAttempts++;
-//			ret=doSubmit(urlOrig,data);
-//			if (httpRequestAttempts<3)
-//				return ret;
-//			threadExecutor.shutdown();
-//			//httpclient.getConnectionManager().shutdown();
-//			client.setExit(true);
-//			client.setExitDueToError(true);
-//			return new StringBuilder(HTTP_RESPONSE_ERROR);
-//		}catch (SocketException e){
-//			System.err.println("Could not create connection");
-//			System.err.println(urlOrig);
-//			client.incRequestErrors();
-//			httpRequestAttempts++;
-//			ret=doSubmit(urlOrig,data);
-//			if (httpRequestAttempts<3)
-//				return ret;
-//			threadExecutor.shutdown();
-//			//httpclient.getConnectionManager().shutdown();
-//			client.setExit(true);
-//			client.setExitDueToError(true);
-//			return new StringBuilder(HTTP_RESPONSE_ERROR);
-//		}
 	}
 
 
@@ -1174,12 +1141,11 @@ public class Page {
 			e1.printStackTrace();
 		}catch (NoHttpResponseException e){
 			System.err.println("Could not create connection");
-			System.err.println(urlOrig);
+//			System.err.println(urlOrig);
 			client.incRequestErrors();
 			httpRequestAttempts++;
-			ret=doSubmitPic(urlOrig,data,pics);
 			if (httpRequestAttempts<3)
-				return ret;
+				return doSubmitPic(urlOrig,data,pics);
 			threadExecutor.shutdown();
 			//httpclient.getConnectionManager().shutdown();
 			client.setExit(true);
@@ -1425,7 +1391,7 @@ public class Page {
 		boolean inCache;
 
 		private GetImageNew(String URLsuffix, Client client,CloseableHttpClient httpclient, boolean inCache){
-			if(verbose)System.out.println("Get Image: "+URLsuffix);
+//			if(verbose)System.out.println("Get Image: "+URLsuffix);
 			this.suffix=URLsuffix;
 			this.client=client;
 			this.httpclient=httpclient;
@@ -1530,7 +1496,7 @@ public class Page {
 		CloseableHttpClient httpclient;
 		boolean inCache;
 		private GetJSCSSNew(String URLsuffix, Client client,CloseableHttpClient httpclient,boolean inCache){
-			if(verbose)System.out.println("Get JS: "+URLsuffix);
+//			if(verbose)System.out.println("Get JS: "+URLsuffix);
 			this.suffix=URLsuffix;
 			this.client=client;
 			this.httpclient=httpclient;

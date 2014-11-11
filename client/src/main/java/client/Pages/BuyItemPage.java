@@ -32,12 +32,7 @@ public class BuyItemPage extends Page{
 		super(page.url,page.html,page.client,page.pageType,page.pageOpenTime,page.lastPageType,page.lastURL);
 		client.pageSpecificRT(pageRTFactor);	// change RT threshold depending on page type
 		if(HTML4){
-			System.out.println("\tBuyItemPage.BuyItemPage() 1d = " + data);
-			System.out.println("\tBuyItemPage.BuyItemPage() 1s = " + searchData);
-			System.out.println(html);
 			searchData=getFormData("search");
-			System.out.println("\tBuyItemPage.BuyItemPage() 2d = " + data);
-			System.out.println("\tBuyItemPage.BuyItemPage() 2s = " + searchData);
 		}
 		updateProbabilities();
 	}
@@ -70,9 +65,6 @@ public class BuyItemPage extends Page{
 			if(nextLinkS.equals("buy")){
 				if(HTML4){
 					data=getFormData("buyitem");
-					System.out.println("\tBuyItemPage.BuyItemPage() 3d = " + data);
-					System.out.println("\tBuyItemPage.BuyItemPage() 3s = " + searchData);
-
 				}
 
 				/**
@@ -153,12 +145,7 @@ public class BuyItemPage extends Page{
 					child=xmlDocument.createElement("type");
 					child.setTextContent("POST");
 					request.appendChild(child);
-					System.out.println("\tBuyItemPage.BuyItemPage() 4d = " + data);
-					System.out.println("\tBuyItemPage.BuyItemPage() 5s = " + searchData);
-					System.out.println("\tBuyItemPage.makeDecision() ");
-
 					nextPage=doSubmit(new StringBuilder(client.getCMARTurl().getAppURL()).append("/buyitem"),data);
-					System.out.println(nextPage);
 				}
 				else{
 					child=xmlDocument.createElement("type");

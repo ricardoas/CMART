@@ -283,9 +283,8 @@ public class Client extends Thread{
 				
 				if (currentPageType == PageType.NONE.getCode()) {
 					this.exit = true;
-//				} else if (currentPageType == PageType.SELLITEMCONFIRM_PAGE_NUM.getCode()){
-//					System.out.println("Client.run()");
-//					this.exit = true;
+				} else if (currentPageType == PageType.SELLITEMCONFIRM_PAGE_NUM.getCode()){
+					this.exit = true;
 				}else{
 					this.currentURL = activePage.makeDecision();
 				}
@@ -304,8 +303,9 @@ public class Client extends Thread{
 //		} catch (IOException | ParseException | InterruptedException | URISyntaxException e) {
 			this.exit = true;
 			this.loggedIn = false;
-			System.out.println(System.currentTimeMillis() + " Client (#" + clientInfo.getClientIndex() + ") " + clientInfo.getUsername()
+			System.err.println(System.currentTimeMillis() + " Client (#" + clientInfo.getClientIndex() + ") " + clientInfo.getUsername()
 					+ " Exiting Due To Error ");
+			e.printStackTrace();
 			cg.activeToRemove(clientInfo, this); // moves the client
 //			cg.addClientSession(numPagesOpened, totalRT, requestErrors, startTime, true, 1.);
 		}
