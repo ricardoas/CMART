@@ -104,12 +104,12 @@ public class ClientInfo {
 		this.registered=true;
 		createNewCreditCard();
 		
-		synchronized(this){
+//		synchronized(this){
 			if (rand.nextInt()>0.7){
 				prepopulateCache();
 			}
 			this.prepopulateToCache();	// prepopulates the cache
-		}
+//		}
 	}
 
 	/**
@@ -441,9 +441,10 @@ public class ClientInfo {
 	 * @param img - the image
 	 */
 	public void addImageCache(String url,Image img){
-		synchronized(imageCache){
-			this.imageCache.put(url,img);
-		}
+		this.imageCache.put(url,img);
+//		synchronized(imageCache){
+//			this.imageCache.put(url,img);
+//		}
 	}
 	/**
 	 * Determines if an image has already been cached
@@ -451,27 +452,30 @@ public class ClientInfo {
 	 * @return Boolean indicating if image is in cache
 	 */
 	public boolean inImageCache(String url){
-		synchronized(imageCache){
-			return this.imageCache.containsKey(url);
-		}
+		return this.imageCache.containsKey(url);
+//		synchronized(imageCache){
+//			return this.imageCache.containsKey(url);
+//		}
 	}
 
 	/**
 	 * @return Copy of Image Cache collection for iteration.
 	 */
 	public TreeMap<String,Image>getImageCache(){
-		synchronized(imageCache){
-			return new TreeMap<String, Image>(this.imageCache);
-		}
+		return this.imageCache;
+//		synchronized(imageCache){
+//			return new TreeMap<String, Image>(this.imageCache);
+//		}
 	}
 
 	/**
 	 * @returnCopy of JS/CSS Cache collection for iteration.
 	 */
 	public TreeMap<String,StringBuilder>getJscssCache(){
-		synchronized(jscssCache){
-			return new TreeMap<String, StringBuilder>(this.jscssCache);
-		}
+		return this.jscssCache;
+//		synchronized(jscssCache){
+//			return new TreeMap<String, StringBuilder>(this.jscssCache);
+//		}
 	}
 
 	/**
@@ -480,9 +484,10 @@ public class ClientInfo {
 	 * @return Boolean indicating if js file is in cache
 	 */
 	public boolean inJSCSSCache(String url){
-		synchronized(jscssCache){
-			return this.jscssCache.containsKey(url);
-		}
+		return this.jscssCache.containsKey(url);
+//		synchronized(jscssCache){
+//			return this.jscssCache.containsKey(url);
+//		}
 	}
 	/**
 	 * Adds a js file to the js cache
@@ -490,9 +495,10 @@ public class ClientInfo {
 	 * @param js - the javascript file
 	 */
 	public void addJSCSSCache(String url,StringBuilder js){
-		synchronized(jscssCache){
-			this.jscssCache.put(url,js);
-		}
+		this.jscssCache.put(url,js);
+//		synchronized(jscssCache){
+//			this.jscssCache.put(url,js);
+//		}
 	}
 
 	/**
@@ -501,9 +507,10 @@ public class ClientInfo {
 	 * @param val
 	 */
 	public void addHTML5Cache(String key,StringBuilder val){
-		synchronized(HTML5Cache){
-			this.HTML5Cache.put(key,val);
-		}
+		this.HTML5Cache.put(key,val);
+//		synchronized(HTML5Cache){
+//			this.HTML5Cache.put(key,val);
+//		}
 	}
 	/**
 	 * Determines if a value for a given key is in the HTML5 cache
@@ -511,43 +518,48 @@ public class ClientInfo {
 	 * @return
 	 */
 	public boolean inHTML5Cache(String key){
-		synchronized(HTML5Cache){
-			return this.HTML5Cache.containsKey(key);
-		}
+		return this.HTML5Cache.containsKey(key);
+//		synchronized(HTML5Cache){
+//			return this.HTML5Cache.containsKey(key);
+//		}
 	}
 	/**
 	 * Gets the HTML5 Cache
 	 * @return
 	 */
 	public Map<String,StringBuilder> getHTML5Cache(){
-		synchronized(HTML5Cache){
-			return new TreeMap<String, StringBuilder>(this.HTML5Cache);
-		}
+		return this.HTML5Cache;
+//		synchronized(HTML5Cache){
+//			return new TreeMap<String, StringBuilder>(this.HTML5Cache);
+//		}
 	}
 
 	/**
 	 * @return the HTML5ItemCache
 	 */
 	public TreeMap<Long,ItemCG> getHTML5ItemCache() {
-		synchronized(HTML5ItemCache){
-			return new TreeMap<Long, ItemCG>(this.HTML5ItemCache);
-		}
+		return this.HTML5ItemCache;
+//		synchronized(HTML5ItemCache){
+//			return new TreeMap<Long, ItemCG>(this.HTML5ItemCache);
+//		}
 	}
 	/**
 	 * @return the HTML5SellerCache
 	 */
 	public TreeMap<Long,SellerCG> getHTML5SellerCache(){
-		synchronized(HTML5SellerCache){
-			return new TreeMap<Long, SellerCG>(this.HTML5SellerCache);
-		}
+		return this.HTML5SellerCache;
+//		synchronized(HTML5SellerCache){
+//			return new TreeMap<Long, SellerCG>(this.HTML5SellerCache);
+//		}
 	}
 	/**
 	 * @return the HTML5QuestionCache
 	 */
 	public TreeMap<Long,QuestionCG> getHTML5QuestionCache(){
-		synchronized(HTML5QuestionCache){
-			return new TreeMap<Long,QuestionCG>(this.HTML5QuestionCache);
-		}
+		return this.HTML5QuestionCache;
+//		synchronized(HTML5QuestionCache){
+//			return new TreeMap<Long,QuestionCG>(this.HTML5QuestionCache);
+//		}
 	}
 
 	/**
@@ -555,27 +567,30 @@ public class ClientInfo {
 	 * @param item - item to be added to the cache
 	 */
 	public void addHTML5ItemCache(ItemCG item) {
-		synchronized(HTML5ItemCache){
-			this.HTML5ItemCache.put(item.getId(), item);
-		}
+		this.HTML5ItemCache.put(item.getId(), item);
+//		synchronized(HTML5ItemCache){
+//			this.HTML5ItemCache.put(item.getId(), item);
+//		}
 	}
 	/**
 	 * Adds a seller to the HTML5SellerCache
 	 * @param seller
 	 */
 	public void addHTML5SellerCache(SellerCG seller) {
-		synchronized(HTML5SellerCache){
-			this.HTML5SellerCache.put(seller.getId(), seller);
-		}
+		this.HTML5SellerCache.put(seller.getId(), seller);
+//		synchronized(HTML5SellerCache){
+//			this.HTML5SellerCache.put(seller.getId(), seller);
+//		}
 	}	
 	/**
 	 * Adds a question to the HTML5QuestionCache
 	 * @param question
 	 */
 	public void addHTML5QuestionCache(QuestionCG question) {
-		synchronized(HTML5QuestionCache){
-			this.HTML5QuestionCache.put(question.getId(), question);
-		}
+		this.HTML5QuestionCache.put(question.getId(), question);
+//		synchronized(HTML5QuestionCache){
+//			this.HTML5QuestionCache.put(question.getId(), question);
+//		}
 	}
 	
 
@@ -583,21 +598,21 @@ public class ClientInfo {
 	 * Clears all data from the image, css, js, HTML5, HTML5Items, HTML5Seller caches
 	 */
 	public void clearCaches(){
-		synchronized (imageCache) {
+//		synchronized (imageCache) {
 			imageCache.clear();
-		}
-		synchronized (jscssCache) {
+//		}
+//		synchronized (jscssCache) {
 			jscssCache.clear();
-		}
-		synchronized (HTML5Cache) {
+//		}
+//		synchronized (HTML5Cache) {
 			HTML5Cache.clear();
-		}
-		synchronized (HTML5ItemCache) {
+//		}
+//		synchronized (HTML5ItemCache) {
 			HTML5ItemCache.clear();
-		}
-		synchronized (HTML5SellerCache) {
+//		}
+//		synchronized (HTML5SellerCache) {
 			HTML5SellerCache.clear();
-		}
+//		}
 	}
 
 	/**

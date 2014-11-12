@@ -266,6 +266,8 @@ public class Client extends Thread{
 	public void run(){
 		int openedPagesCounter = 0;
 		
+		Page activePage = null;
+		
 		try (CloseableHttpClient client = httpClientBuilder.build()) {
 			this.httpclient = client;
 			while (!this.exit) { // while the client is not exiting the system
@@ -275,7 +277,7 @@ public class Client extends Thread{
 							+ PageType.values()[currentPageType]);
 				}
 
-				Page activePage = new Page(this.currentURL, this.currentPageType, this.lastURL, this).toPageType();
+				activePage = new Page(this.currentURL, this.currentPageType, this.lastURL, this).toPageType();
 
 				this.lastURL = this.currentURL;
 				this.lastPageType = this.currentPageType;
@@ -308,6 +310,9 @@ public class Client extends Thread{
 			e.printStackTrace();
 			cg.activeToRemove(clientInfo, this); // moves the client
 //			cg.addClientSession(numPagesOpened, totalRT, requestErrors, startTime, true, 1.);
+			if(activePage!=null){
+				activePage.shutdownThreads();
+			}
 		}
 
 		for (ItemPage ip : openTabs) {

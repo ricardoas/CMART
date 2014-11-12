@@ -52,7 +52,7 @@ public class HomePage extends Page {
 		StringBuilder nextLink=new StringBuilder();
 		String nextLinkS=null;
 
-		if(RunSettings.isRepeatedRun()==false){
+		if(!RunSettings.isRepeatedRun()){
 			nextLink=getRandomStringBuilderFromDist(nextPageProbabilities);
 			nextLinkS=nextLink.toString();
 
