@@ -49,7 +49,9 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -824,8 +826,11 @@ public class Page {
 				return new PageTimePair(new StringBuilder(HTTP_RESPONSE_ERROR),sw);
 			}
 		} catch (IllegalArgumentException e) {
-			System.err.println("Error building url: " + urlString);
+			System.err.println("Could not create URL");
 			e.printStackTrace();
+			if(verbose){
+				System.err.println("URL: " + urlString);
+			}
 			threadExecutor.shutdown();
 			client.setExit(true);
 			client.setExitDueToError(true);
@@ -1031,8 +1036,11 @@ public class Page {
 				return new StringBuilder(HTTP_RESPONSE_ERROR);
 			}
 		}catch(IllegalArgumentException | UnsupportedEncodingException e) {
-			System.err.println("Could not create URL: " + urlOrig);
+			System.err.println("Could not create URL");
 			e.printStackTrace();
+			if(verbose){
+				System.err.println("URL: " + urlOrig);
+			}
 			return new StringBuilder(HTTP_RESPONSE_ERROR);
 		}
 	}
@@ -1058,6 +1066,19 @@ public class Page {
 //			uri = URIUtils.createURI("http", client.getCMARTurl().getIpURL().toString(), client.getCMARTurl().getAppPort(), url.replace(" ", "%20"), null, null);
 			uri=client.getCMARTurl().build(url.replace(" ", "%20"));
 			HttpPost httppost=new HttpPost(uri);
+			
+//			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+//			for (Entry<String,StringBuilder> e:data.entrySet()){
+//				builder.addPart(e.getKey(), new StringBody(e.getValue().toString(), ContentType.TEXT_PLAIN));
+//			}
+//			int n=1;
+//			for(File f:pics){
+//				builder.addPart("image".concat(Integer.toString(n)), new FileBody(f));
+//				n++;
+//			}
+//			httppost.setEntity(builder.build());
+
+			
 			MultipartEntity reqEntity = new MultipartEntity();
 			for (Entry<String,StringBuilder> e:data.entrySet()){
 				reqEntity.addPart(e.getKey(),new StringBody(e.getValue().toString()));
@@ -1137,8 +1158,12 @@ public class Page {
 			client.incNumPagesOpened();
 //			if(verbose)System.out.println("RET "+ret);
 
-		} catch (IllegalArgumentException e1) {
-			e1.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			System.err.println("Could not create URL");
+			e.printStackTrace();
+			if(verbose){
+				System.err.println("URL: " + urlOrig);
+			}
 		}catch (NoHttpResponseException e){
 			System.err.println("Could not create connection");
 //			System.err.println(urlOrig);
@@ -1208,8 +1233,9 @@ public class Page {
 			}
 			
 		} catch (IllegalArgumentException e) {
+			System.err.println("Could not create URL");
+			e.printStackTrace();
 			if(verbose){
-				e.printStackTrace();
 				System.err.println(pageType);
 				System.err.println(lastPageType);
 				System.err.println(lastURL);

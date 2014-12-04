@@ -410,7 +410,7 @@ public class ItemPage extends Page{
 				int start=html.lastIndexOf("href=\".",end)+"href=\".".length();
 				end=html.indexOf("\">",start);
 				nextPage.append(html.subSequence(start,end));	
-				System.out.println("\tItemPage.makeDecision() = " + nextPage);
+//				System.out.println("\tItemPage.makeDecision() = " + nextPage);
 			}
 			else{
 				if(HTML4){
@@ -885,7 +885,7 @@ public class ItemPage extends Page{
 			}
 
 			if(nextLinkS.equals("bid")||nextLinkS.equals("buyNow")){
-				while(new Date().getTime()+thinkTime>=item.getEndDate().getTime()){
+				while(System.currentTimeMillis() < item.getEndDate().getTime() && item.getEndDate().getTime() <= System.currentTimeMillis() + thinkTime){
 					thinkTime/=1.5;	
 				}				
 			}

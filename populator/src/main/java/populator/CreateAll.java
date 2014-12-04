@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.util.Locale;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
@@ -190,6 +191,10 @@ public class CreateAll {
 	private static String configfile = null;
 	
 	public static void main(String args[]){
+		
+		// FIX PROBLEM WHEN RUNNING CLIENT ON NON-ENGLISH LOCALE
+		Locale.setDefault(Locale.ENGLISH);
+
 		boolean populate = true;
 		boolean writeImg = true;
 		boolean indexOn = false;

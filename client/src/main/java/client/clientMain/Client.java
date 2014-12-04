@@ -276,7 +276,6 @@ public class Client extends Thread{
 					System.out.println("Client " + this.getClientID() + " Page Number: " + openedPagesCounter + " Current Page Type: "
 							+ PageType.values()[currentPageType]);
 				}
-
 				activePage = new Page(this.currentURL, this.currentPageType, this.lastURL, this).toPageType();
 
 				this.lastURL = this.currentURL;
@@ -305,7 +304,7 @@ public class Client extends Thread{
 //		} catch (IOException | ParseException | InterruptedException | URISyntaxException e) {
 			this.exit = true;
 			this.loggedIn = false;
-			System.err.println(System.currentTimeMillis() + " Client (#" + clientInfo.getClientIndex() + ") " + clientInfo.getUsername()
+			System.out.println(System.currentTimeMillis() + " Client (#" + clientInfo.getClientIndex() + ") " + clientInfo.getUsername()
 					+ " Exiting Due To Error ");
 			e.printStackTrace();
 			cg.activeToRemove(clientInfo, this); // moves the client

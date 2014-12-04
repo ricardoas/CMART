@@ -315,7 +315,7 @@ public class ClientGenerator extends Thread{
 							break;
 						}
 					}
-					if (!alreadyAdded) {
+					if (!alreadyAdded){// && inactiveClients.isEmpty()) { TODO uncomment to increase probability of concurrent modification exception :p
 						inactiveClients.add(clientInfo);
 					}
 				}
@@ -763,6 +763,7 @@ public class ClientGenerator extends Thread{
 			}
 			cI.appendChild(cache);
 			cache=xmlDocument.createElement("jscssCache");
+			System.out.println("client: " + clientToRun.getUsername() );
 			for(Entry<String,StringBuilder> e: clientToRun.getJscssCache().entrySet()){
 				child=xmlDocument.createElement("jscss");
 				child.setTextContent(e.getKey());
